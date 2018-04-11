@@ -14,7 +14,8 @@ class Config
 	
 	public static var ASSETS:Array<String> = [
 		"img/black.png",
-		"img/bg.jpg"
+		"img/bg.jpg",
+		"img/ui.json"
 		
 	];
 	

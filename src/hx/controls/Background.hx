@@ -4,6 +4,7 @@ import filters.bg.BgFilter;
 import pixi.core.display.Container;
 import pixi.core.math.shapes.Rectangle;
 import pixi.core.sprites.Sprite;
+import pixi.extras.TilingSprite;
 import util.Asset;
 
 /**
@@ -12,9 +13,11 @@ import util.Asset;
  */
 class Background extends Container
 {
+	public var charpos:Float = 0;
+	
 	private var filter: BgFilter;
 
-	private var bg:Sprite;
+	private var bg:TilingSprite;
 	
 	public function new() 
 	{
@@ -24,14 +27,22 @@ class Background extends Container
 	
 	private function initializeControls():Void
 	{
-		this.bg = Asset.getImage("bg.jpg", false);
+		this.bg = new TilingSprite( Asset.getTexture("bg.jpg", false), 2048,2048);
 		
 		
 		this.filter = new BgFilter();
 		this.filterArea =untyped Main.instance.renderer.screen;
-	//	this.filters = [filter];
+		//this.filters = [filter];
 		
 		this.addChild(this.bg);
+		
+		Main.instance.tickListeners.push(onTick);
+	}
+	
+	private function onTick(delta:Float):Void
+	{
+		this.bg.tilePosition.y -= delta * 3;
+		this.bg.tilePosition.x = charpos;
 	}
 	
 	public function resize(size:Rectangle):Void

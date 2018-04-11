@@ -1,0 +1,79 @@
+package particles;
+import createjs.tweenjs.Ease;
+import createjs.tweenjs.Tween;
+import pixi.core.Pixi;
+import pixi.core.display.Container;
+import pixi.core.math.shapes.Rectangle;
+import pixi.core.sprites.Sprite;
+
+import util.Asset;
+import util.Pool;
+
+/**
+ * ...
+ * @author 
+ */
+class BgStars extends BaseParticleEffect
+{
+	private var pool:Pool<BgStarParticle>;
+	
+	private var area:Rectangle = new Rectangle(0, 0, 1456, 1360);
+	
+	public function new()
+	{
+		super();
+		var c:Int = 0;
+		this.pool = new Pool<BgStarParticle>(150, function():BgStarParticle{
+			var p:BgStarParticle = {
+				sprite:Asset.getImage("collector.png", true),
+				lifetime:0,
+				maxlife:0
+			};
+			this.addChild(p.sprite);
+			p.sprite.anchor.x = p.sprite.anchor.y = 0.5;
+			p.sprite.blendMode = Pixi.BLEND_MODES.ADD;
+			randomizeParticle(p);
+			return p;
+		});
+		
+		Main.instance.tickListeners.push(update);
+	}
+	
+	private function randomizeParticle(p:BgStarParticle):Void
+	{
+		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.5 + 0.5;
+		p.lifetime = (Math.random() + 0.5)*1000;
+		p.maxlife = p.lifetime;
+		p.sprite.x = Math.random() * area.width + area.x;
+		p.sprite.y = Math.random() * area.height + area.y;
+	}
+	
+	override public function update(d:Float):Void 
+	{
+		super.update(d);
+		for (p in pool.all)
+		{
+			p.lifetime-= d;
+			if (p.lifetime < 0)
+				randomizeParticle(p);
+			
+			//Update particle
+			var phase:Float = (p.maxlife-p.lifetime) / p.maxlife;
+			p.sprite.alpha = phase < 0.34 ? phase / 0.34 : 1-(phase - 0.34) / (1 - 0.34);
+		}
+	}
+	
+	override public function clear():Void 
+	{
+		super.clear();
+	}
+
+}
+
+typedef BgStarParticle = 
+{
+	public var sprite:Sprite;
+	public var lifetime:Float;
+	public var maxlife:Float;
+	
+}

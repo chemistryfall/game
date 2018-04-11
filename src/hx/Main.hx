@@ -6,6 +6,7 @@ import controls.StartView;
 import createjs.soundjs.Sound;
 import createjs.tweenjs.Tween;
 import haxe.Timer;
+import particles.ParticleManager;
 
 import js.Browser;
 import js.html.CanvasElement;
@@ -54,7 +55,7 @@ class Main
 	
 	private var ticker:Ticker;
 	
-	private var bg:Background;
+	public var bg:Background;
 	private var game:GameView;
 	private var start:StartView;
 	/**
@@ -160,20 +161,27 @@ class Main
 		this.game = new GameView();
 		this.start = new StartView();
 		
+		ParticleManager.init();
+		this.bg.addChild(ParticleManager.stars);
+		
 		this.viewport = new Container();
-		this.bg.addChild(this.start);
-		this.bg.addChild(this.game);
 		this.viewport.addChild(this.bg);
+		this.viewport.addChild(this.start);
+		this.viewport.addChild(this.game);
 		this.mainContainer.addChild(this.viewport);
 		
 		this.viewport.pivot.x = 1024;
 		this.viewport.pivot.y = 1024;
+		
+		this.game.x = 1024;
+		this.game.y = 1024;
 		
 		this.onResize(null);
 		
 		this.ticker = new Ticker();
 		this.ticker.start();
 		this.ticker.add(onTickerTick);
+		
 		
 		DeviceOrientationControl.initialize();
 	}

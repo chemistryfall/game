@@ -111,13 +111,17 @@ Main.prototype = {
 		this.bg = new controls_Background();
 		this.game = new controls_GameView();
 		this.start = new controls_StartView();
+		particles_ParticleManager.init();
+		this.bg.addChild(particles_ParticleManager.stars);
 		this.viewport = new PIXI.Container();
-		this.bg.addChild(this.start);
-		this.bg.addChild(this.game);
 		this.viewport.addChild(this.bg);
+		this.viewport.addChild(this.start);
+		this.viewport.addChild(this.game);
 		this.mainContainer.addChild(this.viewport);
 		this.viewport.pivot.x = 1024;
 		this.viewport.pivot.y = 1024;
+		this.game.x = 1024;
+		this.game.y = 1024;
 		this.onResize(null);
 		this.ticker = new PIXI.ticker.Ticker();
 		this.ticker.start();
@@ -169,6 +173,7 @@ Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
 };
 var controls_Background = function() {
+	this.charpos = 0;
 	PIXI.Container.call(this);
 	this.initializeControls();
 };
@@ -176,15 +181,36 @@ controls_Background.__name__ = true;
 controls_Background.__super__ = PIXI.Container;
 controls_Background.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
-		this.bg = util_Asset.getImage("bg.jpg",false);
+		this.bg = new PIXI.extras.TilingSprite(util_Asset.getTexture("bg.jpg",false),2048,2048);
 		this.filter = new filters_bg_BgFilter();
 		this.filterArea = Main.instance.renderer.screen;
 		this.addChild(this.bg);
+		Main.instance.tickListeners.push($bind(this,this.onTick));
+	}
+	,onTick: function(delta) {
+		this.bg.tilePosition.y -= delta * 3;
+		this.bg.tilePosition.x = this.charpos;
 	}
 	,resize: function(size) {
 		this.filter.resize(size);
 	}
 	,__class__: controls_Background
+});
+var controls_Character = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_Character.__name__ = true;
+controls_Character.__super__ = PIXI.Container;
+controls_Character.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.sprite = util_Asset.getImage("collector.png",true);
+		this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
+		this.sprite.scale.x = this.sprite.scale.y = 0.3;
+		createjs.Tween.get(this.sprite.scale,{ loop : true}).to({ x : 0.25, y : 0.25},500,createjs.Ease.quadInOut).to({ x : 0.3, y : 0.3},500,createjs.Ease.quadInOut);
+		this.addChild(this.sprite);
+	}
+	,__class__: controls_Character
 });
 var controls_DeviceOrientationControl = function() {
 };
@@ -260,12 +286,23 @@ controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
 var controls_GameView = function() {
+	this.time = 0;
 	PIXI.Container.call(this);
+	this.initializeControls();
 };
 controls_GameView.__name__ = true;
 controls_GameView.__super__ = PIXI.Container;
 controls_GameView.prototype = $extend(PIXI.Container.prototype,{
-	__class__: controls_GameView
+	initializeControls: function() {
+		this.character = new controls_Character();
+		this.addChild(this.character);
+		Main.instance.tickListeners.push($bind(this,this.onTick));
+	}
+	,onTick: function(delta) {
+		Main.instance.bg.charpos = Math.sin(this.time) * 300;
+		this.time += delta / 60;
+	}
+	,__class__: controls_GameView
 });
 var controls_StartView = function() {
 	PIXI.Container.call(this);
@@ -989,6 +1026,78 @@ js_three__$ArrayLike_ArrayLike_$Impl_$.arrayWrite = function(this1,k,v) {
 	this1[k] = v;
 	return v;
 };
+var particles_BaseParticleEffect = function() {
+	this.complete = true;
+	PIXI.Container.call(this);
+};
+particles_BaseParticleEffect.__name__ = true;
+particles_BaseParticleEffect.__super__ = PIXI.Container;
+particles_BaseParticleEffect.prototype = $extend(PIXI.Container.prototype,{
+	update: function(d) {
+	}
+	,clear: function() {
+	}
+	,__class__: particles_BaseParticleEffect
+});
+var particles_BgStars = function() {
+	this.area = new PIXI.Rectangle(0,0,1456,1360);
+	var _gthis = this;
+	particles_BaseParticleEffect.call(this);
+	this.pool = new util_Pool(150,function() {
+		var p = { sprite : util_Asset.getImage("collector.png",true), lifetime : 0, maxlife : 0};
+		_gthis.addChild(p.sprite);
+		p.sprite.anchor.x = p.sprite.anchor.y = 0.5;
+		p.sprite.blendMode = PIXI.BLEND_MODES.ADD;
+		_gthis.randomizeParticle(p);
+		return p;
+	});
+	Main.instance.tickListeners.push($bind(this,this.update));
+};
+particles_BgStars.__name__ = true;
+particles_BgStars.__super__ = particles_BaseParticleEffect;
+particles_BgStars.prototype = $extend(particles_BaseParticleEffect.prototype,{
+	randomizeParticle: function(p) {
+		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.5 + 0.5;
+		p.lifetime = (Math.random() + 0.5) * 1000;
+		p.maxlife = p.lifetime;
+		p.sprite.x = Math.random() * this.area.width + this.area.x;
+		p.sprite.y = Math.random() * this.area.height + this.area.y;
+	}
+	,update: function(d) {
+		particles_BaseParticleEffect.prototype.update.call(this,d);
+		var _g = 0;
+		var _g1 = this.pool.get_all();
+		while(_g < _g1.length) {
+			var p = _g1[_g];
+			++_g;
+			p.lifetime -= d;
+			if(p.lifetime < 0) {
+				this.randomizeParticle(p);
+			}
+			var phase = (p.maxlife - p.lifetime) / p.maxlife;
+			p.sprite.alpha = phase < 0.34?phase / 0.34:1 - (phase - 0.34) / 0.65999999999999992;
+		}
+	}
+	,clear: function() {
+		particles_BaseParticleEffect.prototype.clear.call(this);
+	}
+	,__class__: particles_BgStars
+});
+var particles_ParticleManager = $hx_exports["ParticleManager"] = function() {
+	throw new js__$Boot_HaxeError("Particle manager is static.");
+};
+particles_ParticleManager.__name__ = true;
+particles_ParticleManager.init = function() {
+	particles_ParticleManager.stars = new PIXI.Container();
+	particles_ParticleManager.bgStars = new particles_BgStars();
+	particles_ParticleManager.stars.addChild(particles_ParticleManager.bgStars);
+};
+particles_ParticleManager.rand = function(min,max) {
+	return Math.floor(min + Math.random() * (max - min));
+};
+particles_ParticleManager.prototype = {
+	__class__: particles_ParticleManager
+};
 var sounds_Sounds = function() { };
 sounds_Sounds.__name__ = true;
 sounds_Sounds.initSounds = function() {
@@ -1354,6 +1463,30 @@ util_LoaderWrapper.updateSoundText = function(amount) {
 util_LoaderWrapper.prototype = {
 	__class__: util_LoaderWrapper
 };
+var util_Pool = $hx_exports["util"]["Pool"] = function(size,constructor) {
+	this._pool = new Array(size);
+	this._index = 0;
+	if(constructor != null) {
+		var _g1 = 0;
+		var _g = size;
+		while(_g1 < _g) this._pool[_g1++] = constructor();
+	}
+};
+util_Pool.__name__ = true;
+util_Pool.prototype = {
+	get_all: function() {
+		return this._pool;
+	}
+	,addItem: function(item) {
+		this._pool[this._index] = item;
+		this._index = (this._index + 1) % this._pool.length;
+	}
+	,getNext: function() {
+		this._index = (this._index + 1) % this._pool.length;
+		return this._pool[this._index];
+	}
+	,__class__: util_Pool
+};
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 String.prototype.__class__ = String;
@@ -1367,7 +1500,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KDQp1bmlmb3JtIGZsb2F0IHRpbWU7DQp1bmlmb3JtIHZlYzQgZmlsdGVyQ2xhbXA7DQoNCnVuaWZvcm0gZmxvYXQgYXNwZWN0Ow0KDQpmbG9hdCBzaW5kKHZlYzIgcCwgZmxvYXQgcGgsIGZsb2F0IHJhZCwgZmxvYXQgb2ZmLCBmbG9hdCB0bXApDQp7DQogCXJldHVybiBzbW9vdGhzdGVwKDAuLDguLDEuL2FicyhwLnkqcGgtc2luKG9mZitwLngrdGltZSp0bXAqMC4yNCkqcmFkKSkqOC47DQp9DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZC12ZWMyKDAuLDAuNSk7DQoJdXYueSo9YXNwZWN0Ow0KICAgIC8vIFRpbWUgdmFyeWluZyBwaXhlbCBjb2xvcg0KICAgIHZlYzMgY29sID12ZWMzKC4wKTsvLyAwLjUgKyAwLjUqY29zKHRpbWUrdXYueHl4K3ZlYzMoMCwyLDQpKTsNCg0KICAgIHZlYzMgYiA9IDAuNSArIDAuNSpjb3ModGltZSt1di54eXgrdmVjMygwLDIsNCkpOw0KICAgIA0KICAgIGNvbCs9c2luZCh1diwgMjAuLCA1LiwwLjAsMC4yKSpiOw0KICAgIGNvbCs9c2luZCh1diwgNDAuLCAxMC4sMS4wLDAuNCkqYjsNCiAgICBjb2wrPXNpbmQodXYsIDYwLiwgMjAuLDIuMCwwLjYpKmI7DQogICAgY29sKz1zaW5kKHV2LCA4MC4sIDMwLiwzLjAsMC44KSpiOw0KICAgIGNvbCs9c2luZCh1diwgMTAwLiwgNDAuLDQuMCwxLjApKmI7DQogICAgDQogICAgLy8gT3V0cHV0IHRvIHNjcmVlbg0KICAgIGdsX0ZyYWdDb2xvciA9IHZlYzQoY29sLDEuMCkqMC4yNTsNCi8vCWdsX0ZyYWdDb2xvciA9IHZlYzQoMS4sMS4sMS4sMS4pOw0KCS8vZ2xfRnJhZ0NvbG9yID0gdmVjNCh1di54LCB1di55LDAuLDEuKTsNCn0NCg"}];
+haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KDQp1bmlmb3JtIGZsb2F0IHRpbWU7DQp1bmlmb3JtIHZlYzQgZmlsdGVyQ2xhbXA7DQoNCnVuaWZvcm0gZmxvYXQgYXNwZWN0Ow0KDQpmbG9hdCBzaW5kKHZlYzIgcCwgZmxvYXQgcGgsIGZsb2F0IHJhZCwgZmxvYXQgb2ZmLCBmbG9hdCB0bXApDQp7DQogCXJldHVybiBzbW9vdGhzdGVwKDAuLDguLDEuL2FicyhwLnkqcGgtc2luKG9mZitwLngrdGltZSp0bXAqMC4yNCkqcmFkKSkqOC47DQp9DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZC12ZWMyKDAuLDAuNSk7DQoJdXYueSo9YXNwZWN0Ow0KCXV2ID0gdmVjMih1di55LCB1di54KTsNCiAgICAvLyBUaW1lIHZhcnlpbmcgcGl4ZWwgY29sb3INCiAgICB2ZWMzIGNvbCA9dmVjMyguMCk7Ly8gMC41ICsgMC41KmNvcyh0aW1lK3V2Lnh5eCt2ZWMzKDAsMiw0KSk7DQoNCiAgICB2ZWMzIGIgPSAwLjUgKyAwLjUqY29zKHRpbWUrdXYueHl4K3ZlYzMoMCwyLDQpKTsNCiAgICANCiAgICBjb2wrPXNpbmQodXYsIDIwLiwgNS4sMC4wLDAuMikqYjsNCiAgICBjb2wrPXNpbmQodXYsIDQwLiwgMTAuLDEuMCwwLjQpKmI7DQogICAgY29sKz1zaW5kKHV2LCA2MC4sIDIwLiwyLjAsMC42KSpiOw0KICAgIGNvbCs9c2luZCh1diwgODAuLCAzMC4sMy4wLDAuOCkqYjsNCiAgICBjb2wrPXNpbmQodXYsIDEwMC4sIDQwLiw0LjAsMS4wKSpiOw0KICAgIA0KICAgIC8vIE91dHB1dCB0byBzY3JlZW4NCiAgICBnbF9GcmFnQ29sb3IgPSB2ZWM0KGNvbCwxLjApKjAuMjU7DQovLwlnbF9GcmFnQ29sb3IgPSB2ZWM0KDEuLDEuLDEuLDEuKTsNCgkvL2dsX0ZyYWdDb2xvciA9IHZlYzQodXYueCwgdXYueSwwLiwxLik7DQp9DQo"}];
 var __map_reserved = {}
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -1375,7 +1508,7 @@ if(ArrayBuffer.prototype.slice == null) {
 }
 var Float32Array = $global.Float32Array || js_html_compat_Float32Array._new;
 var Uint8Array = $global.Uint8Array || js_html_compat_Uint8Array._new;
-Config.ASSETS = ["img/black.png","img/bg.jpg"];
+Config.ASSETS = ["img/black.png","img/bg.jpg","img/ui.json"];
 Config.VERSION = "chemistry fall 0.1";
 controls_DeviceOrientationControl.lon = 0;
 controls_DeviceOrientationControl.lat = 0;

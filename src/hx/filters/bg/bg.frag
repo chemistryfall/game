@@ -19,6 +19,7 @@ void main(  )
 	// Normalized pixel coordinates (from 0 to 1)
     vec2 uv = vTextureCoord-vec2(0.,0.5);
 	uv.y*=aspect;
+	uv = vec2(uv.y, uv.x);
     // Time varying pixel color
     vec3 col =vec3(.0);// 0.5 + 0.5*cos(time+uv.xyx+vec3(0,2,4));
 
