@@ -15,10 +15,13 @@ class Config
 	public static var ASSETS:Array<String> = [
 		"img/black.png",
 		"img/bg.jpg",
-		"img/ui.json"
+		"img/ui.json",
+		"img/noise.jpg"
 		
 	];
 	
 	public static var VERSION:String  = "chemistry fall 0.1";
 	
+	
+	public static var GRAVITY:Float = 0.1;
 }

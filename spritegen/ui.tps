@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.5.0</string>
         <key>fileName</key>
-        <string>C:/Users/Henri/Documents/workspace/HedelmaSlaissi/v1/spritegen/ui_fi.tps</string>
+        <string>C:/Users/Henri/Documents/fgj/2018_edujam/game/spritegen/ui.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -36,7 +36,7 @@
         <key>dataFormat</key>
         <string>pixijs</string>
         <key>textureFileName</key>
-        <filename>../bin/img/ui_fi.png</filename>
+        <filename>../bin/img/ui.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -150,7 +150,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../bin/img/ui_fi.json</filename>
+                <filename>../bin/img/ui.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -199,239 +199,7 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../assets/images/ui/bar_front.png</key>
-            <key type="filename">../assets/images/ui/bar_top.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>320,160,640,320</rect>
-                <key>scale9Paddings</key>
-                <rect>320,160,640,320</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/bar_top_shade.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>310,29,620,59</rect>
-                <key>scale9Paddings</key>
-                <rect>310,29,620,59</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/counter_0.png</key>
-            <key type="filename">../assets/images/ui/counter_1.png</key>
-            <key type="filename">../assets/images/ui/counter_2.png</key>
-            <key type="filename">../assets/images/ui/counter_3.png</key>
-            <key type="filename">../assets/images/ui/counter_bg_0.png</key>
-            <key type="filename">../assets/images/ui/counter_bg_1.png</key>
-            <key type="filename">../assets/images/ui/counter_bg_2.png</key>
-            <key type="filename">../assets/images/ui/counter_bg_3.png</key>
-            <key type="filename">../assets/images/ui/counter_static.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>15,15,31,31</rect>
-                <key>scale9Paddings</key>
-                <rect>15,15,31,31</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/cut_slice.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>54,3,108,5</rect>
-                <key>scale9Paddings</key>
-                <rect>54,3,108,5</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/fade.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>1,1,2,2</rect>
-                <key>scale9Paddings</key>
-                <rect>1,1,2,2</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/glass_1.png</key>
-            <key type="filename">../assets/images/ui/glass_2.png</key>
-            <key type="filename">../assets/images/ui/glass_3.png</key>
-            <key type="filename">../assets/images/ui/glass_4.png</key>
-            <key type="filename">../assets/images/ui/glass_5.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>18,25,35,50</rect>
-                <key>scale9Paddings</key>
-                <rect>18,25,35,50</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/glass_1_fill.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>18,19,35,37</rect>
-                <key>scale9Paddings</key>
-                <rect>18,19,35,37</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/glass_2_fill.png</key>
-            <key type="filename">../assets/images/ui/glass_4_fill.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>18,18,35,36</rect>
-                <key>scale9Paddings</key>
-                <rect>18,18,35,36</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/glass_3_fill.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>18,21,35,41</rect>
-                <key>scale9Paddings</key>
-                <rect>18,21,35,41</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/glass_5_fill.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>18,18,35,37</rect>
-                <key>scale9Paddings</key>
-                <rect>18,18,35,37</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/logo.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>143,62,286,123</rect>
-                <key>scale9Paddings</key>
-                <rect>143,62,286,123</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/mouse_move.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>51,1,102,2</rect>
-                <key>scale9Paddings</key>
-                <rect>51,1,102,2</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/select_instructions_bg.png</key>
-            <key type="filename">../assets/images/ui/select_instructions_rope.png</key>
-            <key type="filename">../assets/images/ui_fi/select_disclaimer.png</key>
-            <key type="filename">../assets/images/ui_fi/select_instructions.png</key>
-            <key type="filename">../assets/images/ui_fi/select_instructions_mobi.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>60,75,121,149</rect>
-                <key>scale9Paddings</key>
-                <rect>60,75,121,149</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/select_jackpot_0_bg.png</key>
-            <key type="filename">../assets/images/ui/select_jackpot_1_bg.png</key>
-            <key type="filename">../assets/images/ui/select_jackpot_2_bg.png</key>
-            <key type="filename">../assets/images/ui/select_jackpot_3_bg.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>55,37,111,75</rect>
-                <key>scale9Paddings</key>
-                <rect>55,37,111,75</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/select_price_0.png</key>
-            <key type="filename">../assets/images/ui/select_price_1.png</key>
-            <key type="filename">../assets/images/ui/select_price_2.png</key>
-            <key type="filename">../assets/images/ui/select_price_3.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>26,26,51,51</rect>
-                <key>scale9Paddings</key>
-                <rect>26,26,51,51</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/split_particle.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>7,7,15,15</rect>
-                <key>scale9Paddings</key>
-                <rect>7,7,15,15</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/split_particle_overlay.png</key>
+            <key type="filename">../assets/images/ui/black.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -444,79 +212,29 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../assets/images/ui/umbrella_1.png</key>
-            <key type="filename">../assets/images/ui/umbrella_2.png</key>
-            <key type="filename">../assets/images/ui/umbrella_3.png</key>
-            <key type="filename">../assets/images/ui/umbrella_4.png</key>
-            <key type="filename">../assets/images/ui/umbrella_5.png</key>
+            <key type="filename">../assets/images/ui/block.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>21,27,43,54</rect>
+                <rect>106,21,211,42</rect>
                 <key>scale9Paddings</key>
-                <rect>21,27,43,54</rect>
+                <rect>106,21,211,42</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../assets/images/ui/win_0.2.png</key>
-            <key type="filename">../assets/images/ui/win_0.4.png</key>
-            <key type="filename">../assets/images/ui/win_0.5.png</key>
-            <key type="filename">../assets/images/ui/win_1.png</key>
-            <key type="filename">../assets/images/ui/win_10.png</key>
-            <key type="filename">../assets/images/ui/win_100.png</key>
-            <key type="filename">../assets/images/ui/win_1000.png</key>
-            <key type="filename">../assets/images/ui/win_2.5.png</key>
-            <key type="filename">../assets/images/ui/win_2.png</key>
-            <key type="filename">../assets/images/ui/win_200.png</key>
-            <key type="filename">../assets/images/ui/win_25.png</key>
-            <key type="filename">../assets/images/ui/win_4.png</key>
-            <key type="filename">../assets/images/ui/win_5.png</key>
-            <key type="filename">../assets/images/ui/win_50.png</key>
-            <key type="filename">../assets/images/ui/win_500.png</key>
+            <key type="filename">../assets/images/ui/collector.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>21,9,43,19</rect>
+                <rect>101,101,201,201</rect>
                 <key>scale9Paddings</key>
-                <rect>21,9,43,19</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/win_bg_0.png</key>
-            <key type="filename">../assets/images/ui/win_bg_1.png</key>
-            <key type="filename">../assets/images/ui/win_bg_2.png</key>
-            <key type="filename">../assets/images/ui/win_bg_3.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>31,19,62,38</rect>
-                <key>scale9Paddings</key>
-                <rect>31,19,62,38</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui_fi/select_jackpot_0.png</key>
-            <key type="filename">../assets/images/ui_fi/select_jackpot_1.png</key>
-            <key type="filename">../assets/images/ui_fi/select_jackpot_2.png</key>
-            <key type="filename">../assets/images/ui_fi/select_jackpot_3.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>52,25,104,50</rect>
-                <key>scale9Paddings</key>
-                <rect>52,25,104,50</rect>
+                <rect>101,101,201,201</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -524,7 +242,6 @@
         <key>fileList</key>
         <array>
             <filename>../assets/images/ui</filename>
-            <filename>../assets/images/ui_fi</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

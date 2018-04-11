@@ -57,6 +57,14 @@ HxOverrides.substr = function(s,pos,len) {
 	}
 	return s.substr(pos,len);
 };
+HxOverrides.remove = function(a,obj) {
+	var i = a.indexOf(obj);
+	if(i == -1) {
+		return false;
+	}
+	a.splice(i,1);
+	return true;
+};
 var Main = $hx_exports["Game"] = function() {
 	this.tickListeners = [];
 	console.log("new game");
@@ -86,6 +94,7 @@ Main.prototype = {
 		this.resizeTimer = haxe_Timer.delay(function() {
 			var size = _gthis.getGameSize();
 			_gthis.bg.resize(size);
+			_gthis.game.resize(size);
 			_gthis.renderer.resize(size.width,size.height);
 			_gthis.viewport.x = size.width / 2;
 			_gthis.viewport.y = size.height / 2;
@@ -107,6 +116,9 @@ Main.prototype = {
 		window.document.getElementById("game").appendChild(this.renderer.view);
 	}
 	,initializeControls: function() {
+		this.engine = Matter.Engine.create();
+		this.world = this.engine.world;
+		this.world.gravity.y = 0.4;
 		this.mainContainer = new PIXI.Container();
 		this.bg = new controls_Background();
 		this.game = new controls_GameView();
@@ -126,6 +138,8 @@ Main.prototype = {
 		this.ticker = new PIXI.ticker.Ticker();
 		this.ticker.start();
 		this.ticker.add($bind(this,this.onTickerTick));
+		this.runner = Matter.Runner.create();
+		Matter.Runner.run(this.runner,this.engine);
 		controls_DeviceOrientationControl.initialize();
 	}
 	,onTickerTick: function() {
@@ -140,8 +154,9 @@ Main.prototype = {
 		}
 		this.renderer.render(this.mainContainer);
 	}
-	,updateRotation: function(rot) {
-		this.viewport.rotation = rot;
+	,updateRotation: function(rotWorld,angleChar) {
+		this.viewport.rotation = rotWorld;
+		this.game.applyCharMove(rotWorld);
 	}
 	,__class__: Main
 };
@@ -173,7 +188,6 @@ Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
 };
 var controls_Background = function() {
-	this.charpos = 0;
 	PIXI.Container.call(this);
 	this.initializeControls();
 };
@@ -182,19 +196,87 @@ controls_Background.__super__ = PIXI.Container;
 controls_Background.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		this.bg = new PIXI.extras.TilingSprite(util_Asset.getTexture("bg.jpg",false),2048,2048);
+		this.bg.tileScale.x = this.bg.tileScale.y = 0.5;
 		this.filter = new filters_bg_BgFilter();
 		this.filterArea = Main.instance.renderer.screen;
+		this.filters = [this.filter];
 		this.addChild(this.bg);
-		Main.instance.tickListeners.push($bind(this,this.onTick));
 	}
-	,onTick: function(delta) {
-		this.bg.tilePosition.y -= delta * 3;
-		this.bg.tilePosition.x = this.charpos;
+	,update: function(charX,charY) {
+		this.bg.tilePosition.x = charX;
+		this.bg.tilePosition.y = charY;
 	}
 	,resize: function(size) {
 		this.filter.resize(size);
 	}
 	,__class__: controls_Background
+});
+var controls_Block = function(x,y) {
+	this.added = false;
+	PIXI.Container.call(this);
+	this.x = x;
+	this.y = y;
+	this.initializeControls();
+};
+controls_Block.__name__ = true;
+controls_Block.__super__ = PIXI.Container;
+controls_Block.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.block = util_Asset.getImage("block.png",true);
+		this.block.anchor.x = this.block.anchor.y = 0.5;
+		this.addChild(this.block);
+	}
+	,randomize: function(x,y) {
+		this.block.rotation = (Math.random() - 0.5) * 2.5;
+		if(this.block.rotation < 0) {
+			this.block.rotation = Math.min(-0.6,this.block.rotation);
+		} else {
+			this.block.rotation = Math.max(-0.6,this.block.rotation);
+		}
+		this.body = Matter.Bodies.rectangle(x,y,this.block.width,this.block.height,{ isStatic : true, angle : this.block.rotation});
+		Matter.World.add(Main.instance.world,this.body);
+		this.added = true;
+		this.x = x;
+		this.y = y;
+	}
+	,__class__: controls_Block
+});
+var controls_Blocks = function() {
+	this.previousSpawn = 0;
+	this.size = new PIXI.Rectangle(0,0,100,100);
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_Blocks.__name__ = true;
+controls_Blocks.__super__ = PIXI.Container;
+controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		var _gthis = this;
+		this.composite = Matter.Composite.create({ });
+		Matter.World.add(Main.instance.world,this.composite);
+		this.pool = new util_Pool(50,function() {
+			var b = new controls_Block(0,-999);
+			b.visible = false;
+			_gthis.addChild(b);
+			return b;
+		});
+	}
+	,resize: function(size) {
+		this.size = size;
+	}
+	,update: function(charpos) {
+		if(Math.abs(this.previousSpawn - charpos.y) > 100) {
+			this.previousSpawn = charpos.y;
+			var b = this.pool.getNext();
+			if(this.composite.bodies.indexOf(b.body) >= 0) {
+				HxOverrides.remove(this.composite.bodies,b.body);
+			}
+			b.randomize(charpos.x + (Math.random() - 0.5) * this.size.width,charpos.y + this.size.height);
+			this.composite.bodies.push(b.body);
+			b.visible = true;
+		}
+	}
+	,__class__: controls_Blocks
 });
 var controls_Character = function() {
 	PIXI.Container.call(this);
@@ -206,8 +288,9 @@ controls_Character.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		this.sprite = util_Asset.getImage("collector.png",true);
 		this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
-		this.sprite.scale.x = this.sprite.scale.y = 0.3;
-		createjs.Tween.get(this.sprite.scale,{ loop : true}).to({ x : 0.25, y : 0.25},500,createjs.Ease.quadInOut).to({ x : 0.3, y : 0.3},500,createjs.Ease.quadInOut);
+		this.sprite.scale.x = this.sprite.scale.y = 0.2;
+		this.body = Matter.Bodies.circle(0,0,this.sprite.width / 2,{ friction : 0.00001, restitution : 0.5, density : 0.001});
+		Matter.World.add(Main.instance.world,this.body);
 		this.addChild(this.sprite);
 	}
 	,__class__: controls_Character
@@ -232,7 +315,6 @@ controls_DeviceOrientationControl.handleScreenOrientation = function(e) {
 	}
 };
 controls_DeviceOrientationControl.handleDeviceOrientation = function(e) {
-	console.log("HAndle orientation");
 	controls_DeviceOrientationControl.absolute = e.absolute;
 	controls_DeviceOrientationControl.beta = e.beta;
 	controls_DeviceOrientationControl.alpha = e.alpha;
@@ -243,7 +325,8 @@ controls_DeviceOrientationControl.handleDeviceOrientation = function(e) {
 	var orient = THREE.Math.degToRad(0);
 	var currentQ = controls_DeviceOrientationControl.camera.quaternion;
 	(controls_DeviceOrientationControl.setObjectQuaternion())(currentQ,alpha,beta,gamma,orient);
-	Main.instance.updateRotation(new THREE.Euler().setFromQuaternion(currentQ,"YXZ").z);
+	var rotation = new THREE.Euler().setFromQuaternion(currentQ,"YXZ");
+	Main.instance.updateRotation(rotation.z,rotation.x);
 };
 controls_DeviceOrientationControl.setObjectQuaternion = function() {
 	var zee = new THREE.Vector3(0,0,1);
@@ -286,21 +369,45 @@ controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
 var controls_GameView = function() {
+	this.maxvelocity = 40;
+	this.dropSpeed = 0;
 	this.time = 0;
+	this.charpos = new PIXI.Point();
 	PIXI.Container.call(this);
 	this.initializeControls();
 };
 controls_GameView.__name__ = true;
 controls_GameView.__super__ = PIXI.Container;
 controls_GameView.prototype = $extend(PIXI.Container.prototype,{
-	initializeControls: function() {
+	applyCharMove: function(angle) {
+		if(angle < 0) {
+			angle = Math.max(-8,angle);
+		} else if(angle > 0) {
+			angle = Math.min(8,angle);
+		}
+		this.character.body.velocity.x += angle / 10;
+		this.character.body.velocity.x = Math.min(8,Math.max(-8,this.character.body.velocity.x));
+		this.charpos.x += angle;
+	}
+	,initializeControls: function() {
 		this.character = new controls_Character();
 		this.addChild(this.character);
+		this.blocks = new controls_Blocks();
+		this.addChild(this.blocks);
 		Main.instance.tickListeners.push($bind(this,this.onTick));
 	}
 	,onTick: function(delta) {
-		Main.instance.bg.charpos = Math.sin(this.time) * 300;
-		this.time += delta / 60;
+		this.time += delta;
+		this.charpos.x = this.character.body.position.x;
+		this.charpos.y = this.character.body.position.y;
+		this.character.body.velocity.y = Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y));
+		Main.instance.bg.update(-this.charpos.x,-this.charpos.y);
+		this.blocks.y = -this.charpos.y;
+		this.blocks.x = -this.charpos.x;
+		this.blocks.update(this.charpos);
+	}
+	,resize: function(size) {
+		this.blocks.resize(size);
 	}
 	,__class__: controls_GameView
 });
@@ -314,8 +421,12 @@ controls_StartView.prototype = $extend(PIXI.Container.prototype,{
 });
 var filters_bg_BgFilter = function() {
 	this.time = 0;
+	var tex = util_Asset.getTexture("noise.jpg",false);
+	tex.baseTexture.mipmap = false;
+	tex.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
 	var frag = haxe_Resource.getString("bg.frag");
 	PIXI.Filter.call(this,null,frag,this.uniforms);
+	this.uniforms.noise = tex;
 	this.padding = 0;
 };
 filters_bg_BgFilter.__name__ = true;
@@ -325,8 +436,9 @@ filters_bg_BgFilter.prototype = $extend(PIXI.Filter.prototype,{
 		this.uniforms.aspect = size.height / size.width;
 	}
 	,apply: function(filterManager,input,output,clear) {
-		this.time += 0.016666666666666666;
+		this.time += 0.0038461538461538464;
 		this.uniforms.time = this.time;
+		this.uniforms.off = [-Main.instance.game.charpos.x / 2000,-Main.instance.game.charpos.y / 2000];
 		PIXI.Filter.prototype.apply.call(this,filterManager,input,output,clear);
 	}
 	,__class__: filters_bg_BgFilter
@@ -1040,13 +1152,14 @@ particles_BaseParticleEffect.prototype = $extend(PIXI.Container.prototype,{
 	,__class__: particles_BaseParticleEffect
 });
 var particles_BgStars = function() {
-	this.area = new PIXI.Rectangle(0,0,1456,1360);
+	this.area = new PIXI.Rectangle(0,0,2048,2048);
 	var _gthis = this;
 	particles_BaseParticleEffect.call(this);
 	this.pool = new util_Pool(150,function() {
-		var p = { sprite : util_Asset.getImage("collector.png",true), lifetime : 0, maxlife : 0};
+		var p = { sprite : util_Asset.getImage("collector.png",true), lifetime : 0, maxlife : 0, sx : 0, sy : 0};
 		_gthis.addChild(p.sprite);
-		p.sprite.anchor.x = p.sprite.anchor.y = 0.5;
+		p.sprite.scale.x = p.sprite.scale.y = 0.1;
+		p.sprite.anchor.x = p.sprite.anchor.y = 0.5 + Math.random();
 		p.sprite.blendMode = PIXI.BLEND_MODES.ADD;
 		_gthis.randomizeParticle(p);
 		return p;
@@ -1057,11 +1170,13 @@ particles_BgStars.__name__ = true;
 particles_BgStars.__super__ = particles_BaseParticleEffect;
 particles_BgStars.prototype = $extend(particles_BaseParticleEffect.prototype,{
 	randomizeParticle: function(p) {
-		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.5 + 0.5;
-		p.lifetime = (Math.random() + 0.5) * 1000;
+		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.05 + 0.02;
+		p.lifetime = (Math.random() + 0.5) * 80 + 30;
 		p.maxlife = p.lifetime;
 		p.sprite.x = Math.random() * this.area.width + this.area.x;
 		p.sprite.y = Math.random() * this.area.height + this.area.y;
+		p.sx = (Math.random() - 0.5) * 2;
+		p.sy = (Math.random() - 1.5) * 2;
 	}
 	,update: function(d) {
 		particles_BaseParticleEffect.prototype.update.call(this,d);
@@ -1074,6 +1189,9 @@ particles_BgStars.prototype = $extend(particles_BaseParticleEffect.prototype,{
 			if(p.lifetime < 0) {
 				this.randomizeParticle(p);
 			}
+			p.sprite.x += p.sx * d;
+			p.sprite.y += p.sy * d;
+			p.sprite.rotation = (p.lifetime + p.maxlife) * p.sprite.scale.x * 0.1;
 			var phase = (p.maxlife - p.lifetime) / p.maxlife;
 			p.sprite.alpha = phase < 0.34?phase / 0.34:1 - (phase - 0.34) / 0.65999999999999992;
 		}
@@ -1463,6 +1581,75 @@ util_LoaderWrapper.updateSoundText = function(amount) {
 util_LoaderWrapper.prototype = {
 	__class__: util_LoaderWrapper
 };
+var util_MathUtil = function() {
+};
+util_MathUtil.__name__ = true;
+util_MathUtil.findLineIntersection = function(p1,p2,p3,p4) {
+	var x12 = p1.x - p2.x;
+	var x34 = p3.x - p4.x;
+	var y12 = p1.y - p2.y;
+	var y34 = p3.y - p4.y;
+	var c = x12 * y34 - y12 * x34;
+	if(Math.abs(c) < 0.01) {
+		return null;
+	} else {
+		var a = p1.x * p2.y - p1.y * p2.x;
+		var b = p3.x * p4.y - p3.y * p4.x;
+		return new PIXI.Point((a * x34 - b * x12) / c,(a * y34 - b * y12) / c);
+	}
+};
+util_MathUtil.normalize = function(point) {
+	var np = new PIXI.Point(point.x,point.y);
+	var l = Math.sqrt(np.x * np.x + np.y * np.y);
+	if(l == 0) {
+		l = 1;
+	}
+	np.x /= l;
+	np.y /= l;
+	return np;
+};
+util_MathUtil.pointLength = function(point) {
+	return Math.sqrt(point.x * point.x + point.y * point.y);
+};
+util_MathUtil.calculateArea = function(polygon) {
+	var sum = 0;
+	var _g1 = 0;
+	var _g = polygon.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		sum += polygon[i].x * polygon[(i + 1) % polygon.length].y - polygon[i].y * polygon[(i + 1) % polygon.length].x;
+	}
+	return Math.abs(sum / 2);
+};
+util_MathUtil.clipInput = function(k,arr) {
+	if(k < 0) {
+		k = 0;
+	}
+	if(k > arr.length - 1) {
+		k = arr.length - 1;
+	}
+	return arr[k];
+};
+util_MathUtil.getTangent = function(k,factor,array) {
+	return factor * (util_MathUtil.clipInput(k + 1,array) - util_MathUtil.clipInput(k - 1,array)) / 2;
+};
+util_MathUtil.cubicInterpolation = function(array,t,tangentFactor) {
+	if(tangentFactor == null) {
+		tangentFactor = 1;
+	}
+	var k = Math.floor(t);
+	var m_0 = util_MathUtil.getTangent(k,tangentFactor,array);
+	var m_1 = util_MathUtil.getTangent(k + 1,tangentFactor,array);
+	var p_0 = util_MathUtil.clipInput(k,array);
+	var p_1 = util_MathUtil.clipInput(k + 1,array);
+	t -= k;
+	var t2 = t * t;
+	var t3 = t * t2;
+	return (2 * t3 - 3 * t2 + 1) * p_0 + (t3 - 2 * t2 + t) * m_0 + (-2 * t3 + 3 * t2) * p_1 + (t3 - t2) * m_1;
+};
+util_MathUtil.prototype = {
+	__class__: util_MathUtil
+};
 var util_Pool = $hx_exports["util"]["Pool"] = function(size,constructor) {
 	this._pool = new Array(size);
 	this._index = 0;
@@ -1500,7 +1687,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KDQp1bmlmb3JtIGZsb2F0IHRpbWU7DQp1bmlmb3JtIHZlYzQgZmlsdGVyQ2xhbXA7DQoNCnVuaWZvcm0gZmxvYXQgYXNwZWN0Ow0KDQpmbG9hdCBzaW5kKHZlYzIgcCwgZmxvYXQgcGgsIGZsb2F0IHJhZCwgZmxvYXQgb2ZmLCBmbG9hdCB0bXApDQp7DQogCXJldHVybiBzbW9vdGhzdGVwKDAuLDguLDEuL2FicyhwLnkqcGgtc2luKG9mZitwLngrdGltZSp0bXAqMC4yNCkqcmFkKSkqOC47DQp9DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZC12ZWMyKDAuLDAuNSk7DQoJdXYueSo9YXNwZWN0Ow0KCXV2ID0gdmVjMih1di55LCB1di54KTsNCiAgICAvLyBUaW1lIHZhcnlpbmcgcGl4ZWwgY29sb3INCiAgICB2ZWMzIGNvbCA9dmVjMyguMCk7Ly8gMC41ICsgMC41KmNvcyh0aW1lK3V2Lnh5eCt2ZWMzKDAsMiw0KSk7DQoNCiAgICB2ZWMzIGIgPSAwLjUgKyAwLjUqY29zKHRpbWUrdXYueHl4K3ZlYzMoMCwyLDQpKTsNCiAgICANCiAgICBjb2wrPXNpbmQodXYsIDIwLiwgNS4sMC4wLDAuMikqYjsNCiAgICBjb2wrPXNpbmQodXYsIDQwLiwgMTAuLDEuMCwwLjQpKmI7DQogICAgY29sKz1zaW5kKHV2LCA2MC4sIDIwLiwyLjAsMC42KSpiOw0KICAgIGNvbCs9c2luZCh1diwgODAuLCAzMC4sMy4wLDAuOCkqYjsNCiAgICBjb2wrPXNpbmQodXYsIDEwMC4sIDQwLiw0LjAsMS4wKSpiOw0KICAgIA0KICAgIC8vIE91dHB1dCB0byBzY3JlZW4NCiAgICBnbF9GcmFnQ29sb3IgPSB2ZWM0KGNvbCwxLjApKjAuMjU7DQovLwlnbF9GcmFnQ29sb3IgPSB2ZWM0KDEuLDEuLDEuLDEuKTsNCgkvL2dsX0ZyYWdDb2xvciA9IHZlYzQodXYueCwgdXYueSwwLiwxLik7DQp9DQo"}];
+haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZDsNCgl2ZWMyIG51diA9IHZUZXh0dXJlQ29vcmQqLjA4Ow0KCQ0KICAgIGZsb2F0IG4gPSB0ZXh0dXJlMkQobm9pc2UsIG51dit2ZWMyKHNpbih0aW1lKi4zKSx0aW1lKSouMDItb2ZmKi40KS5yLS41Ow0KICAgIGZsb2F0IG4yID0gdGV4dHVyZTJEKG5vaXNlLCBudXYrdmVjMihzaW4odGltZSouNSksdGltZSkqLjA0LW9mZiouOCkuci0uNTsNCiAgICBuKz1uMjsNCiAgICANCgludXYueSo9YXNwZWN0Ow0KICAgIHV2LngrPW4vNTAuOw0KICAgIHV2LnkrPW4vNTAuOw0KICAgIA0KICAgIGZsb2F0IGQgPSBsZW5ndGgodXYtdmVjMigwLjUpKTsNCiAgICBkPXNtb290aHN0ZXAoMC4xLDAuNiwxLi1kKTsNCgl2ZWM0IGJhc2UgPSB0ZXh0dXJlMkQodVNhbXBsZXIsIHV2KSpkOw0KICAgIC8vIE91dHB1dCB0byBzY3JlZW4NCiAgICB2ZWM0IGNvbCA9IHZlYzQoIHNpbih1di54K3RpbWUpLCBjb3ModXYueSt0aW1lKSwgdXYueCwxLik7DQogICAgZ2xfRnJhZ0NvbG9yID0gYmFzZStzbW9vdGhzdGVwKC0xLiwgMS4sIG4pKmNvbCouMTsNCn0NCg"}];
 var __map_reserved = {}
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -1508,8 +1695,9 @@ if(ArrayBuffer.prototype.slice == null) {
 }
 var Float32Array = $global.Float32Array || js_html_compat_Float32Array._new;
 var Uint8Array = $global.Uint8Array || js_html_compat_Uint8Array._new;
-Config.ASSETS = ["img/black.png","img/bg.jpg","img/ui.json"];
+Config.ASSETS = ["img/black.png","img/bg.jpg","img/ui.json","img/noise.jpg"];
 Config.VERSION = "chemistry fall 0.1";
+Config.GRAVITY = 0.1;
 controls_DeviceOrientationControl.lon = 0;
 controls_DeviceOrientationControl.lat = 0;
 controls_DeviceOrientationControl.absolute = true;

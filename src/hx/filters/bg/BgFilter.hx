@@ -24,8 +24,13 @@ class BgFilter extends Filter
 	
 	public function new() 
 	{
+		var tex:Texture = Asset.getTexture("noise.jpg", false);
+		tex.baseTexture.mipmap = false;
+		tex.baseTexture.wrapMode = Pixi.WRAP_MODES.REPEAT;
+		
 		var frag:String = Resource.getString("bg.frag");
 		super(null, frag, uniforms);
+		uniforms.noise = tex;
 		untyped this.padding = 0;
 	}
 	
@@ -36,8 +41,9 @@ class BgFilter extends Filter
 	
 	override public function apply(filterManager:Dynamic, input:Dynamic, output:Dynamic, ?clear:Bool):Void 
 	{
-		time+= 1 / 60;
+		time+= 1 / 260;
 		this.uniforms.time = time;
+		this.uniforms.off = [-Main.instance.game.charpos.x/2000, -Main.instance.game.charpos.y/2000];
 		super.apply(filterManager, input, output, clear);
 	}
 }

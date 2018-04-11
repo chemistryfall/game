@@ -6,6 +6,9 @@ import controls.StartView;
 import createjs.soundjs.Sound;
 import createjs.tweenjs.Tween;
 import haxe.Timer;
+import matter.Engine;
+import matter.Runner;
+import matter.World;
 import particles.ParticleManager;
 
 import js.Browser;
@@ -56,7 +59,13 @@ class Main
 	private var ticker:Ticker;
 	
 	public var bg:Background;
-	private var game:GameView;
+	public var game:GameView;
+	
+	public var engine:Engine;
+	public var world:World;
+	private var runner:Runner;
+	
+	
 	private var start:StartView;
 	/**
 	 * Renderer for the game.
@@ -113,6 +122,7 @@ class Main
 			var size:Rectangle = this.getGameSize();
 			
 			this.bg.resize(size);
+			this.game.resize(size);
 			this.renderer.resize(size.width, size.height);
 			
 			this.viewport.x = size.width / 2;
@@ -155,6 +165,10 @@ class Main
 	*/
 	private function initializeControls():Void
 	{
+		this.engine = Engine.create();
+		this.world = engine.world;
+		this.world.gravity.y = 0.4;
+		
 		this.mainContainer = new Container();
 		
 		this.bg = new Background();
@@ -183,6 +197,9 @@ class Main
 		this.ticker.add(onTickerTick);
 		
 		
+		this.runner = Runner.create();
+		Runner.run(runner, engine);
+		
 		DeviceOrientationControl.initialize();
 	}
 	
@@ -196,11 +213,14 @@ class Main
 		Tween.tick(ticker.elapsedMS,false);
 		for (t in tickListeners) t(delta);
 		
+		
+		
 		this.renderer.render(this.mainContainer);
 	}
 	
-	public function updateRotation(rot:Float):Void
+	public function updateRotation(rotWorld:Float, angleChar:Float ):Void
 	{
-		this.viewport.rotation = rot;
+		this.viewport.rotation = rotWorld;
+		game.applyCharMove(rotWorld);
 	}
 }

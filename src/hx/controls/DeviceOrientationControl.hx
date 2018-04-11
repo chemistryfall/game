@@ -54,7 +54,6 @@ class DeviceOrientationControl
 	
 	private static function handleDeviceOrientation(e:DeviceOrientationEvent):Void
 	{
-		trace("HAndle orientation");
 		absolute = e.absolute;
 		if (true || e.absolute)
 		{
@@ -73,7 +72,7 @@ class DeviceOrientationControl
 			
 			setObjectQuaternion()(currentQ, alpha, beta, gamma, orient);
 			var rotation:Euler =new Euler().setFromQuaternion( currentQ, "YXZ" );
-			Main.instance.updateRotation( rotation.z);
+			Main.instance.updateRotation( rotation.z, rotation.x);
 		}
 	}
 	
