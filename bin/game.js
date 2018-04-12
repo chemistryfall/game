@@ -57,14 +57,6 @@ HxOverrides.substr = function(s,pos,len) {
 	}
 	return s.substr(pos,len);
 };
-HxOverrides.remove = function(a,obj) {
-	var i = a.indexOf(obj);
-	if(i == -1) {
-		return false;
-	}
-	a.splice(i,1);
-	return true;
-};
 var Main = $hx_exports["Game"] = function() {
 	this.tickListeners = [];
 	console.log("new game");
@@ -138,11 +130,10 @@ Main.prototype = {
 		this.ticker = new PIXI.ticker.Ticker();
 		this.ticker.start();
 		this.ticker.add($bind(this,this.onTickerTick));
-		this.runner = Matter.Runner.create();
-		Matter.Runner.run(this.runner,this.engine);
 		controls_DeviceOrientationControl.initialize();
 	}
 	,onTickerTick: function() {
+		Matter.Engine.update(this.engine,16.666666666666668);
 		var delta = this.ticker.deltaTime;
 		createjs.Tween.tick(this.ticker.elapsedMS,false);
 		var _g = 0;
@@ -224,6 +215,7 @@ controls_Block.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		this.block = util_Asset.getImage("block.png",true);
 		this.block.anchor.x = this.block.anchor.y = 0.5;
+		this.hitArea = new PIXI.Rectangle(-this.block.width / 2,-this.block.height,this.block.width,this.block.height * 2);
 		this.addChild(this.block);
 	}
 	,randomize: function(x,y) {
@@ -234,7 +226,6 @@ controls_Block.prototype = $extend(PIXI.Container.prototype,{
 			this.block.rotation = Math.max(-0.6,this.block.rotation);
 		}
 		this.body = Matter.Bodies.rectangle(x,y,this.block.width,this.block.height,{ isStatic : true, angle : this.block.rotation});
-		Matter.World.add(Main.instance.world,this.body);
 		this.added = true;
 		this.x = x;
 		this.y = y;
@@ -252,14 +243,25 @@ controls_Blocks.__super__ = PIXI.Container;
 controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		var _gthis = this;
-		this.composite = Matter.Composite.create({ });
-		Matter.World.add(Main.instance.world,this.composite);
 		this.pool = new util_Pool(50,function() {
 			var b = new controls_Block(0,-999);
 			b.visible = false;
+			b.interactive = true;
+			b.addListener("click",$bind(_gthis,_gthis.onBlockClick));
+			b.addListener("tap",$bind(_gthis,_gthis.onBlockClick));
 			_gthis.addChild(b);
 			return b;
 		});
+	}
+	,onBlockClick: function(e) {
+		var b = e.currentTarget;
+		if(b.body == null) {
+			return;
+		}
+		console.log("Remove body");
+		Matter.World.remove(Main.instance.world,b.body);
+		b.body = null;
+		b.visible = false;
 	}
 	,resize: function(size) {
 		this.size = size;
@@ -268,12 +270,18 @@ controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 		if(Math.abs(this.previousSpawn - charpos.y) > 100) {
 			this.previousSpawn = charpos.y;
 			var b = this.pool.getNext();
-			if(this.composite.bodies.indexOf(b.body) >= 0) {
-				HxOverrides.remove(this.composite.bodies,b.body);
+			if(b.body != null) {
+				Matter.World.remove(Main.instance.world,b.body);
 			}
 			b.randomize(charpos.x + (Math.random() - 0.5) * this.size.width,charpos.y + this.size.height);
-			this.composite.bodies.push(b.body);
+			Matter.World.add(Main.instance.world,b.body);
 			b.visible = true;
+		}
+		var _g = 0;
+		var _g1 = this.pool.get_all();
+		while(_g < _g1.length) {
+			var b1 = _g1[_g];
+			++_g;
 		}
 	}
 	,__class__: controls_Blocks
@@ -286,10 +294,35 @@ controls_Character.__name__ = true;
 controls_Character.__super__ = PIXI.Container;
 controls_Character.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
-		this.sprite = util_Asset.getImage("collector.png",true);
+		this.sprite = util_Asset.getImage("bomb_blast_blue.png",true);
 		this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
-		this.sprite.scale.x = this.sprite.scale.y = 0.2;
-		this.body = Matter.Bodies.circle(0,0,this.sprite.width / 2,{ friction : 0.00001, restitution : 0.5, density : 0.001});
+		this.sprite.scale.x = this.sprite.scale.y = 0.7;
+		var sprite2 = util_Asset.getImage("bomb_blast_red.png",true);
+		sprite2.anchor.x = sprite2.anchor.y = 0.5;
+		sprite2.scale.x = sprite2.scale.y = 0.7;
+		var sprite3 = util_Asset.getImage("bomb_blast_green.png",true);
+		sprite3.anchor.x = sprite3.anchor.y = 0.5;
+		sprite3.scale.x = sprite3.scale.y = 0.7;
+		var sprite4 = util_Asset.getImage("bomb_blast_orange.png",true);
+		sprite4.anchor.x = sprite4.anchor.y = 0.5;
+		sprite4.scale.x = sprite4.scale.y = 0.7;
+		this.sprite.blendMode = PIXI.BLEND_MODES.ADD;
+		sprite2.blendMode = PIXI.BLEND_MODES.ADD;
+		sprite3.blendMode = PIXI.BLEND_MODES.ADD;
+		sprite4.blendMode = PIXI.BLEND_MODES.ADD;
+		this.sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.1;
+		var tmp = Math.PI * 2;
+		createjs.Tween.get(this.sprite,{ loop : true}).to({ rotation : tmp},8000);
+		var tmp1 = Math.PI * 2;
+		createjs.Tween.get(sprite2,{ loop : true}).to({ rotation : tmp1},8300);
+		var tmp2 = -Math.PI * 2;
+		createjs.Tween.get(sprite3,{ loop : true}).to({ rotation : tmp2},8200);
+		var tmp3 = -Math.PI * 2;
+		createjs.Tween.get(sprite4,{ loop : true}).to({ rotation : tmp3},8100);
+		this.addChild(sprite2);
+		this.addChild(sprite2);
+		this.addChild(sprite3);
+		this.body = Matter.Bodies.circle(0,0,this.sprite.width / 2 * 0.8,{ friction : 0.00001, restitution : 0.5, density : 0.001});
 		Matter.World.add(Main.instance.world,this.body);
 		this.addChild(this.sprite);
 	}
@@ -369,7 +402,7 @@ controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
 var controls_GameView = function() {
-	this.maxvelocity = 40;
+	this.maxvelocity = 3.0;
 	this.dropSpeed = 0;
 	this.time = 0;
 	this.charpos = new PIXI.Point();
@@ -391,16 +424,16 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,initializeControls: function() {
 		this.character = new controls_Character();
-		this.addChild(this.character);
 		this.blocks = new controls_Blocks();
 		this.addChild(this.blocks);
+		this.addChild(this.character);
 		Main.instance.tickListeners.push($bind(this,this.onTick));
 	}
 	,onTick: function(delta) {
 		this.time += delta;
 		this.charpos.x = this.character.body.position.x;
 		this.charpos.y = this.character.body.position.y;
-		this.character.body.velocity.y = Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y));
+		Matter.Body.setVelocity(this.character.body,{ x : Math.min(8,Math.max(-8,this.character.body.velocity.x)), y : Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y))});
 		Main.instance.bg.update(-this.charpos.x,-this.charpos.y);
 		this.blocks.y = -this.charpos.y;
 		this.blocks.x = -this.charpos.x;
@@ -1687,7 +1720,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZDsNCgl2ZWMyIG51diA9IHZUZXh0dXJlQ29vcmQqLjA4Ow0KCQ0KICAgIGZsb2F0IG4gPSB0ZXh0dXJlMkQobm9pc2UsIG51dit2ZWMyKHNpbih0aW1lKi4zKSx0aW1lKSouMDItb2ZmKi40KS5yLS41Ow0KICAgIGZsb2F0IG4yID0gdGV4dHVyZTJEKG5vaXNlLCBudXYrdmVjMihzaW4odGltZSouNSksdGltZSkqLjA0LW9mZiouOCkuci0uNTsNCiAgICBuKz1uMjsNCiAgICANCgludXYueSo9YXNwZWN0Ow0KICAgIHV2LngrPW4vNTAuOw0KICAgIHV2LnkrPW4vNTAuOw0KICAgIA0KICAgIGZsb2F0IGQgPSBsZW5ndGgodXYtdmVjMigwLjUpKTsNCiAgICBkPXNtb290aHN0ZXAoMC4xLDAuNiwxLi1kKTsNCgl2ZWM0IGJhc2UgPSB0ZXh0dXJlMkQodVNhbXBsZXIsIHV2KSpkOw0KICAgIC8vIE91dHB1dCB0byBzY3JlZW4NCiAgICB2ZWM0IGNvbCA9IHZlYzQoIHNpbih1di54K3RpbWUpLCBjb3ModXYueSt0aW1lKSwgdXYueCwxLik7DQogICAgZ2xfRnJhZ0NvbG9yID0gYmFzZStzbW9vdGhzdGVwKC0xLiwgMS4sIG4pKmNvbCouMTsNCn0NCg"}];
+haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZDsNCgl2ZWMyIG51diA9IHZUZXh0dXJlQ29vcmQqMy4wOw0KCQ0KICAgIGZsb2F0IG4gPSB0ZXh0dXJlMkQobm9pc2UsIG51dit2ZWMyKHNpbih0aW1lKi4zKSx0aW1lKSouMDItb2ZmKi40KS5yLS41Ow0KICAgIGZsb2F0IG4yID0gdGV4dHVyZTJEKG5vaXNlLHZlYzIoLjIpKyBudXYrdmVjMihzaW4odGltZSouNSksdGltZSkqLjA0LW9mZiouOCkuci0uNTsNCiAgICBuKz1uMjsNCiAgICANCgludXYueSo9YXNwZWN0Ow0KICAgIHV2LngrPW4vMjUwLjsNCiAgICB1di55Kz1uLzI1MC47DQogICAgDQogICAgZmxvYXQgZCA9IGxlbmd0aCh1di12ZWMyKDAuNSkpOw0KICAgIGQ9c21vb3Roc3RlcCgwLjEsMC42LDEuLWQpOw0KCXZlYzQgYmFzZSA9IHRleHR1cmUyRCh1U2FtcGxlciwgdXYpKmQ7DQogICAgLy8gT3V0cHV0IHRvIHNjcmVlbg0KICAgIHZlYzQgY29sID0gdmVjNCggc2luKHV2LngrdGltZSksIGNvcyh1di55K3RpbWUpLCB1di54LDEuKTsNCiAgICBnbF9GcmFnQ29sb3IgPSBiYXNlK3Ntb290aHN0ZXAoLTEuLCAxLiwgbikqY29sKi4xOw0KCS8vZ2xfRnJhZ0NvbG9yID12ZWM0KG4sbixuLDEuKTsvLw0KfQ0K"}];
 var __map_reserved = {}
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {

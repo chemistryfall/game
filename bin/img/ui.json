@@ -2,7 +2,7 @@
 
 "black.png":
 {
-	"frame": {"x":1,"y":392,"w":10,"h":10},
+	"frame": {"x":881,"y":1,"w":10,"h":10},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":10},
@@ -10,11 +10,43 @@
 },
 "block.png":
 {
-	"frame": {"x":1,"y":364,"w":150,"h":26},
+	"frame": {"x":623,"y":259,"w":150,"h":26},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":26},
 	"sourceSize": {"w":150,"h":26}
+},
+"bomb_blast_blue.png":
+{
+	"frame": {"x":365,"y":1,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"bomb_blast_green.png":
+{
+	"frame": {"x":623,"y":1,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"bomb_blast_orange.png":
+{
+	"frame": {"x":365,"y":259,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"bomb_blast_red.png":
+{
+	"frame": {"x":1,"y":364,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
 },
 "collector.png":
 {
@@ -29,8 +61,8 @@
 	"version": "1.0",
 	"image": "ui.png",
 	"format": "RGBA8888",
-	"size": {"w":512,"h":512},
+	"size": {"w":1024,"h":1024},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:4f3b528c2d083e3af1866fb66743f618:70bbc34b750d4f466d36e4cd8d5f06ac:5b04aa198265472a3c5f56958d78e97b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:25e9aea50428c41ca61e20a6121cd407:c7a4501b7552b432e5f3c7c61b06e29f:5b04aa198265472a3c5f56958d78e97b$"
 }
 }

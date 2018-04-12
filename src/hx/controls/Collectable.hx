@@ -8,7 +8,9 @@ import pixi.core.display.Container;
  */
 class Collectable extends Container
 {
-
+	
+	
+	
 	public function new() 
 	{
 		super();

@@ -197,8 +197,8 @@ class Main
 		this.ticker.add(onTickerTick);
 		
 		
-		this.runner = Runner.create();
-		Runner.run(runner, engine);
+	//	this.runner = Runner.create();
+	//	Runner.run(runner, engine);
 		
 		DeviceOrientationControl.initialize();
 	}
@@ -209,6 +209,8 @@ class Main
 	*/
 	private function onTickerTick():Void
 	{
+		Engine.update(engine, 1000 / 60);
+		
 		var delta:Float = ticker.deltaTime;
 		Tween.tick(ticker.elapsedMS,false);
 		for (t in tickListeners) t(delta);

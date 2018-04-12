@@ -17,11 +17,26 @@
 	<script type="text/javascript" charset="utf-8" src="libs/three.js"></script>
 	<script type="text/javascript" charset="utf-8" src="libs/webvr-polyfill.js"></script>
 	<script type="text/javascript" charset="utf-8" src="libs/matter.js"></script>
+	<script type="text/javascript" charset="utf-8" src="libs/NoSleep.js"></script>
 
 </head>
 <body ontouchstart="">
 
 <div id="game"></div>
 <div id="preload"></div>
+	
+<script>
+
+var noSleep = new NoSleep();
+
+function enableNoSleep() {
+  noSleep.enable();
+  document.removeEventListener('click', enableNoSleep, false);
+}
+
+// Enable wake lock.
+// (must be wrapped in a user input event handler e.g. a mouse or touch handler)
+document.addEventListener('click', enableNoSleep, false);
+</script>
 </body>
 </html>

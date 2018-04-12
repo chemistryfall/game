@@ -29,14 +29,28 @@ class Blocks extends Container
 	
 	private function initializeControls():Void
 	{
-		this.composite = Composite.create( { } );
-		World.add(Main.instance.world, this.composite);
+	//	this.composite = Composite.create( { } );
+	//	World.add(Main.instance.world, this.composite);
 		this.pool = new Pool<Block>(50, function():Block { 
 			var b:Block = new Block(0, -999);
 			b.visible = false;
+			b.interactive = true;
+			b.addListener("click", onBlockClick);
+			b.addListener("tap", onBlockClick);
 			this.addChild(b);
 			return b;
 		} );
+	}
+	
+	private function onBlockClick(e:Dynamic):Void
+	{
+		var b:Block = e.currentTarget;
+		if (b.body == null) return;
+		trace("Remove body");
+		
+		untyped World.remove(Main.instance.world, b.body);
+		b.body = null;
+		b.visible = false;
 	}
 	
 	public function resize(size:Rectangle):Void
@@ -50,10 +64,22 @@ class Blocks extends Container
 		{
 			previousSpawn = charpos.y;
 			var b:Block = pool.getNext();
-			if (composite.bodies.indexOf(b.body) >= 0) composite.bodies.remove(b.body);
+			
+			if(b.body != null)
+				untyped World.remove(Main.instance.world, b.body);
 			b.randomize(charpos.x + (Math.random() - 0.5) * size.width, charpos.y + size.height);
-			composite.bodies.push(b.body);
+		//	Composite.add(composite, b.body);
+			World.add(Main.instance.world, b.body);
 			b.visible = true;
+		}
+		for (b in pool.all)
+		{
+			if (b.body != null)
+			{
+		//		b.x = b.body.position.x;
+		//		b.y = b.body.position.y;
+		//		b.rotation = b.body.angle;
+			}
 		}
 	}
 	

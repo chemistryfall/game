@@ -4,6 +4,7 @@ import matter.Bodies;
 import matter.Body;
 import matter.World;
 import pixi.core.display.Container;
+import pixi.core.math.shapes.Rectangle;
 import pixi.core.sprites.Sprite;
 import util.Asset;
 
@@ -31,6 +32,7 @@ class Block extends Container
 		this.block = Asset.getImage("block.png", true);
 		this.block.anchor.x = this.block.anchor.y = 0.5;
 		
+		this.hitArea = new Rectangle( -block.width / 2, -block.height, block.width, block.height * 2);
 		
 		this.addChild(this.block);
 	}
@@ -43,8 +45,8 @@ class Block extends Container
 		else
 			this.block.rotation = Math.max( -0.6, this.block.rotation);
 		body = Bodies.rectangle(x, y, block.width, block.height, { isStatic:true, angle:block.rotation } );
-		
-		World.add(Main.instance.world, body);
+	//	
+	//	World.add(Main.instance.world, body);
 		added = true;
 		
 		this.x = x;

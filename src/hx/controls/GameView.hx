@@ -1,6 +1,8 @@
 package controls;
 
 import js.Lib;
+import matter.Body;
+import matter.Vector;
 import pixi.core.display.Container;
 import pixi.core.math.Point;
 import pixi.core.math.shapes.Rectangle;
@@ -20,7 +22,7 @@ class GameView extends Container
 	
 	private var dropSpeed:Float = 0;
 	
-	private var maxvelocity:Float = 40;
+	private var maxvelocity:Float = 3.0;
 	
 	public function new() 
 	{
@@ -43,12 +45,9 @@ class GameView extends Container
 	{
 		this.character = new Character();
 		
-		
-		
-		this.addChild(this.character);
-		
 		this.blocks = new Blocks();
 		this.addChild(this.blocks);
+		this.addChild(this.character);
 		
 		Main.instance.tickListeners.push(onTick);
 	}
@@ -78,7 +77,10 @@ class GameView extends Container
 		this.charpos.x = character.body.position.x;
 		this.charpos.y = character.body.position.y;
 		
-		this.character.body.velocity.y = Math.max( -maxvelocity, Math.min(maxvelocity, this.character.body.velocity.y));
+		Body.setVelocity(this.character.body,cast {
+			x:Math.min(8, Math.max( -8, this.character.body.velocity.x)),
+			y:Math.max( -maxvelocity, Math.min(maxvelocity, this.character.body.velocity.y))
+		});
 		
 		Main.instance.bg.update(-charpos.x, -charpos.y);
 		this.blocks.y = -charpos.y;
