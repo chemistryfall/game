@@ -215,6 +215,7 @@ class GameView extends Container
 			
 			if (d < 85)
 			{
+				var wrong:Bool  = false;
 				//Hit
 				if (baseconf.indexOf(c.type) >= 0)
 				{
@@ -222,18 +223,31 @@ class GameView extends Container
 				}
 				else
 				{
+					wrong = true;
 					//Wrong element.
+					Main.instance.bg.filter.wrong();
 					extra.push(c.type);
 				}
 				remove.push(c);
 				cp.x += this.character.body.velocity.x * 20;
 				cp.y += this.character.body.velocity.y * 20;
-				Tween.get(c).to( { x:cp.x, y:cp.y }, 350, Ease.quadOut);
-				Tween.get(c.scale).to( { x:0, y:0 }, 350, Ease.quadOut).call(function(){
-					collectables.removeChild(c);
-					updatePairs();
-				});
-				
+				if (!wrong)
+				{
+					Tween.get(c).to( { x:cp.x, y:cp.y }, 350, Ease.quadOut);
+					Tween.get(c.scale).to( { x:0, y:0 }, 350, Ease.quadOut).call(function(){
+						collectables.removeChild(c);
+						updatePairs();
+					});
+				}
+				else
+				{
+					Tween.get(c).to( { alpha:0 }, 350);
+					Tween.get(c.scale).to( { x:1.5, y:1.5 }, 350, Ease.quadOut).call(function(){
+						collectables.removeChild(c);
+						updatePairs();
+					});
+
+				}
 			}
 			if (c.getBounds().y < -size.height)
 			{
@@ -250,6 +264,7 @@ class GameView extends Container
 		var rc:Int = 0;
 		var conf:Array<CType> = baseconf.slice(0);
 		var removeFromCur:Array<CType> = [];
+		var charge:Int = 0;
 		for (c in current)
 		{
 			if (c == ui.target1.type) lc++;
@@ -259,7 +274,14 @@ class GameView extends Container
 				conf.remove(c);
 				removeFromCur.push(c);
 			}
+			
+			if (c == CType.lithium) charge++;
+			else if (c == CType.brohm) charge--;
+			else if (c == CType.oxygen) charge-= 2;
+			else if (c == CType.magnesium) charge+= 2;
+			else if (c == CType.aluminium) charge+= 3;
 		}
+		this.ui.charge.updateCharge(charge);
 		this.ui.target1.setcount(lc);
 		this.ui.target2.setcount(rc);
 		

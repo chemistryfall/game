@@ -33,7 +33,6 @@ class Block extends Container
 	private function initializeControls():Void
 	{
 		this.type = (++blockType % 3 + 1) ;
-		this.type = 3;
 		this.block = Asset.getImage("block_"+type+ ".png", true);
 		
 		this.block.anchor.x = this.block.anchor.y = 0.5;
@@ -45,6 +44,8 @@ class Block extends Container
 	
 	public function randomize(x:Float, y:Float):Void
 	{
+		this.scale.x = this.scale.y = 1;
+		this.alpha = 1;
 		this.block.rotation = (Math.random() - 0.5)*2.5;
 		if (this.block.rotation < 0)
 			this.block.rotation = Math.min( -0.6, this.block.rotation);

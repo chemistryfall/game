@@ -50,8 +50,8 @@ class StartView extends Container
 	
 	public function hide():Void
 	{
-		Tween.get(this.logo).to( {  alpha:0 }, 250);
-		Tween.get(this.start).to( { alpha:0 }, 250);
+		Tween.get(this.logo).to( {  alpha:0 }, 450);
+		Tween.get(this.start).to( { alpha:0 }, 450);
 		
 	}
 	

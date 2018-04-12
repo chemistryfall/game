@@ -15,7 +15,7 @@ class UI extends Container
 {
 	public var target1:TargetIndicator;
 	public var target2:TargetIndicator;
-	private var charge:Charge;
+	public var charge:Charge;
 	private var former:PairFormer;
 	
 	private var size:Rectangle;
@@ -71,7 +71,6 @@ class UI extends Container
 		this.reactionC.addChild(this.reaction);
 		this.finalReactionC.addChild(this.finalReaction);
 		this.reactionC.pivot.y = 100;
-		this.charge.pivot.y = 100;
 		this.finalReactionC.pivot.y = 100; 
 	}
 	
@@ -93,7 +92,7 @@ class UI extends Container
 		this.finalReaction.x = (finalreactionlabel.width - finalReaction.width) / 2;
 		this.finalReactionC.x = Math.round((size.width - finalReactionC.width) / 2);
 		
-		this.charge.x = size.width / 2;
+		this.charge.resize(size);
 		this.former.resize(size);
 	}
 	
@@ -104,18 +103,19 @@ class UI extends Container
 		this.reaction.texture = Asset.getTexture(reaction, true);
 		this.finalReaction.texture = Asset.getTexture(finalReaction, true);
 		this.resize(size);
-		Tween.get(this.reactionC.pivot).to( { y:0 }, 450, Ease.backOut);
-		Tween.get(this.charge.pivot).to( { y: -60 }, 450, Ease.backOut);
-		Tween.get(this.finalReactionC.pivot).to( { y:100 }, 450, Ease.backOut);
+		Tween.get(this.reactionC.pivot).to( { y:0 }, 450, Ease.getBackOut(0.3));
+		this.charge.show();
+		Tween.get(this.finalReactionC.pivot).to( { y:100 }, 450, Ease.getBackOut(0.3));
 	}
 	
 	public function hide():Void
 	{
-		Tween.get(this.charge.pivot).to( { y: 100 }, 450, Ease.backOut);
+		Tween.get(this.charge.pivot).to( { y: 100 }, 450, Ease.backIn);
 		this.target1.hide();
 		this.target2.hide();
-		Tween.get(this.reactionC.pivot).to( { y:100 }, 450, Ease.backOut);
-		Tween.get(this.finalReactionC.pivot).to( { y:0 }, 450, Ease.backOut);
+		this.charge.hide();
+		Tween.get(this.reactionC.pivot).to( { y:100 }, 450, Ease.backIn);
+		Tween.get(this.finalReactionC.pivot).to( { y:0 }, 450, Ease.backIn);
 	}
 	
 	public function updatePairAmount(pairsNeeded:Int):Void

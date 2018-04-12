@@ -11,6 +11,7 @@ uniform vec4 filterClamp;
 uniform float aspect;
 
 uniform vec2 off;
+uniform float flash;
 
 void main(  )
 {
@@ -32,6 +33,7 @@ void main(  )
 	
     // Output to screen
     vec4 col = vec4( sin(uv.x+time), cos(uv.y+time), uv.x,1.);
-    gl_FragColor = base+smoothstep(-1., 1., n)*col*.1;
+    
+	gl_FragColor = base+smoothstep(-1., 1., n)*col*.1 + vec4(2., 0.,0.,1.)*flash*smoothstep(-0.1,1.5,1.-d);
 	//gl_FragColor =vec4(n,n,n,1.);//
 }

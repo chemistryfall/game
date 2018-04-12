@@ -199,6 +199,32 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">../assets/images/ui/UI_info button.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>44,44,87,88</rect>
+                <key>scale9Paddings</key>
+                <rect>44,44,87,88</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/UI_little circle.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>44,44,88,88</rect>
+                <key>scale9Paddings</key>
+                <rect>44,44,88,88</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">../assets/images/ui/alumiini.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -264,19 +290,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../assets/images/ui/alumiinioksidin reaktio_intro.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>82,24,164,47</rect>
-                <key>scale9Paddings</key>
-                <rect>82,24,164,47</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">../assets/images/ui/alumiinioksidin_reaktio.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -287,6 +300,19 @@
                 <rect>201,35,402,71</rect>
                 <key>scale9Paddings</key>
                 <rect>201,35,402,71</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/alumiinioksidin_reaktio_intro.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>82,24,164,47</rect>
+                <key>scale9Paddings</key>
+                <rect>82,24,164,47</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -316,19 +342,42 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">../assets/images/ui/bomb_blast_blue.png</key>
-            <key type="filename">../assets/images/ui/bomb_blast_green.png</key>
-            <key type="filename">../assets/images/ui/bomb_blast_orange.png</key>
-            <key type="filename">../assets/images/ui/bomb_blast_red.png</key>
+            <key type="filename">../assets/images/ui/block_1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>64,64,128,128</rect>
+                <rect>43,43,86,86</rect>
                 <key>scale9Paddings</key>
-                <rect>64,64,128,128</rect>
+                <rect>43,43,86,86</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/block_2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>69,30,138,60</rect>
+                <key>scale9Paddings</key>
+                <rect>69,30,138,60</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/block_3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>40,40,80,80</rect>
+                <key>scale9Paddings</key>
+                <rect>40,40,80,80</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -345,6 +394,20 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">../assets/images/ui/charge_slider.png</key>
+            <key type="filename">../assets/images/ui/charge_sliderPointer.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>75,26,150,53</rect>
+                <key>scale9Paddings</key>
+                <rect>75,26,150,53</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">../assets/images/ui/collector.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -355,6 +418,62 @@
                 <rect>101,101,201,201</rect>
                 <key>scale9Paddings</key>
                 <rect>101,101,201,201</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/collector/collector_1.png</key>
+            <key type="filename">../assets/images/ui/collector/collector_2.png</key>
+            <key type="filename">../assets/images/ui/collector/collector_3.png</key>
+            <key type="filename">../assets/images/ui/collector/collector_4.png</key>
+            <key type="filename">../assets/images/ui/collector/collector_arrow.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>75,75,150,150</rect>
+                <key>scale9Paddings</key>
+                <rect>75,75,150,150</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/corner beaker.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>49,49,97,97</rect>
+                <key>scale9Paddings</key>
+                <rect>49,49,97,97</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/instructions jar.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>180,275,360,550</rect>
+                <key>scale9Paddings</key>
+                <rect>180,275,360,550</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/label.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>123,43,246,87</rect>
+                <key>scale9Paddings</key>
+                <rect>123,43,246,87</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -552,6 +671,19 @@
                 <rect>92,21,183,42</rect>
                 <key>scale9Paddings</key>
                 <rect>92,21,183,42</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">../assets/images/ui/start_button.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>122,66,244,132</rect>
+                <key>scale9Paddings</key>
+                <rect>122,66,244,132</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

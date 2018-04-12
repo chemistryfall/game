@@ -156,10 +156,13 @@ Main.prototype = {
 		this.start.start.addListener("tap",$bind(this,this.onStartClick));
 	}
 	,onStartClick: function() {
+		var _gthis = this;
 		this.start.interactiveChildren = false;
 		this.start.hide();
-		this.game.start();
-		this.ui.start(controls_GameView.CONF.instruction,controls_GameView.CONF["final"]);
+		haxe_Timer.delay(function() {
+			_gthis.game.start();
+			_gthis.ui.start(controls_GameView.CONF.instruction,controls_GameView.CONF["final"]);
+		},500);
 	}
 	,ongameEnd: function() {
 		this.start.interactiveChildren = true;
@@ -475,13 +478,14 @@ controls_Block.__super__ = PIXI.Container;
 controls_Block.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		this.type = ++controls_Block.blockType % 3 + 1;
-		this.type = 3;
 		this.block = util_Asset.getImage("block_" + this.type + ".png",true);
 		this.block.anchor.x = this.block.anchor.y = 0.5;
 		this.hitArea = new PIXI.Rectangle(-this.block.width / 2,-this.block.height,this.block.width,this.block.height * 2);
 		this.addChild(this.block);
 	}
 	,randomize: function(x,y) {
+		this.scale.x = this.scale.y = 1;
+		this.alpha = 1;
 		this.block.rotation = (Math.random() - 0.5) * 2.5;
 		if(this.block.rotation < 0) {
 			this.block.rotation = Math.min(-0.6,this.block.rotation);
@@ -532,7 +536,10 @@ controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 		console.log("Remove body");
 		Matter.World.remove(Main.instance.world,b.body);
 		b.body = null;
-		b.visible = false;
+		createjs.Tween.get(b).to({ alpha : 0},75);
+		createjs.Tween.get(b.scale).to({ x : 1.5, y : 1.5},75,createjs.Ease.quadOut).call(function() {
+			b.visible = false;
+		});
 	}
 	,resize: function(size) {
 		this.size = size;
@@ -623,6 +630,7 @@ controls_Character.prototype = $extend(PIXI.Container.prototype,{
 	,__class__: controls_Character
 });
 var controls_Charge = function() {
+	this.amount = 0;
 	PIXI.Container.call(this);
 	this.initializeControls();
 };
@@ -632,14 +640,47 @@ controls_Charge.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		this.beaker = util_Asset.getImage("corner beaker.png",true);
 		this.beaker.scale.x = this.beaker.scale.y = 0.4;
-		this.beaker.anchor.x = 0.5;
+		this.beaker.anchor.x = 0.0;
 		var ts = { };
 		ts.fontSize = 70;
 		this.count = new PIXI.Text("5",ts);
-		this.count.x = -this.count.width / 2 - 6;
+		this.count.x = 60;
 		this.count.y = 50;
 		this.beaker.addChild(this.count);
+		this.charge = util_Asset.getImage("charge_slider.png",true);
+		this.slider = util_Asset.getImage("charge_sliderPointer.png",true);
+		this.slider.anchor.x = 0.5;
+		this.charge.anchor.x = 0.5;
+		this.charge.scale.x = this.charge.scale.y = 0.7;
+		this.charge.addChild(this.slider);
 		this.addChild(this.beaker);
+		this.addChild(this.charge);
+		this.charge.pivot.y = 100;
+		this.beaker.pivot.x = 200;
+	}
+	,updateCharge: function(amount) {
+		if(Math.abs(amount) > 5 && Math.abs(this.amount) == 5) {
+			amount = Math.min(5,Math.max(-5,amount));
+			createjs.Tween.get(this.slider).to({ x : amount * 28},350,createjs.Ease.backInOut).to({ x : amount * 27},350,createjs.Ease.backInOut);
+		} else {
+			amount = Math.min(5,Math.max(-5,amount));
+			createjs.Tween.get(this.slider).to({ x : amount * 27},350,createjs.Ease.backInOut);
+			this.amount = amount;
+		}
+	}
+	,show: function() {
+		this.amount = 0;
+		createjs.Tween.get(this.charge.pivot).to({ y : -90},450,createjs.Ease.getBackOut(0.3));
+		createjs.Tween.get(this.beaker.pivot).to({ x : 0},450,createjs.Ease.getBackOut(0.3));
+	}
+	,hide: function() {
+		createjs.Tween.get(this.charge.pivot).to({ y : 100},450,createjs.Ease.backIn);
+		createjs.Tween.get(this.beaker.pivot).to({ x : 200},450,createjs.Ease.backIn);
+	}
+	,resize: function(size) {
+		this.charge.x = size.width / 2;
+		this.beaker.y = size.height - this.beaker.height;
+		this.beaker.x = 0;
 	}
 	,__class__: controls_Charge
 });
@@ -937,21 +978,34 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 			var dx = cp.x - c[0].x;
 			var dy = cp.y - c[0].y;
 			if(Math.sqrt(dx * dx + dy * dy) < 85) {
+				var wrong = false;
 				if(this.baseconf.indexOf(c[0].type) >= 0) {
 					this.current.push(c[0].type);
 				} else {
+					wrong = true;
+					Main.instance.bg.filter.wrong();
 					this.extra.push(c[0].type);
 				}
 				remove.push(c[0]);
 				cp.x += this.character.body.velocity.x * 20;
 				cp.y += this.character.body.velocity.y * 20;
-				createjs.Tween.get(c[0]).to({ x : cp.x, y : cp.y},350,createjs.Ease.quadOut);
-				createjs.Tween.get(c[0].scale).to({ x : 0, y : 0},350,createjs.Ease.quadOut).call((function(c1) {
-					return function() {
-						_gthis.collectables.removeChild(c1[0]);
-						_gthis.updatePairs();
-					};
-				})(c));
+				if(!wrong) {
+					createjs.Tween.get(c[0]).to({ x : cp.x, y : cp.y},350,createjs.Ease.quadOut);
+					createjs.Tween.get(c[0].scale).to({ x : 0, y : 0},350,createjs.Ease.quadOut).call((function(c1) {
+						return function() {
+							_gthis.collectables.removeChild(c1[0]);
+							_gthis.updatePairs();
+						};
+					})(c));
+				} else {
+					createjs.Tween.get(c[0]).to({ alpha : 0},350);
+					createjs.Tween.get(c[0].scale).to({ x : 1.5, y : 1.5},350,createjs.Ease.quadOut).call((function(c2) {
+						return function() {
+							_gthis.collectables.removeChild(c2[0]);
+							_gthis.updatePairs();
+						};
+					})(c));
+				}
 			}
 			if(c[0].getBounds().y < -this.size.height) {
 				remove.push(c[0]);
@@ -960,9 +1014,9 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		}
 		var _g2 = 0;
 		while(_g2 < remove.length) {
-			var c2 = remove[_g2];
+			var c3 = remove[_g2];
 			++_g2;
-			HxOverrides.remove(this.active,c2);
+			HxOverrides.remove(this.active,c3);
 		}
 	}
 	,updatePairs: function() {
@@ -971,6 +1025,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		var rc = 0;
 		var conf = this.baseconf.slice(0);
 		var removeFromCur = [];
+		var charge = 0;
 		var _g = 0;
 		var _g1 = this.current;
 		while(_g < _g1.length) {
@@ -985,7 +1040,19 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 				HxOverrides.remove(conf,c);
 				removeFromCur.push(c);
 			}
+			if(c == controls_CType.lithium) {
+				++charge;
+			} else if(c == controls_CType.brohm) {
+				--charge;
+			} else if(c == controls_CType.oxygen) {
+				charge -= 2;
+			} else if(c == controls_CType.magnesium) {
+				charge += 2;
+			} else if(c == controls_CType.aluminium) {
+				charge += 3;
+			}
 		}
+		this.ui.charge.updateCharge(charge);
 		this.ui.target1.setcount(lc);
 		this.ui.target2.setcount(rc);
 		if(conf.length == 0) {
@@ -1187,10 +1254,10 @@ controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
 				com.visible = true;
 				com.alpha = 0;
 				com.scale.x = com.scale.y = 0.7;
-				createjs.Tween.get(com).to({ alpha : 1},250,createjs.Ease.quadOut).wait(500,true).to({ alpha : 0},500).call(function() {
+				createjs.Tween.get(com).to({ alpha : 1},250,createjs.Ease.quadOut).wait(750,true).to({ alpha : 0},500).call(function() {
 					_gthis.removeChild(com);
 				});
-				createjs.Tween.get(com.scale).to({ x : 1, y : 1},500,createjs.Ease.quadOut).to({ x : 1.3, y : 1.3},750,createjs.Ease.quadIn);
+				createjs.Tween.get(com.scale).to({ x : 1, y : 1},500,createjs.Ease.quadOut).wait(250,true).to({ x : 1.3, y : 1.3},750,createjs.Ease.quadIn);
 			}
 		});
 	}
@@ -1221,8 +1288,8 @@ controls_StartView.prototype = $extend(PIXI.Container.prototype,{
 		this.x = Math.round((size.width - this.width) / 2);
 	}
 	,hide: function() {
-		createjs.Tween.get(this.logo).to({ alpha : 0},250);
-		createjs.Tween.get(this.start).to({ alpha : 0},250);
+		createjs.Tween.get(this.logo).to({ alpha : 0},450);
+		createjs.Tween.get(this.start).to({ alpha : 0},450);
 	}
 	,show: function() {
 		createjs.Tween.get(this.logo).to({ y : 0, alpha : 1},500);
@@ -1284,12 +1351,12 @@ controls_TargetIndicator.prototype = $extend(PIXI.Container.prototype,{
 		this.count.text = val == null?"null":"" + val;
 	}
 	,start: function() {
-		createjs.Tween.get(this.pivot).wait(450,true).to({ x : 0},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.pivot).wait(450,true).to({ x : 0},450,createjs.Ease.getBackOut(1.3));
 		createjs.Tween.get(this.count).wait(900,true).to({ alpha : 1},450);
 	}
 	,hide: function() {
 		var tmp = this.left?100:-100;
-		createjs.Tween.get(this.pivot).wait(450,true).to({ x : tmp},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.pivot).to({ x : tmp},450,createjs.Ease.backIn);
 		createjs.Tween.get(this.count).to({ alpha : 0},450);
 	}
 	,__class__: controls_TargetIndicator
@@ -1329,7 +1396,6 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.reactionC.addChild(this.reaction);
 		this.finalReactionC.addChild(this.finalReaction);
 		this.reactionC.pivot.y = 100;
-		this.charge.pivot.y = 100;
 		this.finalReactionC.pivot.y = 100;
 	}
 	,resize: function(size) {
@@ -1347,7 +1413,7 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.finalreactionlabel.width = this.finalReaction.width * 2;
 		this.finalReaction.x = (this.finalreactionlabel.width - this.finalReaction.width) / 2;
 		this.finalReactionC.x = Math.round((size.width - this.finalReactionC.width) / 2);
-		this.charge.x = size.width / 2;
+		this.charge.resize(size);
 		this.former.resize(size);
 	}
 	,start: function(reaction,finalReaction) {
@@ -1356,16 +1422,17 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.reaction.texture = util_Asset.getTexture(reaction,true);
 		this.finalReaction.texture = util_Asset.getTexture(finalReaction,true);
 		this.resize(this.size);
-		createjs.Tween.get(this.reactionC.pivot).to({ y : 0},450,createjs.Ease.backOut);
-		createjs.Tween.get(this.charge.pivot).to({ y : -60},450,createjs.Ease.backOut);
-		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 100},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.reactionC.pivot).to({ y : 0},450,createjs.Ease.getBackOut(0.3));
+		this.charge.show();
+		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 100},450,createjs.Ease.getBackOut(0.3));
 	}
 	,hide: function() {
-		createjs.Tween.get(this.charge.pivot).to({ y : 100},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.charge.pivot).to({ y : 100},450,createjs.Ease.backIn);
 		this.target1.hide();
 		this.target2.hide();
-		createjs.Tween.get(this.reactionC.pivot).to({ y : 100},450,createjs.Ease.backOut);
-		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 0},450,createjs.Ease.backOut);
+		this.charge.hide();
+		createjs.Tween.get(this.reactionC.pivot).to({ y : 100},450,createjs.Ease.backIn);
+		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 0},450,createjs.Ease.backIn);
 	}
 	,updatePairAmount: function(pairsNeeded) {
 		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
@@ -1397,6 +1464,11 @@ filters_bg_BgFilter.prototype = $extend(PIXI.Filter.prototype,{
 		this.uniforms.time = this.time;
 		this.uniforms.off = [-Main.instance.game.charpos.x / 2000,-Main.instance.game.charpos.y / 2000];
 		PIXI.Filter.prototype.apply.call(this,filterManager,input,output,clear);
+	}
+	,wrong: function() {
+		this.uniforms.flash += 2;
+		createjs.Tween.removeTweens(this.uniforms);
+		createjs.Tween.get(this.uniforms).to({ flash : 0},1050,createjs.Ease.quadIn);
 	}
 	,__class__: filters_bg_BgFilter
 });
@@ -2809,7 +2881,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZDsNCgl2ZWMyIG51diA9IHZUZXh0dXJlQ29vcmQqMy4wOw0KCQ0KICAgIGZsb2F0IG4gPSB0ZXh0dXJlMkQobm9pc2UsIG51dit2ZWMyKHNpbih0aW1lKi4zKSx0aW1lKSouMDItb2ZmKi40KS5yLS41Ow0KICAgIGZsb2F0IG4yID0gdGV4dHVyZTJEKG5vaXNlLHZlYzIoLjIpKyBudXYrdmVjMihzaW4odGltZSouNSksdGltZSkqLjA0LW9mZiouOCkuci0uNTsNCiAgICBuKz1uMjsNCiAgICANCgludXYueSo9YXNwZWN0Ow0KICAgIHV2LngrPW4vMjUwLjsNCiAgICB1di55Kz1uLzI1MC47DQogICAgDQogICAgZmxvYXQgZCA9IGxlbmd0aCh1di12ZWMyKDAuNSkpOw0KICAgIGQ9c21vb3Roc3RlcCgwLjEsMC42LDEuLWQpOw0KCXZlYzQgYmFzZSA9IHRleHR1cmUyRCh1U2FtcGxlciwgdXYpKmQ7DQoJDQogICAgLy8gT3V0cHV0IHRvIHNjcmVlbg0KICAgIHZlYzQgY29sID0gdmVjNCggc2luKHV2LngrdGltZSksIGNvcyh1di55K3RpbWUpLCB1di54LDEuKTsNCiAgICBnbF9GcmFnQ29sb3IgPSBiYXNlK3Ntb290aHN0ZXAoLTEuLCAxLiwgbikqY29sKi4xOw0KCS8vZ2xfRnJhZ0NvbG9yID12ZWM0KG4sbixuLDEuKTsvLw0KfQ0K"}];
+haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQp1bmlmb3JtIGZsb2F0IGZsYXNoOw0KDQp2b2lkIG1haW4oICApDQp7DQoJLy8gTm9ybWFsaXplZCBwaXhlbCBjb29yZGluYXRlcyAoZnJvbSAwIHRvIDEpDQogICAgdmVjMiB1diA9IHZUZXh0dXJlQ29vcmQ7DQoJdmVjMiBudXYgPSB2VGV4dHVyZUNvb3JkKjMuMDsNCgkNCiAgICBmbG9hdCBuID0gdGV4dHVyZTJEKG5vaXNlLCBudXYrdmVjMihzaW4odGltZSouMyksdGltZSkqLjAyLW9mZiouNCkuci0uNTsNCiAgICBmbG9hdCBuMiA9IHRleHR1cmUyRChub2lzZSx2ZWMyKC4yKSsgbnV2K3ZlYzIoc2luKHRpbWUqLjUpLHRpbWUpKi4wNC1vZmYqLjgpLnItLjU7DQogICAgbis9bjI7DQogICAgDQoJbnV2LnkqPWFzcGVjdDsNCiAgICB1di54Kz1uLzI1MC47DQogICAgdXYueSs9bi8yNTAuOw0KICAgIA0KICAgIGZsb2F0IGQgPSBsZW5ndGgodXYtdmVjMigwLjUpKTsNCiAgICBkPXNtb290aHN0ZXAoMC4xLDAuNiwxLi1kKTsNCgl2ZWM0IGJhc2UgPSB0ZXh0dXJlMkQodVNhbXBsZXIsIHV2KSpkOw0KCQ0KICAgIC8vIE91dHB1dCB0byBzY3JlZW4NCiAgICB2ZWM0IGNvbCA9IHZlYzQoIHNpbih1di54K3RpbWUpLCBjb3ModXYueSt0aW1lKSwgdXYueCwxLik7DQogICAgDQoJZ2xfRnJhZ0NvbG9yID0gYmFzZStzbW9vdGhzdGVwKC0xLiwgMS4sIG4pKmNvbCouMSArIHZlYzQoMi4sIDAuLDAuLDEuKSpmbGFzaCpzbW9vdGhzdGVwKC0wLjEsMS41LDEuLWQpOw0KCS8vZ2xfRnJhZ0NvbG9yID12ZWM0KG4sbixuLDEuKTsvLw0KfQ0K"}];
 var __map_reserved = {}
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {

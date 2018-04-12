@@ -217,8 +217,10 @@ class Main
 	{
 		this.start.interactiveChildren = false;
 		this.start.hide();
-		this.game.start();
-		this.ui.start(GameView.CONF.instruction, GameView.CONF.final);
+		Timer.delay(function(){
+			this.game.start();
+			this.ui.start(GameView.CONF.instruction, GameView.CONF.final);
+		},500);
 	}
 	
 	public function ongameEnd():Void

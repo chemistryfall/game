@@ -1,6 +1,8 @@
 package controls;
 
 
+import createjs.tweenjs.Ease;
+import createjs.tweenjs.Tween;
 import matter.Composite;
 import matter.World;
 import pixi.core.display.Container;
@@ -50,7 +52,8 @@ class Blocks extends Container
 		
 		untyped World.remove(Main.instance.world, b.body);
 		b.body = null;
-		b.visible = false;
+		Tween.get(b).to( { alpha:0 }, 75);
+		Tween.get(b.scale).to( { x:1.5, y:1.5 }, 75, Ease.quadOut).call(function() { b.visible = false; } );
 	}
 	
 	public function resize(size:Rectangle):Void
@@ -65,7 +68,6 @@ class Blocks extends Container
 			b.visible = false;
 		}
 	}
-	
 	
 	public function update(charpos:Point):Void
 	{

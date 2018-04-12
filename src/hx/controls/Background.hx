@@ -15,7 +15,7 @@ import util.Asset;
 class Background extends Container
 {
 	
-	private var filter: BgFilter;
+	public var filter: BgFilter;
 
 	private var bg:TilingSprite;
 	

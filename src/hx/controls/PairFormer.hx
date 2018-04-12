@@ -131,8 +131,8 @@ class PairFormer extends Container
 					com.visible = true;
 					com.alpha = 0;
 					com.scale.x = com.scale.y = 0.7;
-					Tween.get(com).to( { alpha:1 }, 250, Ease.quadOut).wait(500, true).to( { alpha:0 }, 500).call(function() { removeChild(com); } );
-					Tween.get(com.scale).to( { x:1, y:1 }, 500, Ease.quadOut).to( { x:1.3, y:1.3 }, 750, Ease.quadIn);
+					Tween.get(com).to( { alpha:1 }, 250, Ease.quadOut).wait(750, true).to( { alpha:0 }, 500).call(function() { removeChild(com); } );
+					Tween.get(com.scale).to( { x:1, y:1 }, 500, Ease.quadOut).wait(250,true).to( { x:1.3, y:1.3 }, 750, Ease.quadIn);
 				}
 			});
 			
