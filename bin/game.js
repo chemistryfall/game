@@ -570,28 +570,47 @@ controls_Character.__super__ = PIXI.Container;
 controls_Character.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		this.sprite = util_Asset.getImage("collector/collector_1.png",true);
-		this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
+		this.sprite.anchor.x = 0.5;
+		this.sprite.anchor.y = 0.45;
 		this.sprite.scale.x = this.sprite.scale.y = 0.7;
 		var sprite2 = util_Asset.getImage("collector/collector_2.png",true);
-		sprite2.anchor.x = sprite2.anchor.y = 0.5;
+		sprite2.anchor.x = 0.5;
+		sprite2.anchor.y = this.sprite.anchor.y;
 		sprite2.scale.x = sprite2.scale.y = 0.7;
 		var sprite3 = util_Asset.getImage("collector/collector_3.png",true);
-		sprite3.anchor.x = sprite3.anchor.y = 0.5;
+		sprite3.anchor.x = 0.5;
+		sprite3.anchor.y = this.sprite.anchor.y;
 		sprite3.scale.x = sprite3.scale.y = 0.7;
 		var sprite4 = util_Asset.getImage("collector/collector_4.png",true);
-		sprite4.anchor.x = sprite4.anchor.y = 0.5;
+		sprite4.anchor.x = 0.5;
+		sprite4.anchor.y = this.sprite.anchor.y;
 		sprite4.scale.x = sprite4.scale.y = 0.7;
 		this.sprite.blendMode = PIXI.BLEND_MODES.ADD;
 		sprite2.blendMode = PIXI.BLEND_MODES.ADD;
 		sprite3.blendMode = PIXI.BLEND_MODES.ADD;
 		sprite4.blendMode = PIXI.BLEND_MODES.ADD;
-		this.sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.3;
+		this.sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.1;
+		var tmp = Math.PI * 2;
+		createjs.Tween.get(this.sprite,{ loop : true}).to({ rotation : tmp},18000);
+		var tmp1 = Math.PI * 2;
+		createjs.Tween.get(sprite2,{ loop : true}).to({ rotation : tmp1},18300);
+		var tmp2 = -Math.PI * 2;
+		createjs.Tween.get(sprite3,{ loop : true}).to({ rotation : tmp2},18200);
+		var tmp3 = -Math.PI * 2;
+		createjs.Tween.get(sprite4,{ loop : true}).to({ rotation : tmp3},18100);
 		this.addChild(sprite2);
 		this.addChild(sprite2);
 		this.addChild(sprite3);
+		this.arrow = util_Asset.getImage("collector/collector_arrow.png",true);
+		this.arrow.scale = this.sprite.scale;
+		this.arrow.anchor = this.sprite.anchor;
+		this.addChild(this.arrow);
 		this.body = Matter.Bodies.circle(0,0,this.sprite.width / 2 * 0.8,{ friction : 0.00001, restitution : 0.5, density : 0.001});
 		Matter.World.add(Main.instance.world,this.body);
 		this.addChild(this.sprite);
+		Main.instance.tickListeners.push($bind(this,this.ontick));
+	}
+	,ontick: function(d) {
 	}
 	,__class__: controls_Character
 });
@@ -826,6 +845,7 @@ controls_GameView.__name__ = true;
 controls_GameView.__super__ = PIXI.Container;
 controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	start: function() {
+		createjs.Tween.get(this.character).to({ alpha : 1},1000);
 		createjs.Tween.get(this.jar).to({ alpha : 0},1000);
 		this.ending = false;
 		this.collectables.removeChildren();
@@ -876,6 +896,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.addChild(this.jar);
 		this.jar.visible = false;
 		Main.instance.tickListeners.push($bind(this,this.onTick));
+		this.character.alpha = 0;
 	}
 	,onTick: function(delta) {
 		this.time += delta;
@@ -974,14 +995,15 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 				_gthis.ui.formPair(_gthis.baseconf,_gthis.requiredPairs);
 				if(_gthis.requiredPairs == 0 && !_gthis.ending) {
 					_gthis.ending = true;
-					createjs.Tween.get(_gthis.blocks).to({ alpha : 0},2500).call($bind(_gthis,_gthis.endgame));
+					createjs.Tween.get(_gthis.character).to({ alpha : 0},2500);
+					createjs.Tween.get(_gthis.collectables).wait(1000,true).to({ alpha : 0},2500);
+					createjs.Tween.get(_gthis.blocks).wait(1000,true).to({ alpha : 0},2500).wait(1500,true).call($bind(_gthis,_gthis.endgame));
 				}
 			}
 		},350);
 	}
 	,endgame: function() {
 		this.running = false;
-		createjs.Tween.get(this.collectables).to({ alpha : 0},500);
 		this.jar.visible = true;
 		createjs.Tween.get(this.jar).to({ alpha : 1},500);
 	}

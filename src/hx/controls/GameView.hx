@@ -73,12 +73,12 @@ class GameView extends Container
 			this.aluminium,
 			this.brohm
 		];
-		
 		this.initializeControls();
 	}
 	
 	public function start():Void
 	{
+		Tween.get(this.character).to( { alpha:1 }, 1000);
 		Tween.get(this.jar).to( { alpha:0 }, 1000);
 		this.ending = false;
 		this.collectables.removeChildren();
@@ -166,6 +166,9 @@ class GameView extends Container
 		this.addChild(this.jar);
 		this.jar.visible = false;
 		Main.instance.tickListeners.push(onTick);
+
+		this.character.alpha = 0;
+
 	}
 	
 	private function onTick(delta:Float):Void
@@ -279,7 +282,9 @@ class GameView extends Container
 				if (requiredPairs == 0 && !ending)
 				{
 					this.ending = true;
-					Tween.get(this.blocks).to( { alpha:0 }, 2500).call(endgame);
+					Tween.get(this.character).to( { alpha:0 }, 2500);
+					Tween.get(this.collectables).wait(1000,true).to( { alpha:0 }, 2500);
+					Tween.get(this.blocks).wait(1000,true).to( { alpha:0 }, 2500).wait(1500,true).call(endgame);
 				}
 			}
 		},350 );
@@ -288,7 +293,6 @@ class GameView extends Container
 	private function endgame():Void
 	{
 		running = false;
-		Tween.get(this.collectables).to( { alpha:0 }, 500);
 		this.jar.visible = true;
 		Tween.get(this.jar).to( { alpha:1 }, 500);
 	}
