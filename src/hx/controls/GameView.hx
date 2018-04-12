@@ -12,12 +12,15 @@ import pixi.core.math.shapes.Rectangle;
 import util.MathUtil;
 import util.Pool;
 import controls.Collectable.CType;
+import controls.Compound.CompoundType;
 /**
  * ...
  * @author Henri Sarasvirta
  */
+@:expose("GV")
 class GameView extends Container
 {
+	public static var CONF:REACTION;
 	public var ui:UI;
 	public var charpos:Point = new Point();
 	
@@ -76,14 +79,45 @@ class GameView extends Container
 	{
 		this.extra = [];
 		this.current = [];
-		var conf:Array<CType> = [
-			[CType.lithium, CType.lithium, CType.oxygen], //Li2O
-			[CType.lithium, CType.brohm], //LiBr
-			[CType.magnesium, CType.brohm, CType.brohm], //MgBr2
-			[CType.magnesium, CType.oxygen],//MgO
-			[CType.aluminium, CType.brohm, CType.brohm, CType.brohm],//AlBr3
-			[CType.aluminium, CType.aluminium, CType.oxygen, CType.oxygen, CType.oxygen] //Al2O3
+		GameView.CONF = [
+			{   //Li2O
+				instruction:"litiumoksidin_reaktio_intro.png",
+				final:"litiumoksidin_reaktio.png",
+				conf:[CType.lithium, CType.lithium, CType.oxygen],
+				compound:CompoundType.lithium_oxide
+			}, 
+			{   //LiBr
+				instruction:"litiumbromidin_reaktio_intro.png",
+				final:"litiumbromidin_reaktio.png",
+				conf:[CType.lithium, CType.brohm],
+				compound:CompoundType.lithium_bromide
+			}, 
+			{   //MgBr2
+				instruction:"magnesiumbromidin_reaktio_intro.png",
+				final:"magnesiumbromidin_reaktio.png",
+				conf:[CType.magnesium, CType.brohm, CType.brohm],
+				compound:CompoundType.mag_bromide
+			}, 
+			{   //MgO
+				instruction:"magnesiumoksidin_reaktio_intro.png",
+				final:"magnesiumoksidin_reaktio.png",
+				conf:[CType.magnesium, CType.oxygen],
+				compound:CompoundType.mag_oxide
+			},
+			{   //AlBr3
+				instruction:"alumiinibromidin_reaktio_intro.png",
+				final:"alumiinibromidin_reaktio.png",
+				conf:[CType.aluminium, CType.brohm, CType.brohm, CType.brohm],
+				compound:CompoundType.alu_bromide
+			},
+			{   //Al2O3
+				instruction:"alumiinioksidin_reaktio_intro.png",
+				final:"alumiinioksidin_reaktio.png",
+				conf:[CType.aluminium, CType.aluminium, CType.oxygen, CType.oxygen, CType.oxygen],
+				compound:CompoundType.alu_oxide
+			} 
 		][Math.floor(Math.random() * 6)];
+		var conf:Array<CType> = CONF.conf;
 		this.baseconf = conf;
 		Body.setStatic(this.character.body, false);
 		var amount:Int = Math.round(20 / conf.length);
@@ -212,12 +246,16 @@ class GameView extends Container
 		this.ui.target1.setcount(lc);
 		this.ui.target2.setcount(rc);
 		
+		if (conf.length == 0)
+		{
+			for (c in removeFromCur) current.remove(c);
+		}
+		
 		Timer.delay(function() { 
 			
 			//check if pair is formed.
 			if (conf.length == 0)
 			{
-				for (c in removeFromCur) current.remove(c);
 				updatePairs();
 				//Animate pair forming
 				ui.formPair(baseconf);
@@ -246,4 +284,12 @@ class GameView extends Container
 		this.size = size;
 		this.blocks.resize(size);
 	}
+}
+
+typedef REACTION =
+{
+	public var instruction:String;
+	public var conf:Array<CType>;
+	public var final:String;
+	public var compound:CompoundType;
 }

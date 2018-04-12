@@ -10,7 +10,7 @@
 },
 "Idle/lithium_1.png":
 {
-	"frame": {"x":1,"y":303,"w":300,"h":300},
+	"frame": {"x":303,"y":1,"w":300,"h":300},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
@@ -18,7 +18,7 @@
 },
 "Idle/lithium_2.png":
 {
-	"frame": {"x":1,"y":605,"w":300,"h":300},
+	"frame": {"x":605,"y":1,"w":300,"h":300},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
@@ -26,7 +26,7 @@
 },
 "Idle/lithium_3.png":
 {
-	"frame": {"x":303,"y":1,"w":300,"h":300},
+	"frame": {"x":907,"y":1,"w":300,"h":300},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
@@ -37,8 +37,8 @@
 	"version": "1.0",
 	"image": "lithium.png",
 	"format": "RGBA8888",
-	"size": {"w":1024,"h":1024},
+	"size": {"w":1208,"h":302},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:5ac9756a80de125700d64ffcb2aa0687:eb9dfb06f7255d3bb5b04cc20b3eb580:b71aad5875c68c13aa1ce11ee6baabaa$"
+	"smartupdate": "$TexturePacker:SmartUpdate:c6959a9c6435ea5e9f3d5c75d8964c82:eb9dfb06f7255d3bb5b04cc20b3eb580:b71aad5875c68c13aa1ce11ee6baabaa$"
 }
 }

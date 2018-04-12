@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.5.0</string>
         <key>fileName</key>
-        <string>C:/Users/Henri/Documents/fgj/2018_edujam/game/spritegen/magnesium.tps</string>
+        <string>C:/Users/Henri/Documents/fgj/2018_edujam/game/spritegen/alu_bromide.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -36,7 +36,7 @@
         <key>dataFormat</key>
         <string>pixijs</string>
         <key>textureFileName</key>
-        <filename>../bin/img/magnesium.png</filename>
+        <filename>../bin/img/alu_bromide.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -150,7 +150,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../bin/img/magnesium.json</filename>
+                <filename>../bin/img/alu_bromide.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -199,10 +199,11 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../assets/images/Magnesium/Blink/Magnesium_blink.png</key>
-            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_1.png</key>
-            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_2.png</key>
-            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_3.png</key>
+            <key type="filename">../assets/images/Alu Bromide/Blink/Aluminium bromide_blink.png</key>
+            <key type="filename">../assets/images/Alu Bromide/Idle/Aluminium bromide_1.png</key>
+            <key type="filename">../assets/images/Alu Bromide/Idle/Aluminium bromide_2.png</key>
+            <key type="filename">../assets/images/Alu Bromide/Idle/Aluminium bromide_3.png</key>
+            <key type="filename">../assets/images/Alu Bromide/Idle/Aluminium bromide_4.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -218,7 +219,7 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>../assets/images/Magnesium</filename>
+            <filename>../assets/images/Alu Bromide</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

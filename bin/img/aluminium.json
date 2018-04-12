@@ -26,7 +26,7 @@
 },
 "Idle/Aluminium_3.png":
 {
-	"frame": {"x":1,"y":277,"w":287,"h":274},
+	"frame": {"x":868,"y":1,"w":287,"h":274},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":11,"w":287,"h":274},
@@ -37,8 +37,8 @@
 	"version": "1.0",
 	"image": "aluminium.png",
 	"format": "RGBA8888",
-	"size": {"w":1024,"h":1024},
+	"size": {"w":1156,"h":276},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:73842eea02b4faa64aa55103d7770ce9:d61fe6a76bc5aed677847d2920a5d167:8e5104cb71af310646f334fd8ea66ec5$"
+	"smartupdate": "$TexturePacker:SmartUpdate:6abd05241c3c6bebfd76be58afdfb407:d61fe6a76bc5aed677847d2920a5d167:8e5104cb71af310646f334fd8ea66ec5$"
 }
 }

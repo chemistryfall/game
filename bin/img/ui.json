@@ -16,14 +16,6 @@
 	"spriteSourceSize": {"x":9,"y":14,"w":136,"h":73},
 	"sourceSize": {"w":149,"h":91}
 },
-"alumiinibromidin reaktio_intro.png":
-{
-	"frame": {"x":365,"y":822,"w":281,"h":78},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":7,"y":9,"w":281,"h":78},
-	"sourceSize": {"w":301,"h":94}
-},
 "alumiinibromidin_reaktio.png":
 {
 	"frame": {"x":1,"y":350,"w":677,"h":81},
@@ -31,6 +23,14 @@
 	"trimmed": true,
 	"spriteSourceSize": {"x":7,"y":9,"w":677,"h":81},
 	"sourceSize": {"w":689,"h":94}
+},
+"alumiinibromidin_reaktio_intro.png":
+{
+	"frame": {"x":365,"y":822,"w":281,"h":78},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":9,"w":281,"h":78},
+	"sourceSize": {"w":301,"h":94}
 },
 "alumiinioksidi.png":
 {
@@ -136,14 +136,6 @@
 	"spriteSourceSize": {"x":11,"y":16,"w":98,"h":67},
 	"sourceSize": {"w":113,"h":91}
 },
-"litiumbromidin reaktio_intro.png":
-{
-	"frame": {"x":365,"y":902,"w":266,"h":93},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":6,"y":0,"w":266,"h":93},
-	"sourceSize": {"w":277,"h":94}
-},
 "litiumbromidin_reaktio.png":
 {
 	"frame": {"x":1,"y":527,"w":569,"h":93},
@@ -151,6 +143,14 @@
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":0,"w":569,"h":93},
 	"sourceSize": {"w":581,"h":95}
+},
+"litiumbromidin_reaktio_intro.png":
+{
+	"frame": {"x":365,"y":902,"w":266,"h":93},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":0,"w":266,"h":93},
+	"sourceSize": {"w":277,"h":94}
 },
 "litiumoksidi.png":
 {
@@ -160,14 +160,6 @@
 	"spriteSourceSize": {"x":1,"y":7,"w":119,"h":79},
 	"sourceSize": {"w":126,"h":91}
 },
-"litiumoksidin reaktio_intro.png":
-{
-	"frame": {"x":1,"y":925,"w":284,"h":68},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":11,"y":10,"w":284,"h":68},
-	"sourceSize": {"w":295,"h":97}
-},
 "litiumoksidin_reaktio.png":
 {
 	"frame": {"x":1,"y":433,"w":646,"h":92},
@@ -175,6 +167,14 @@
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":12,"w":646,"h":92},
 	"sourceSize": {"w":660,"h":104}
+},
+"litiumoksidin_reaktio_intro.png":
+{
+	"frame": {"x":1,"y":925,"w":284,"h":68},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":10,"w":284,"h":68},
+	"sourceSize": {"w":295,"h":97}
 },
 "logo.png":
 {
@@ -263,6 +263,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1024,"h":2048},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:6ae7292c10805e5ab53a30f6dbaf927e:75b68cff8e2394d4007e658749bc3706:5b04aa198265472a3c5f56958d78e97b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:0fc7f4051ee6108f2ffe5e21e1385184:904c5ecef2eaaef12a86cdc43df3adc3:5b04aa198265472a3c5f56958d78e97b$"
 }
 }

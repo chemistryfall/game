@@ -216,7 +216,7 @@ class Main
 	{
 		this.start.hide();
 		this.game.start();
-		this.ui.start();
+		this.ui.start(GameView.CONF.instruction);
 	}
 	
 	public function ongameEnd():Void

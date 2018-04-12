@@ -158,7 +158,7 @@ Main.prototype = {
 	,onStartClick: function() {
 		this.start.hide();
 		this.game.start();
-		this.ui.start();
+		this.ui.start(controls_GameView.CONF.instruction);
 	}
 	,ongameEnd: function() {
 	}
@@ -646,6 +646,60 @@ controls_Collectable.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,__class__: controls_Collectable
 });
+var controls_CompoundType = { __ename__ : true, __constructs__ : ["alu_bromide","alu_oxide","lithium_bromide","lithium_oxide","mag_bromide","mag_oxide"] };
+controls_CompoundType.alu_bromide = ["alu_bromide",0];
+controls_CompoundType.alu_bromide.toString = $estr;
+controls_CompoundType.alu_bromide.__enum__ = controls_CompoundType;
+controls_CompoundType.alu_oxide = ["alu_oxide",1];
+controls_CompoundType.alu_oxide.toString = $estr;
+controls_CompoundType.alu_oxide.__enum__ = controls_CompoundType;
+controls_CompoundType.lithium_bromide = ["lithium_bromide",2];
+controls_CompoundType.lithium_bromide.toString = $estr;
+controls_CompoundType.lithium_bromide.__enum__ = controls_CompoundType;
+controls_CompoundType.lithium_oxide = ["lithium_oxide",3];
+controls_CompoundType.lithium_oxide.toString = $estr;
+controls_CompoundType.lithium_oxide.__enum__ = controls_CompoundType;
+controls_CompoundType.mag_bromide = ["mag_bromide",4];
+controls_CompoundType.mag_bromide.toString = $estr;
+controls_CompoundType.mag_bromide.__enum__ = controls_CompoundType;
+controls_CompoundType.mag_oxide = ["mag_oxide",5];
+controls_CompoundType.mag_oxide.toString = $estr;
+controls_CompoundType.mag_oxide.__enum__ = controls_CompoundType;
+var controls_Compound = function(type) {
+	PIXI.Container.call(this);
+	this.type = type;
+	this.initializeControls();
+};
+controls_Compound.__name__ = true;
+controls_Compound.__super__ = PIXI.Container;
+controls_Compound.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.ac = new controls_AnimationController([util_Asset.getTextures(util_Asset.getResource("img/" + this.type[0] + ".json").data,new EReg("Idle/.*","")),util_Asset.getTextures(util_Asset.getResource("img/" + this.type[0] + ".json").data,new EReg("Blink/.*",""))],["idle","blink"]);
+		this.addChild(this.ac);
+		this.ac.gotoAndPlay("idle");
+		this.ac.loop = true;
+		this.ac.animationSpeed = 0.083333333333333329;
+		this.scale.x = this.scale.y = 0.5;
+		this.restartTimer();
+	}
+	,restartTimer: function() {
+		if(this.idleTimer != null) {
+			this.idleTimer.stop();
+		}
+		this.idleTimer = new haxe_Timer(Math.floor(Math.random() * 3 + 1) * 500);
+		this.idleTimer.run = $bind(this,this.ontick);
+	}
+	,ontick: function() {
+		var _gthis = this;
+		this.ac.gotoAndPlay("blink");
+		this.restartTimer();
+		var tmp = Math.floor(100 + Math.floor(Math.random() * 100));
+		haxe_Timer.delay(function() {
+			_gthis.ac.gotoAndPlay("idle");
+		},tmp);
+	}
+	,__class__: controls_Compound
+});
 var controls_DeviceOrientationControl = function() {
 };
 controls_DeviceOrientationControl.__name__ = true;
@@ -719,7 +773,7 @@ controls_DeviceOrientationControl.Quat2Angle = function(x,y,z,w) {
 controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
-var controls_GameView = function() {
+var controls_GameView = $hx_exports["GV"] = function() {
 	this.running = false;
 	this.previousSpawn = 0;
 	this.active = [];
@@ -752,7 +806,8 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	start: function() {
 		this.extra = [];
 		this.current = [];
-		var conf = [[controls_CType.lithium,controls_CType.lithium,controls_CType.oxygen],[controls_CType.lithium,controls_CType.brohm],[controls_CType.magnesium,controls_CType.brohm,controls_CType.brohm],[controls_CType.magnesium,controls_CType.oxygen],[controls_CType.aluminium,controls_CType.brohm,controls_CType.brohm,controls_CType.brohm],[controls_CType.aluminium,controls_CType.aluminium,controls_CType.oxygen,controls_CType.oxygen,controls_CType.oxygen]][Math.floor(Math.random() * 6)];
+		controls_GameView.CONF = [{ instruction : "litiumoksidin_reaktio_intro.png", 'final' : "litiumoksidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.lithium,controls_CType.oxygen], compound : controls_CompoundType.lithium_oxide},{ instruction : "litiumbromidin_reaktio_intro.png", 'final' : "litiumbromidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.brohm], compound : controls_CompoundType.lithium_bromide},{ instruction : "magnesiumbromidin_reaktio_intro.png", 'final' : "magnesiumbromidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.mag_bromide},{ instruction : "magnesiumoksidin_reaktio_intro.png", 'final' : "magnesiumoksidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.oxygen], compound : controls_CompoundType.mag_oxide},{ instruction : "alumiinibromidin_reaktio_intro.png", 'final' : "alumiinibromidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.brohm,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.alu_bromide},{ instruction : "alumiinioksidin_reaktio_intro.png", 'final' : "alumiinioksidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.aluminium,controls_CType.oxygen,controls_CType.oxygen,controls_CType.oxygen], compound : controls_CompoundType.alu_oxide}][Math.floor(Math.random() * 6)];
+		var conf = controls_GameView.CONF.conf;
 		this.baseconf = conf;
 		Matter.Body.setStatic(this.character.body,false);
 		this.requiredPairs = Math.round(20 / conf.length);
@@ -869,14 +924,16 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		}
 		this.ui.target1.setcount(lc);
 		this.ui.target2.setcount(rc);
+		if(conf.length == 0) {
+			var _g2 = 0;
+			while(_g2 < removeFromCur.length) {
+				var c1 = removeFromCur[_g2];
+				++_g2;
+				HxOverrides.remove(this.current,c1);
+			}
+		}
 		haxe_Timer.delay(function() {
 			if(conf.length == 0) {
-				var _g2 = 0;
-				while(_g2 < removeFromCur.length) {
-					var c1 = removeFromCur[_g2];
-					++_g2;
-					HxOverrides.remove(_gthis.current,c1);
-				}
 				_gthis.updatePairs();
 				_gthis.ui.formPair(_gthis.baseconf);
 			}
@@ -929,32 +986,87 @@ controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
 		this.pools.set(controls_CType.magnesium,this.magnesium);
 		this.pools.set(controls_CType.aluminium,this.aluminium);
 		this.pools.set(controls_CType.brohm,this.brohm);
+		this.comAluBromide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.alu_bromide);
+		});
+		this.comAluOxide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.alu_oxide);
+		});
+		this.comLithiumBromide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.lithium_bromide);
+		});
+		this.comLithiumOxide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.lithium_oxide);
+		});
+		this.comMagBromide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.mag_bromide);
+		});
+		this.comMagOxide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.mag_oxide);
+		});
+		this.comPools = new haxe_ds_EnumValueMap();
+		this.comPools.set(controls_CompoundType.alu_bromide,this.comAluBromide);
+		this.comPools.set(controls_CompoundType.alu_oxide,this.comAluOxide);
+		this.comPools.set(controls_CompoundType.lithium_bromide,this.comLithiumBromide);
+		this.comPools.set(controls_CompoundType.lithium_oxide,this.comLithiumOxide);
+		this.comPools.set(controls_CompoundType.mag_bromide,this.comMagBromide);
+		this.comPools.set(controls_CompoundType.mag_oxide,this.comMagOxide);
 	}
 	,resize: function(size) {
 		this.size = size;
 	}
 	,formPairs: function(items,left,right) {
 		var cc = 0;
+		var cols = [];
 		var _g = 0;
 		while(_g < items.length) {
 			var item = items[_g];
 			++_g;
-			var c = [this.pools.get(item).getNext()];
-			this.addChild(c[0]);
+			var c = this.pools.get(item).getNext();
+			c.visible = true;
+			this.addChild(c);
+			cols.push(c);
 			if(item == left) {
-				c[0].x = 50;
-				c[0].y = 50;
+				c.x = 50;
+				c.y = 50;
 			} else {
-				c[0].x = this.size.width - 50;
-				c[0].y = 50;
+				c.x = this.size.width - 50;
+				c.y = 50;
 			}
-			createjs.Tween.get(c[0]).to({ x : this.size.width / 2, y : 100},350 + cc * 100,createjs.Ease.quadOut).call((function(c1) {
-				return function() {
-					c1[0].visible = false;
-				};
-			})(c));
+			var last = cc == items.length - 1;
+			c.visible = false;
+			this.animateform(c,cols,last,cc);
 			++cc;
 		}
+	}
+	,animateform: function(c,cols,last,cc) {
+		var _gthis = this;
+		var tmp = createjs.Tween.get(c);
+		var tmp1 = cc * 100 + 50;
+		var tmp2 = this.size.width / 2;
+		tmp.wait(tmp1,true).call(function() {
+			c.visible = true;
+		}).to({ x : tmp2, y : 100},250,createjs.Ease.quadOut).call(function() {
+			if(last) {
+				var _g = 0;
+				while(_g < cols.length) {
+					var cr = cols[_g];
+					++_g;
+					cr.visible = false;
+				}
+				var com = _gthis.comPools.get(controls_GameView.CONF.compound).getNext();
+				com.x = _gthis.size.width / 2;
+				com.y = 50;
+				_gthis.addChild(com);
+				com.visible = true;
+				com.alpha = 0;
+				com.scale.x = com.scale.y = 0.7;
+				createjs.Tween.get(com).to({ alpha : 1},250,createjs.Ease.quadOut).wait(250,true).to({ alpha : 0},500).call(function() {
+					_gthis.removeChild(com);
+				});
+				createjs.Tween.get(com.scale).to({ x : 1, y : 1},500,createjs.Ease.quadOut).to({ x : 1.3, y : 1.3},500,createjs.Ease.quadIn);
+			}
+		});
 	}
 	,__class__: controls_PairFormer
 });
@@ -1073,6 +1185,7 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.reaction.pivot.y = 100;
 	}
 	,resize: function(size) {
+		this.size = size;
 		this.target2.x = size.width - 100;
 		this.reaction.width = size.width - 100;
 		this.reaction.height = 50;
@@ -1080,9 +1193,11 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.reaction.x = Math.round((size.width - this.reaction.width) / 2);
 		this.former.resize(size);
 	}
-	,start: function() {
+	,start: function(reaction) {
 		this.target1.start();
 		this.target2.start();
+		this.reaction.texture = util_Asset.getTexture(reaction,true);
+		this.resize(this.size);
 		createjs.Tween.get(this.reaction.pivot).to({ y : 0},450,createjs.Ease.backOut);
 	}
 	,formPair: function(items) {
@@ -2533,7 +2648,7 @@ if(ArrayBuffer.prototype.slice == null) {
 }
 var Float32Array = $global.Float32Array || js_html_compat_Float32Array._new;
 var Uint8Array = $global.Uint8Array || js_html_compat_Uint8Array._new;
-Config.ASSETS = ["img/black.png","img/bg.jpg","img/noise.jpg","img/ui.json","img/oxygen.json","img/brohm.json","img/lithium.json","img/aluminium.json","img/magnesium.json"];
+Config.ASSETS = ["img/black.png","img/bg.jpg","img/noise.jpg","img/ui.json","img/oxygen.json","img/brohm.json","img/lithium.json","img/aluminium.json","img/magnesium.json","img/alu_bromide.json","img/alu_oxide.json","img/lithium_bromide.json","img/lithium_oxide.json","img/mag_bromide.json","img/mag_oxide.json"];
 Config.VERSION = "chemistry fall 0.1";
 Config.GRAVITY = 0.1;
 controls_AnimationController.ON_COMPLETE = "onComplete";

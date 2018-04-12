@@ -26,7 +26,7 @@
 },
 "Idle/Bromine_3.png":
 {
-	"frame": {"x":1,"y":297,"w":300,"h":294},
+	"frame": {"x":907,"y":1,"w":300,"h":294},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":294},
@@ -37,8 +37,8 @@
 	"version": "1.0",
 	"image": "brohm.png",
 	"format": "RGBA8888",
-	"size": {"w":1024,"h":1024},
+	"size": {"w":1208,"h":296},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:5246a59f9b27eaddcf3c81d8d6f2325b:26d42dd5642bdc85dfc6b0dba35f30a4:69919bdcd38dd541a52f936bcd50aec9$"
+	"smartupdate": "$TexturePacker:SmartUpdate:58e33a12813d1404a838f2bfd5c4d460:26d42dd5642bdc85dfc6b0dba35f30a4:69919bdcd38dd541a52f936bcd50aec9$"
 }
 }

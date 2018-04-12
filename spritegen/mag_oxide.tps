@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.5.0</string>
         <key>fileName</key>
-        <string>C:/Users/Henri/Documents/fgj/2018_edujam/game/spritegen/magnesium.tps</string>
+        <string>C:/Users/Henri/Documents/fgj/2018_edujam/game/spritegen/mag_oxide.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -36,7 +36,7 @@
         <key>dataFormat</key>
         <string>pixijs</string>
         <key>textureFileName</key>
-        <filename>../bin/img/magnesium.png</filename>
+        <filename>../bin/img/mag_oxide.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -150,7 +150,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../bin/img/magnesium.json</filename>
+                <filename>../bin/img/mag_oxide.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -199,10 +199,11 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../assets/images/Magnesium/Blink/Magnesium_blink.png</key>
-            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_1.png</key>
-            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_2.png</key>
-            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_3.png</key>
+            <key type="filename">../assets/images/Mag Oxide/Blink/Mag oxide_blink.png</key>
+            <key type="filename">../assets/images/Mag Oxide/Idle/Mag oxide_1.png</key>
+            <key type="filename">../assets/images/Mag Oxide/Idle/Mag oxide_2.png</key>
+            <key type="filename">../assets/images/Mag Oxide/Idle/Mag oxide_3.png</key>
+            <key type="filename">../assets/images/Mag Oxide/Idle/Mag oxide_4.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -218,7 +219,7 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>../assets/images/Magnesium</filename>
+            <filename>../assets/images/Mag Oxide</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

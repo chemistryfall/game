@@ -18,6 +18,7 @@ class UI extends Container
 	private var charge:Charge;
 	private var former:PairFormer;
 	
+	private var size:Rectangle;
 	private var reaction:Sprite;
 	
 	public function new() 
@@ -52,6 +53,7 @@ class UI extends Container
 	
 	public function resize(size:Rectangle):Void
 	{
+		this.size = size;
 		this.target2.x = size.width - 100;
 		this.reaction.width = size.width - 100;
 		this.reaction.height = 50;
@@ -60,10 +62,12 @@ class UI extends Container
 		this.former.resize(size);
 	}
 	
-	public function start():Void
+	public function start(reaction:String):Void
 	{
 		this.target1.start();
 		this.target2.start();
+		this.reaction.texture = Asset.getTexture(reaction, true);
+		this.resize(size);
 		Tween.get(this.reaction.pivot).to( { y:0 }, 450, Ease.backOut);
 	}
 	
