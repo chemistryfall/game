@@ -9,14 +9,23 @@ import util.Asset;
  * ...
  * @author Henri Sarasvirta
  */
+enum CType
+{
+	oxygen;
+	lithium;
+	aluminium;
+	magnesium;
+	brohm;
+}
+ 
 class Collectable extends Container
 {
 	private var ac:AnimationController;
-	private var type:String;
+	public var type:CType;
 	
 	private var idleTimer:Timer;
 	
-	public function new(type:String) 
+	public function new(type:CType) 
 	{
 		super();
 		this.type = type;
@@ -25,9 +34,8 @@ class Collectable extends Container
 	
 	private function initializeControls():Void
 	{
-		var idle:Array<Texture> = Asset.getTextures( Asset.getResource("img/"+type).data, new EReg("Idle/.*", ""));
-		var blink:Array<Texture> = Asset.getTextures( Asset.getResource("img/"+type).data, new EReg("Blink/.*", ""));
-		
+		var idle:Array<Texture> = Asset.getTextures( Asset.getResource("img/"+type.getName()+".json").data, new EReg("Idle/.*", ""));
+		var blink:Array<Texture> = Asset.getTextures( Asset.getResource("img/"+type.getName()+".json").data, new EReg("Blink/.*", ""));
 		
 		var textures:Array<Array<Texture>> = [idle, blink];
 		this.ac = new AnimationController(textures, ["idle", "blink"]);

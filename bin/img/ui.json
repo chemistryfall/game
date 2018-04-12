@@ -1,8 +1,64 @@
 {"frames": {
 
+"alumiini.png":
+{
+	"frame": {"x":924,"y":189,"w":98,"h":75},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":9,"w":98,"h":75},
+	"sourceSize": {"w":122,"h":91}
+},
+"alumiinibromidi.png":
+{
+	"frame": {"x":394,"y":622,"w":136,"h":73},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":14,"w":136,"h":73},
+	"sourceSize": {"w":149,"h":91}
+},
+"alumiinibromidin reaktio_intro.png":
+{
+	"frame": {"x":365,"y":822,"w":281,"h":78},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":9,"w":281,"h":78},
+	"sourceSize": {"w":301,"h":94}
+},
+"alumiinibromidin_reaktio.png":
+{
+	"frame": {"x":1,"y":350,"w":677,"h":81},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":9,"w":677,"h":81},
+	"sourceSize": {"w":689,"h":94}
+},
+"alumiinioksidi.png":
+{
+	"frame": {"x":790,"y":111,"w":149,"h":76},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":10,"w":149,"h":76},
+	"sourceSize": {"w":167,"h":91}
+},
+"alumiinioksidin reaktio_intro.png":
+{
+	"frame": {"x":707,"y":335,"w":310,"h":83},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":10,"y":11,"w":310,"h":83},
+	"sourceSize": {"w":327,"h":94}
+},
+"alumiinioksidin_reaktio.png":
+{
+	"frame": {"x":1,"y":1,"w":787,"h":141},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":17,"y":0,"w":787,"h":141},
+	"sourceSize": {"w":804,"h":141}
+},
 "black.png":
 {
-	"frame": {"x":881,"y":1,"w":10,"h":10},
+	"frame": {"x":976,"y":1,"w":10,"h":10},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":10},
@@ -10,7 +66,7 @@
 },
 "block.png":
 {
-	"frame": {"x":623,"y":259,"w":150,"h":26},
+	"frame": {"x":790,"y":83,"w":150,"h":26},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":26},
@@ -18,7 +74,7 @@
 },
 "bomb_blast_blue.png":
 {
-	"frame": {"x":365,"y":1,"w":256,"h":256},
+	"frame": {"x":1,"y":995,"w":256,"h":256},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
@@ -26,7 +82,7 @@
 },
 "bomb_blast_green.png":
 {
-	"frame": {"x":623,"y":1,"w":256,"h":256},
+	"frame": {"x":633,"y":939,"w":256,"h":256},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
@@ -34,7 +90,7 @@
 },
 "bomb_blast_orange.png":
 {
-	"frame": {"x":365,"y":259,"w":256,"h":256},
+	"frame": {"x":259,"y":997,"w":256,"h":256},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
@@ -42,27 +98,171 @@
 },
 "bomb_blast_red.png":
 {
-	"frame": {"x":1,"y":364,"w":256,"h":256},
+	"frame": {"x":1,"y":1253,"w":256,"h":256},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
+"bromidi.png":
+{
+	"frame": {"x":515,"y":705,"w":92,"h":72},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":19,"y":11,"w":92,"h":72},
+	"sourceSize": {"w":117,"h":91}
+},
 "collector.png":
 {
-	"frame": {"x":1,"y":1,"w":362,"h":361},
+	"frame": {"x":649,"y":500,"w":362,"h":361},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":20,"y":20,"w":362,"h":361},
 	"sourceSize": {"w":402,"h":402}
+},
+"litium.png":
+{
+	"frame": {"x":942,"y":83,"w":65,"h":61},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":16,"w":65,"h":61},
+	"sourceSize": {"w":71,"h":91}
+},
+"litiumbromidi.png":
+{
+	"frame": {"x":918,"y":266,"w":98,"h":67},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":16,"w":98,"h":67},
+	"sourceSize": {"w":113,"h":91}
+},
+"litiumbromidin reaktio_intro.png":
+{
+	"frame": {"x":365,"y":902,"w":266,"h":93},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":0,"w":266,"h":93},
+	"sourceSize": {"w":277,"h":94}
+},
+"litiumbromidin_reaktio.png":
+{
+	"frame": {"x":1,"y":527,"w":569,"h":93},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":0,"w":569,"h":93},
+	"sourceSize": {"w":581,"h":95}
+},
+"litiumoksidi.png":
+{
+	"frame": {"x":394,"y":697,"w":119,"h":79},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":7,"w":119,"h":79},
+	"sourceSize": {"w":126,"h":91}
+},
+"litiumoksidin reaktio_intro.png":
+{
+	"frame": {"x":1,"y":925,"w":284,"h":68},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":10,"w":284,"h":68},
+	"sourceSize": {"w":295,"h":97}
+},
+"litiumoksidin_reaktio.png":
+{
+	"frame": {"x":1,"y":433,"w":646,"h":92},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":12,"w":646,"h":92},
+	"sourceSize": {"w":660,"h":104}
+},
+"logo.png":
+{
+	"frame": {"x":1,"y":622,"w":391,"h":198},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":36,"y":74,"w":391,"h":198},
+	"sourceSize": {"w":463,"h":326}
+},
+"magnesium.png":
+{
+	"frame": {"x":779,"y":258,"w":137,"h":74},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":5,"w":137,"h":74},
+	"sourceSize": {"w":153,"h":82}
+},
+"magnesiumbromidi.png":
+{
+	"frame": {"x":790,"y":1,"w":184,"h":80},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":11,"w":184,"h":80},
+	"sourceSize": {"w":186,"h":91}
+},
+"magnesiumbromidin_reaktio.png":
+{
+	"frame": {"x":1,"y":144,"w":776,"h":122},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":21,"y":0,"w":776,"h":122},
+	"sourceSize": {"w":819,"h":122}
+},
+"magnesiumbromidin_reaktio_intro.png":
+{
+	"frame": {"x":680,"y":420,"w":342,"h":78},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":9,"w":342,"h":78},
+	"sourceSize": {"w":354,"h":100}
+},
+"magnesiumoksidi.png":
+{
+	"frame": {"x":779,"y":189,"w":143,"h":67},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":10,"y":13,"w":143,"h":67},
+	"sourceSize": {"w":154,"h":82}
+},
+"magnesiumoksidin_reaktio.png":
+{
+	"frame": {"x":1,"y":268,"w":704,"h":80},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":0,"w":704,"h":80},
+	"sourceSize": {"w":717,"h":83}
+},
+"magnesiumoksidin_reaktio_intro.png":
+{
+	"frame": {"x":648,"y":863,"w":358,"h":74},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":6,"w":358,"h":74},
+	"sourceSize": {"w":366,"h":83}
+},
+"oksidi.png":
+{
+	"frame": {"x":532,"y":622,"w":107,"h":81},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":10,"w":107,"h":81},
+	"sourceSize": {"w":113,"h":91}
+},
+"start.png":
+{
+	"frame": {"x":1,"y":822,"w":362,"h":101},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":46,"y":117,"w":362,"h":101},
+	"sourceSize": {"w":463,"h":326}
 }},
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "ui.png",
 	"format": "RGBA8888",
-	"size": {"w":1024,"h":1024},
+	"size": {"w":1024,"h":2048},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:25e9aea50428c41ca61e20a6121cd407:c7a4501b7552b432e5f3c7c61b06e29f:5b04aa198265472a3c5f56958d78e97b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:6ae7292c10805e5ab53a30f6dbaf927e:75b68cff8e2394d4007e658749bc3706:5b04aa198265472a3c5f56958d78e97b$"
 }
 }

@@ -1,13 +1,5 @@
 {"frames": {
 
-"black.png":
-{
-	"frame": {"x":1,"y":907,"w":10,"h":10},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":10},
-	"sourceSize": {"w":10,"h":10}
-},
 "Blink/lithium_blink.png":
 {
 	"frame": {"x":1,"y":1,"w":300,"h":300},
@@ -47,6 +39,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1024,"h":1024},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:b32cb427dde17fce029991f8186b6248:fe0bef76a04ddba02742df32a9870731:b71aad5875c68c13aa1ce11ee6baabaa$"
+	"smartupdate": "$TexturePacker:SmartUpdate:5ac9756a80de125700d64ffcb2aa0687:eb9dfb06f7255d3bb5b04cc20b3eb580:b71aad5875c68c13aa1ce11ee6baabaa$"
 }
 }

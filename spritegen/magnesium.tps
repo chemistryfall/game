@@ -199,10 +199,10 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../assets/images/Lithium/Blink/lithium_blink.png</key>
-            <key type="filename">../assets/images/Lithium/Idle/lithium_1.png</key>
-            <key type="filename">../assets/images/Lithium/Idle/lithium_2.png</key>
-            <key type="filename">../assets/images/Lithium/Idle/lithium_3.png</key>
+            <key type="filename">../assets/images/Magnesium/Blink/Magnesium_blink.png</key>
+            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_1.png</key>
+            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_2.png</key>
+            <key type="filename">../assets/images/Magnesium/Idle/Magnesium_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -218,7 +218,7 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>../assets/images/Lithium</filename>
+            <filename>../assets/images/Magnesium</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

@@ -67,7 +67,7 @@ class Blocks extends Container
 			
 			if(b.body != null)
 				untyped World.remove(Main.instance.world, b.body);
-			b.randomize(charpos.x + (Math.random() - 0.5) * size.width, charpos.y + size.height);
+			b.randomize(charpos.x + (Math.random() - 0.5) * size.width*2, charpos.y + size.height/Main.instance.viewport.scale.x);
 		//	Composite.add(composite, b.body);
 			World.add(Main.instance.world, b.body);
 			b.visible = true;

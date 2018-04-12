@@ -1,35 +1,35 @@
 {"frames": {
 
-"Blink/lithium_blink.png":
+"Blink/Aluminium_blink.png":
 {
-	"frame": {"x":1,"y":1,"w":300,"h":300},
+	"frame": {"x":1,"y":1,"w":287,"h":274},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":11,"w":287,"h":274},
 	"sourceSize": {"w":300,"h":300}
 },
-"Idle/lithium_1.png":
+"Idle/Aluminium_1.png":
 {
-	"frame": {"x":1,"y":303,"w":300,"h":300},
+	"frame": {"x":290,"y":1,"w":287,"h":274},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":11,"w":287,"h":274},
 	"sourceSize": {"w":300,"h":300}
 },
-"Idle/lithium_2.png":
+"Idle/Aluminium_2.png":
 {
-	"frame": {"x":1,"y":605,"w":300,"h":300},
+	"frame": {"x":579,"y":1,"w":287,"h":274},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":11,"w":287,"h":274},
 	"sourceSize": {"w":300,"h":300}
 },
-"Idle/lithium_3.png":
+"Idle/Aluminium_3.png":
 {
-	"frame": {"x":303,"y":1,"w":300,"h":300},
+	"frame": {"x":1,"y":277,"w":287,"h":274},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":11,"w":287,"h":274},
 	"sourceSize": {"w":300,"h":300}
 }},
 "meta": {
@@ -39,6 +39,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1024,"h":1024},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:84b1a8f363cfa6e82c2354903ac19e9a:eb9dfb06f7255d3bb5b04cc20b3eb580:8e5104cb71af310646f334fd8ea66ec5$"
+	"smartupdate": "$TexturePacker:SmartUpdate:73842eea02b4faa64aa55103d7770ce9:d61fe6a76bc5aed677847d2920a5d167:8e5104cb71af310646f334fd8ea66ec5$"
 }
 }

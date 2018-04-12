@@ -100,11 +100,14 @@ Main.prototype = {
 		}
 		this.resizeTimer = haxe_Timer.delay(function() {
 			var size = _gthis.getGameSize();
+			_gthis.viewport.scale.x = _gthis.viewport.scale.y = Math.min(size.width / 450,size.height / 450);
 			_gthis.bg.resize(size);
 			_gthis.game.resize(size);
 			_gthis.renderer.resize(size.width,size.height);
 			_gthis.viewport.x = size.width / 2;
 			_gthis.viewport.y = size.height / 2;
+			_gthis.start.resize(size);
+			_gthis.ui.resize(size);
 		},50);
 	}
 	,getGameSize: function() {
@@ -130,13 +133,16 @@ Main.prototype = {
 		this.bg = new controls_Background();
 		this.game = new controls_GameView();
 		this.start = new controls_StartView();
+		this.ui = new controls_UI();
+		this.game.ui = this.ui;
 		particles_ParticleManager.init();
 		this.bg.addChild(particles_ParticleManager.stars);
 		this.viewport = new PIXI.Container();
 		this.viewport.addChild(this.bg);
-		this.viewport.addChild(this.start);
 		this.viewport.addChild(this.game);
 		this.mainContainer.addChild(this.viewport);
+		this.mainContainer.addChild(this.ui);
+		this.ui.addChild(this.start);
 		this.viewport.pivot.x = 1024;
 		this.viewport.pivot.y = 1024;
 		this.game.x = 1024;
@@ -146,6 +152,15 @@ Main.prototype = {
 		this.ticker.start();
 		this.ticker.add($bind(this,this.onTickerTick));
 		controls_DeviceOrientationControl.initialize();
+		this.start.start.addListener("click",$bind(this,this.onStartClick));
+		this.start.start.addListener("tap",$bind(this,this.onStartClick));
+	}
+	,onStartClick: function() {
+		this.start.hide();
+		this.game.start();
+		this.ui.start();
+	}
+	,ongameEnd: function() {
 	}
 	,onTickerTick: function() {
 		Matter.Engine.update(this.engine,16.666666666666668);
@@ -187,6 +202,22 @@ Reflect.fields = function(o) {
 		}
 	}
 	return a;
+};
+Reflect.compare = function(a,b) {
+	if(a == b) {
+		return 0;
+	} else if(a > b) {
+		return 1;
+	} else {
+		return -1;
+	}
+};
+Reflect.isEnumValue = function(v) {
+	if(v != null) {
+		return v.__enum__ != null;
+	} else {
+		return false;
+	}
 };
 var Std = function() { };
 Std.__name__ = true;
@@ -501,7 +532,7 @@ controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 			if(b.body != null) {
 				Matter.World.remove(Main.instance.world,b.body);
 			}
-			b.randomize(charpos.x + (Math.random() - 0.5) * this.size.width,charpos.y + this.size.height);
+			b.randomize(charpos.x + (Math.random() - 0.5) * this.size.width * 2,charpos.y + this.size.height / Main.instance.viewport.scale.x);
 			Matter.World.add(Main.instance.world,b.body);
 			b.visible = true;
 		}
@@ -556,6 +587,30 @@ controls_Character.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,__class__: controls_Character
 });
+var controls_Charge = function() {
+	PIXI.Container.call(this);
+};
+controls_Charge.__name__ = true;
+controls_Charge.__super__ = PIXI.Container;
+controls_Charge.prototype = $extend(PIXI.Container.prototype,{
+	__class__: controls_Charge
+});
+var controls_CType = { __ename__ : true, __constructs__ : ["oxygen","lithium","aluminium","magnesium","brohm"] };
+controls_CType.oxygen = ["oxygen",0];
+controls_CType.oxygen.toString = $estr;
+controls_CType.oxygen.__enum__ = controls_CType;
+controls_CType.lithium = ["lithium",1];
+controls_CType.lithium.toString = $estr;
+controls_CType.lithium.__enum__ = controls_CType;
+controls_CType.aluminium = ["aluminium",2];
+controls_CType.aluminium.toString = $estr;
+controls_CType.aluminium.__enum__ = controls_CType;
+controls_CType.magnesium = ["magnesium",3];
+controls_CType.magnesium.toString = $estr;
+controls_CType.magnesium.__enum__ = controls_CType;
+controls_CType.brohm = ["brohm",4];
+controls_CType.brohm.toString = $estr;
+controls_CType.brohm.__enum__ = controls_CType;
 var controls_Collectable = function(type) {
 	PIXI.Container.call(this);
 	this.type = type;
@@ -565,7 +620,7 @@ controls_Collectable.__name__ = true;
 controls_Collectable.__super__ = PIXI.Container;
 controls_Collectable.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
-		this.ac = new controls_AnimationController([util_Asset.getTextures(util_Asset.getResource("img/" + this.type).data,new EReg("Idle/.*","")),util_Asset.getTextures(util_Asset.getResource("img/" + this.type).data,new EReg("Blink/.*",""))],["idle","blink"]);
+		this.ac = new controls_AnimationController([util_Asset.getTextures(util_Asset.getResource("img/" + this.type[0] + ".json").data,new EReg("Idle/.*","")),util_Asset.getTextures(util_Asset.getResource("img/" + this.type[0] + ".json").data,new EReg("Blink/.*",""))],["idle","blink"]);
 		this.addChild(this.ac);
 		this.ac.gotoAndPlay("idle");
 		this.ac.loop = true;
@@ -665,6 +720,7 @@ controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
 var controls_GameView = function() {
+	this.running = false;
 	this.previousSpawn = 0;
 	this.active = [];
 	this.maxvelocity = 3.0;
@@ -673,19 +729,19 @@ var controls_GameView = function() {
 	this.charpos = new PIXI.Point();
 	PIXI.Container.call(this);
 	this.oxygen = new util_Pool(10,function() {
-		return new controls_Collectable("oxygen.json");
+		return new controls_Collectable(controls_CType.oxygen);
 	});
 	this.lithium = new util_Pool(10,function() {
-		return new controls_Collectable("lithium.json");
+		return new controls_Collectable(controls_CType.lithium);
 	});
 	this.magnesium = new util_Pool(10,function() {
-		return new controls_Collectable("magnesium.json");
+		return new controls_Collectable(controls_CType.magnesium);
 	});
 	this.aluminium = new util_Pool(10,function() {
-		return new controls_Collectable("aluminium.json");
+		return new controls_Collectable(controls_CType.aluminium);
 	});
 	this.brohm = new util_Pool(10,function() {
-		return new controls_Collectable("brohm.json");
+		return new controls_Collectable(controls_CType.brohm);
 	});
 	this.allCollectables = [this.oxygen,this.lithium,this.magnesium,this.aluminium,this.brohm];
 	this.initializeControls();
@@ -693,7 +749,28 @@ var controls_GameView = function() {
 controls_GameView.__name__ = true;
 controls_GameView.__super__ = PIXI.Container;
 controls_GameView.prototype = $extend(PIXI.Container.prototype,{
-	applyCharMove: function(angle) {
+	start: function() {
+		this.extra = [];
+		this.current = [];
+		var conf = [[controls_CType.lithium,controls_CType.lithium,controls_CType.oxygen],[controls_CType.lithium,controls_CType.brohm],[controls_CType.magnesium,controls_CType.brohm,controls_CType.brohm],[controls_CType.magnesium,controls_CType.oxygen],[controls_CType.aluminium,controls_CType.brohm,controls_CType.brohm,controls_CType.brohm],[controls_CType.aluminium,controls_CType.aluminium,controls_CType.oxygen,controls_CType.oxygen,controls_CType.oxygen]][Math.floor(Math.random() * 6)];
+		this.baseconf = conf;
+		Matter.Body.setStatic(this.character.body,false);
+		this.requiredPairs = Math.round(20 / conf.length);
+		var types = [];
+		var _g = 0;
+		while(_g < conf.length) {
+			var t = conf[_g];
+			++_g;
+			if(types.indexOf(t) == -1) {
+				types.push(t);
+			}
+		}
+		this.ui.target1.setType(types[0]);
+		this.ui.target2.setType(types[1]);
+		this.running = true;
+		this.updatePairs();
+	}
+	,applyCharMove: function(angle) {
 		if(angle < 0) {
 			angle = Math.max(-8,angle);
 		} else if(angle > 0) {
@@ -705,6 +782,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	,initializeControls: function() {
 		this.collectables = new PIXI.Container();
 		this.character = new controls_Character();
+		Matter.Body.setStatic(this.character.body,true);
 		this.blocks = new controls_Blocks();
 		this.addChild(this.blocks);
 		this.addChild(this.collectables);
@@ -715,6 +793,9 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.time += delta;
 		this.charpos.x = this.character.body.position.x;
 		this.charpos.y = this.character.body.position.y;
+		if(!this.running) {
+			return;
+		}
 		Matter.Body.setVelocity(this.character.body,{ x : Math.min(this.maxvelocity,Math.max(-this.maxvelocity,this.character.body.velocity.x)), y : Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y))});
 		Main.instance.bg.update(-this.charpos.x,-this.charpos.y);
 		this.blocks.y = -this.charpos.y;
@@ -736,7 +817,12 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 			var cp = this.collectables.toLocal(new PIXI.Point(this.size.width / 2,this.size.height / 2));
 			var dx = cp.x - c[0].x;
 			var dy = cp.y - c[0].y;
-			if(Math.sqrt(dx * dx + dy * dy) < 150) {
+			if(Math.sqrt(dx * dx + dy * dy) < 85) {
+				if(this.baseconf.indexOf(c[0].type) >= 0) {
+					this.current.push(c[0].type);
+				} else {
+					this.extra.push(c[0].type);
+				}
 				remove.push(c[0]);
 				cp.x += this.character.body.velocity.x * 20;
 				cp.y += this.character.body.velocity.y * 20;
@@ -744,6 +830,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 				createjs.Tween.get(c[0].scale).to({ x : 0, y : 0},350,createjs.Ease.quadOut).call((function(c1) {
 					return function() {
 						_gthis.collectables.removeChild(c1[0]);
+						_gthis.updatePairs();
 					};
 				})(c));
 			}
@@ -759,6 +846,42 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 			HxOverrides.remove(this.active,c2);
 		}
 	}
+	,updatePairs: function() {
+		var _gthis = this;
+		var lc = 0;
+		var rc = 0;
+		var conf = this.baseconf.slice(0);
+		var removeFromCur = [];
+		var _g = 0;
+		var _g1 = this.current;
+		while(_g < _g1.length) {
+			var c = _g1[_g];
+			++_g;
+			if(c == this.ui.target1.type) {
+				++lc;
+			} else if(c == this.ui.target2.type) {
+				++rc;
+			}
+			if(conf.indexOf(c) >= 0) {
+				HxOverrides.remove(conf,c);
+				removeFromCur.push(c);
+			}
+		}
+		this.ui.target1.setcount(lc);
+		this.ui.target2.setcount(rc);
+		haxe_Timer.delay(function() {
+			if(conf.length == 0) {
+				var _g2 = 0;
+				while(_g2 < removeFromCur.length) {
+					var c1 = removeFromCur[_g2];
+					++_g2;
+					HxOverrides.remove(_gthis.current,c1);
+				}
+				_gthis.updatePairs();
+				_gthis.ui.formPair(_gthis.baseconf);
+			}
+		},350);
+	}
 	,spawnCollectable: function() {
 		if(Math.abs(this.previousSpawn - this.charpos.y) > 100) {
 			console.log("spawn");
@@ -767,8 +890,8 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 			this.collectables.addChild(c);
 			c.scale.x = c.scale.y = 0.5;
 			this.active.push(c);
-			c.x = this.charpos.x + (Math.random() - 0.5) * this.size.width;
-			c.y = this.charpos.y + this.size.height;
+			c.x = this.charpos.x + (Math.random() - 0.5) * this.size.width * 2;
+			c.y = this.charpos.y + this.size.height / Main.instance.viewport.scale.x;
 		}
 	}
 	,resize: function(size) {
@@ -777,13 +900,195 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,__class__: controls_GameView
 });
+var controls_PairFormer = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_PairFormer.__name__ = true;
+controls_PairFormer.__super__ = PIXI.Container;
+controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.oxygen = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.oxygen);
+		});
+		this.lithium = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.lithium);
+		});
+		this.magnesium = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.magnesium);
+		});
+		this.aluminium = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.aluminium);
+		});
+		this.brohm = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.brohm);
+		});
+		this.pools = new haxe_ds_EnumValueMap();
+		this.pools.set(controls_CType.oxygen,this.oxygen);
+		this.pools.set(controls_CType.lithium,this.lithium);
+		this.pools.set(controls_CType.magnesium,this.magnesium);
+		this.pools.set(controls_CType.aluminium,this.aluminium);
+		this.pools.set(controls_CType.brohm,this.brohm);
+	}
+	,resize: function(size) {
+		this.size = size;
+	}
+	,formPairs: function(items,left,right) {
+		var cc = 0;
+		var _g = 0;
+		while(_g < items.length) {
+			var item = items[_g];
+			++_g;
+			var c = [this.pools.get(item).getNext()];
+			this.addChild(c[0]);
+			if(item == left) {
+				c[0].x = 50;
+				c[0].y = 50;
+			} else {
+				c[0].x = this.size.width - 50;
+				c[0].y = 50;
+			}
+			createjs.Tween.get(c[0]).to({ x : this.size.width / 2, y : 100},350 + cc * 100,createjs.Ease.quadOut).call((function(c1) {
+				return function() {
+					c1[0].visible = false;
+				};
+			})(c));
+			++cc;
+		}
+	}
+	,__class__: controls_PairFormer
+});
 var controls_StartView = function() {
 	PIXI.Container.call(this);
+	this.initializeControls();
 };
 controls_StartView.__name__ = true;
 controls_StartView.__super__ = PIXI.Container;
 controls_StartView.prototype = $extend(PIXI.Container.prototype,{
-	__class__: controls_StartView
+	initializeControls: function() {
+		this.logo = util_Asset.getImage("logo.png",true);
+		this.start = util_Asset.getImage("start.png",true);
+		this.start.y = 200;
+		this.start.interactive = true;
+		this.addChild(this.logo);
+		this.addChild(this.start);
+		this.origsize = this.getBounds();
+	}
+	,resize: function(size) {
+		this.scale.x = this.scale.y = 1;
+		this.scale.x = this.scale.y = Math.min((size.width - 100) / this.origsize.width,(size.height - 100) / this.origsize.height);
+		this.x = Math.round((size.width - this.width) / 2);
+	}
+	,hide: function() {
+		createjs.Tween.get(this.logo).to({ y : -100, alpha : 0},500);
+		createjs.Tween.get(this.start).to({ y : 100, alpha : 0},500);
+	}
+	,show: function() {
+		createjs.Tween.get(this.logo).to({ y : 0, alpha : 1},500);
+		createjs.Tween.get(this.start).to({ y : 200, alpha : 1},500);
+	}
+	,__class__: controls_StartView
+});
+var controls_TargetIndicator = function(left) {
+	this.left = false;
+	PIXI.Container.call(this);
+	this.left = left;
+	this.initializeControls();
+};
+controls_TargetIndicator.__name__ = true;
+controls_TargetIndicator.__super__ = PIXI.Container;
+controls_TargetIndicator.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.cOxygen = new controls_Collectable(controls_CType.oxygen);
+		this.cLithium = new controls_Collectable(controls_CType.lithium);
+		this.cAluminium = new controls_Collectable(controls_CType.aluminium);
+		this.cBrohm = new controls_Collectable(controls_CType.brohm);
+		this.cMagnesium = new controls_Collectable(controls_CType.magnesium);
+		this.addChild(this.cOxygen);
+		this.addChild(this.cLithium);
+		this.addChild(this.cBrohm);
+		this.addChild(this.cMagnesium);
+		this.addChild(this.cAluminium);
+		this.cOxygen.scale.x = this.cOxygen.scale.y = 0.25;
+		this.cLithium.scale.x = this.cLithium.scale.y = 0.25;
+		this.cBrohm.scale.x = this.cBrohm.scale.y = 0.25;
+		this.cMagnesium.scale.x = this.cMagnesium.scale.y = 0.25;
+		this.cAluminium.scale.x = this.cAluminium.scale.y = 0.25;
+		this.cOxygen.x = 50;
+		this.cOxygen.y = 50;
+		this.cLithium.x = 50;
+		this.cLithium.y = 50;
+		this.cBrohm.x = 50;
+		this.cBrohm.y = 50;
+		this.cMagnesium.x = 50;
+		this.cMagnesium.y = 50;
+		this.cAluminium.x = 50;
+		this.cAluminium.y = 50;
+		var ts = { };
+		this.count = new PIXI.Text("7",ts);
+		this.addChild(this.count);
+		this.pivot.y = -50;
+		this.pivot.x = this.left?100:-100;
+		this.count.alpha = 0;
+	}
+	,setType: function(type) {
+		this.type = type;
+		this.cOxygen.visible = type == controls_CType.oxygen;
+		this.cLithium.visible = type == controls_CType.lithium;
+		this.cBrohm.visible = type == controls_CType.brohm;
+		this.cMagnesium.visible = type == controls_CType.magnesium;
+		this.cAluminium.visible = type == controls_CType.aluminium;
+	}
+	,setcount: function(val) {
+		this.count.text = val == null?"null":"" + val;
+	}
+	,start: function() {
+		createjs.Tween.get(this.pivot).wait(450,true).to({ x : 0},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.count).wait(900,true).to({ alpha : 1},450);
+	}
+	,__class__: controls_TargetIndicator
+});
+var controls_UI = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_UI.__name__ = true;
+controls_UI.__super__ = PIXI.Container;
+controls_UI.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.target1 = new controls_TargetIndicator(true);
+		this.target2 = new controls_TargetIndicator(false);
+		this.charge = new controls_Charge();
+		this.target1.count.x = 44;
+		this.target2.count.x = 44;
+		this.target1.count.y = 80;
+		this.target2.count.y = 80;
+		this.addChild(this.charge);
+		this.addChild(this.target1);
+		this.addChild(this.target2);
+		this.former = new controls_PairFormer();
+		this.addChild(this.former);
+		this.reaction = util_Asset.getImage("alumiinibromidin_reaktio.png",true);
+		this.addChild(this.reaction);
+		this.reaction.pivot.y = 100;
+	}
+	,resize: function(size) {
+		this.target2.x = size.width - 100;
+		this.reaction.width = size.width - 100;
+		this.reaction.height = 50;
+		this.reaction.scale.x = this.reaction.scale.y = Math.min(1,Math.min(this.reaction.scale.y,this.reaction.scale.x));
+		this.reaction.x = Math.round((size.width - this.reaction.width) / 2);
+		this.former.resize(size);
+	}
+	,start: function() {
+		this.target1.start();
+		this.target2.start();
+		createjs.Tween.get(this.reaction.pivot).to({ y : 0},450,createjs.Ease.backOut);
+	}
+	,formPair: function(items) {
+		this.former.formPairs(items,this.target1.type,this.target2.type);
+	}
+	,__class__: controls_UI
 });
 var filters_bg_BgFilter = function() {
 	this.time = 0;
@@ -1029,6 +1334,154 @@ haxe_crypto_BaseCode.prototype = {
 	}
 	,__class__: haxe_crypto_BaseCode
 };
+var haxe_ds_BalancedTree = function() {
+};
+haxe_ds_BalancedTree.__name__ = true;
+haxe_ds_BalancedTree.prototype = {
+	set: function(key,value) {
+		this.root = this.setLoop(key,value,this.root);
+	}
+	,get: function(key) {
+		var node = this.root;
+		while(node != null) {
+			var c = this.compare(key,node.key);
+			if(c == 0) {
+				return node.value;
+			}
+			if(c < 0) {
+				node = node.left;
+			} else {
+				node = node.right;
+			}
+		}
+		return null;
+	}
+	,setLoop: function(k,v,node) {
+		if(node == null) {
+			return new haxe_ds_TreeNode(null,k,v,null);
+		}
+		var c = this.compare(k,node.key);
+		if(c == 0) {
+			return new haxe_ds_TreeNode(node.left,k,v,node.right,node == null?0:node._height);
+		} else if(c < 0) {
+			return this.balance(this.setLoop(k,v,node.left),node.key,node.value,node.right);
+		} else {
+			return this.balance(node.left,node.key,node.value,this.setLoop(k,v,node.right));
+		}
+	}
+	,balance: function(l,k,v,r) {
+		var hl = l == null?0:l._height;
+		var hr = r == null?0:r._height;
+		if(hl > hr + 2) {
+			var _this = l.left;
+			var tmp = _this == null?0:_this._height;
+			var _this1 = l.right;
+			if(tmp >= (_this1 == null?0:_this1._height)) {
+				return new haxe_ds_TreeNode(l.left,l.key,l.value,new haxe_ds_TreeNode(l.right,k,v,r));
+			} else {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l.left,l.key,l.value,l.right.left),l.right.key,l.right.value,new haxe_ds_TreeNode(l.right.right,k,v,r));
+			}
+		} else if(hr > hl + 2) {
+			var _this2 = r.right;
+			var tmp1 = _this2 == null?0:_this2._height;
+			var _this3 = r.left;
+			if(tmp1 > (_this3 == null?0:_this3._height)) {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l,k,v,r.left),r.key,r.value,r.right);
+			} else {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l,k,v,r.left.left),r.left.key,r.left.value,new haxe_ds_TreeNode(r.left.right,r.key,r.value,r.right));
+			}
+		} else {
+			return new haxe_ds_TreeNode(l,k,v,r,(hl > hr?hl:hr) + 1);
+		}
+	}
+	,compare: function(k1,k2) {
+		return Reflect.compare(k1,k2);
+	}
+	,__class__: haxe_ds_BalancedTree
+};
+var haxe_ds_TreeNode = function(l,k,v,r,h) {
+	if(h == null) {
+		h = -1;
+	}
+	this.left = l;
+	this.key = k;
+	this.value = v;
+	this.right = r;
+	if(h == -1) {
+		var tmp;
+		var _this = this.left;
+		var tmp1 = _this == null?0:_this._height;
+		var _this1 = this.right;
+		if(tmp1 > (_this1 == null?0:_this1._height)) {
+			var _this2 = this.left;
+			if(_this2 == null) {
+				tmp = 0;
+			} else {
+				tmp = _this2._height;
+			}
+		} else {
+			var _this3 = this.right;
+			if(_this3 == null) {
+				tmp = 0;
+			} else {
+				tmp = _this3._height;
+			}
+		}
+		this._height = tmp + 1;
+	} else {
+		this._height = h;
+	}
+};
+haxe_ds_TreeNode.__name__ = true;
+haxe_ds_TreeNode.prototype = {
+	__class__: haxe_ds_TreeNode
+};
+var haxe_ds_EnumValueMap = function() {
+	haxe_ds_BalancedTree.call(this);
+};
+haxe_ds_EnumValueMap.__name__ = true;
+haxe_ds_EnumValueMap.__interfaces__ = [haxe_IMap];
+haxe_ds_EnumValueMap.__super__ = haxe_ds_BalancedTree;
+haxe_ds_EnumValueMap.prototype = $extend(haxe_ds_BalancedTree.prototype,{
+	compare: function(k1,k2) {
+		var d = k1[1] - k2[1];
+		if(d != 0) {
+			return d;
+		}
+		var p1 = k1.slice(2);
+		var p2 = k2.slice(2);
+		if(p1.length == 0 && p2.length == 0) {
+			return 0;
+		}
+		return this.compareArgs(p1,p2);
+	}
+	,compareArgs: function(a1,a2) {
+		var ld = a1.length - a2.length;
+		if(ld != 0) {
+			return ld;
+		}
+		var _g1 = 0;
+		var _g = a1.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var d = this.compareArg(a1[i],a2[i]);
+			if(d != 0) {
+				return d;
+			}
+		}
+		return 0;
+	}
+	,compareArg: function(v1,v2) {
+		if(Reflect.isEnumValue(v1) && Reflect.isEnumValue(v2)) {
+			return this.compare(v1,v2);
+		} else if((v1 instanceof Array) && v1.__enum__ == null && ((v2 instanceof Array) && v2.__enum__ == null)) {
+			return this.compareArgs(v1,v2);
+		} else {
+			return Reflect.compare(v1,v2);
+		}
+	}
+	,__class__: haxe_ds_EnumValueMap
+});
 var haxe_ds_StringMap = function() {
 	this.h = { };
 };

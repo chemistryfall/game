@@ -1,13 +1,5 @@
 {"frames": {
 
-"black.png":
-{
-	"frame": {"x":1,"y":907,"w":10,"h":10},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":10},
-	"sourceSize": {"w":10,"h":10}
-},
 "Blink/oxygen_blink.png":
 {
 	"frame": {"x":1,"y":1,"w":275,"h":300},
@@ -47,6 +39,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1024,"h":1024},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:86a6f7d3742663f36727a09752d6635a:4c78cc0e695edffba1a4c2cea5ad0c5a:8fe69a54bbaa03269d050a03de31a591$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a5a21a6597c67c9878c2beeb2ea87d5f:8c11d93e8fc2934a88bd328c395dcb20:8fe69a54bbaa03269d050a03de31a591$"
 }
 }

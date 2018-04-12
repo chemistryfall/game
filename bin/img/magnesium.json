@@ -1,35 +1,35 @@
 {"frames": {
 
-"Blink/lithium_blink.png":
+"Blink/Magnesium_blink.png":
 {
-	"frame": {"x":1,"y":1,"w":300,"h":300},
+	"frame": {"x":1,"y":1,"w":282,"h":289},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":11,"w":282,"h":289},
 	"sourceSize": {"w":300,"h":300}
 },
-"Idle/lithium_1.png":
+"Idle/Magnesium_1.png":
 {
-	"frame": {"x":1,"y":303,"w":300,"h":300},
+	"frame": {"x":1,"y":292,"w":282,"h":289},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":11,"w":282,"h":289},
 	"sourceSize": {"w":300,"h":300}
 },
-"Idle/lithium_2.png":
+"Idle/Magnesium_2.png":
 {
-	"frame": {"x":1,"y":605,"w":300,"h":300},
+	"frame": {"x":1,"y":583,"w":282,"h":289},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":11,"w":282,"h":289},
 	"sourceSize": {"w":300,"h":300}
 },
-"Idle/lithium_3.png":
+"Idle/Magnesium_3.png":
 {
-	"frame": {"x":303,"y":1,"w":300,"h":300},
+	"frame": {"x":285,"y":1,"w":282,"h":289},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":300},
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":11,"w":282,"h":289},
 	"sourceSize": {"w":300,"h":300}
 }},
 "meta": {
@@ -39,6 +39,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1024,"h":1024},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:ff9e6f238a04716fb7fef442ba33edb6:eb9dfb06f7255d3bb5b04cc20b3eb580:e5725190bf868536d5f5353a2035a5fa$"
+	"smartupdate": "$TexturePacker:SmartUpdate:97557eca2823a05898f7168a4b786c09:77cff5aa342b8a2b6df5e8d7d498a72b:e5725190bf868536d5f5353a2035a5fa$"
 }
 }
