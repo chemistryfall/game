@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.5.0</string>
         <key>fileName</key>
-        <string>C:/Users/Henri/Documents/fgj/2018_edujam/game/spritegen/ui.tps</string>
+        <string>C:/Users/Henri/Documents/fgj/2018_edujam/game/spritegen/brohm.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -36,7 +36,7 @@
         <key>dataFormat</key>
         <string>pixijs</string>
         <key>textureFileName</key>
-        <filename>../bin/img/ui.png</filename>
+        <filename>../bin/img/brohm.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -150,7 +150,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../bin/img/ui.json</filename>
+                <filename>../bin/img/brohm.json</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -199,65 +199,26 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../assets/images/ui/black.png</key>
+            <key type="filename">../assets/images/Lithium/Blink/lithium_blink.png</key>
+            <key type="filename">../assets/images/Lithium/Idle/lithium_1.png</key>
+            <key type="filename">../assets/images/Lithium/Idle/lithium_2.png</key>
+            <key type="filename">../assets/images/Lithium/Idle/lithium_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>3,3,5,5</rect>
+                <rect>75,75,150,150</rect>
                 <key>scale9Paddings</key>
-                <rect>3,3,5,5</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/block.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>106,21,211,42</rect>
-                <key>scale9Paddings</key>
-                <rect>106,21,211,42</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/bomb_blast_blue.png</key>
-            <key type="filename">../assets/images/ui/bomb_blast_green.png</key>
-            <key type="filename">../assets/images/ui/bomb_blast_orange.png</key>
-            <key type="filename">../assets/images/ui/bomb_blast_red.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>64,64,128,128</rect>
-                <key>scale9Paddings</key>
-                <rect>64,64,128,128</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/collector.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>101,101,201,201</rect>
-                <key>scale9Paddings</key>
-                <rect>101,101,201,201</rect>
+                <rect>75,75,150,150</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
         </map>
         <key>fileList</key>
         <array>
-            <filename>../assets/images/ui</filename>
+            <filename>../assets/images/Lithium</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

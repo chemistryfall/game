@@ -57,6 +57,21 @@ HxOverrides.substr = function(s,pos,len) {
 	}
 	return s.substr(pos,len);
 };
+HxOverrides.remove = function(a,obj) {
+	var i = a.indexOf(obj);
+	if(i == -1) {
+		return false;
+	}
+	a.splice(i,1);
+	return true;
+};
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
+};
 var Main = $hx_exports["Game"] = function() {
 	this.tickListeners = [];
 	console.log("new game");
@@ -178,6 +193,219 @@ Std.__name__ = true;
 Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
 };
+var controls_AnimationController = function(textures,animations,name) {
+	this._queu = [];
+	this.sheet = null;
+	this._delay = 0;
+	this.instantDelay = 0;
+	this.frameDelay = 0;
+	this.frameListeners = [];
+	this._currentTime = 0;
+	this.targetLoop = 0;
+	this.frameCount = 0;
+	this.playing = false;
+	this.animationSpeed = 1;
+	this.loop = false;
+	PIXI.Sprite.call(this,textures == null || textures.length == 0?null:textures[0][0]);
+	this._textureMap = new haxe_ds_StringMap();
+	var _g1 = 0;
+	var _g = animations.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(textures == null || textures[i] == null || textures[i].length == 0) {
+			continue;
+		}
+		var _this = this._textureMap;
+		var key = animations[i];
+		var value = textures[i];
+		if(__map_reserved[key] != null) {
+			_this.setReserved(key,value);
+		} else {
+			_this.h[key] = value;
+		}
+	}
+	this.currentAnimation = animations[0];
+	this.currentFrame = 0;
+	this.animationSpeed = 0.5;
+	this.updateTextures();
+};
+controls_AnimationController.__name__ = true;
+controls_AnimationController.__super__ = PIXI.Sprite;
+controls_AnimationController.prototype = $extend(PIXI.Sprite.prototype,{
+	changeAnimations: function(textures,animations) {
+		this.frameDelay = 0;
+		this.frameListeners = [];
+		this._textureMap = new haxe_ds_StringMap();
+		var _g1 = 0;
+		var _g = animations.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(textures == null || textures[i] == null || textures[i].length == 0) {
+				continue;
+			}
+			var _this = this._textureMap;
+			var key = animations[i];
+			var value = textures[i];
+			if(__map_reserved[key] != null) {
+				_this.setReserved(key,value);
+			} else {
+				_this.h[key] = value;
+			}
+		}
+		this.currentAnimation = animations[0];
+		this.currentFrame = 0;
+		this.updateTextures(true);
+	}
+	,stop: function() {
+		if(!this.playing) {
+			return;
+		}
+		this.playing = false;
+		HxOverrides.remove(Main.instance.tickListeners,$bind(this,this.update));
+	}
+	,play: function() {
+		if(this.playing) {
+			return;
+		}
+		this.playing = true;
+		Main.instance.tickListeners.push($bind(this,this.update));
+	}
+	,playAll: function() {
+		this.loop = false;
+		this._queu = [];
+		var tmp = this._textureMap.keys();
+		while(tmp.hasNext()) this._queu.push(tmp.next());
+		if(this._queu.length > 0) {
+			this.gotoAndPlay(this._queu[0]);
+		}
+	}
+	,nextQueu: function() {
+		if(this._queu.length > 0) {
+			this.gotoAndPlay(this._queu[0]);
+		}
+	}
+	,gotoAndStop: function(animation,frame) {
+		this.frameListeners = [];
+		this.loopCount = 0;
+		this.frameDelay = 0;
+		this.stop();
+		if(frame == null) {
+			frame = 0;
+		}
+		this._currentTime = frame;
+		if(frame != this.currentFrame || (animation != this.currentAnimation || animation == null)) {
+			this.currentFrame = frame;
+			if(animation != null) {
+				this.currentAnimation = animation;
+			}
+			this.updateTextures();
+		}
+	}
+	,gotoAndPlay: function(animation,frame,frameDelay) {
+		HxOverrides.remove(Main.instance.tickListeners,$bind(this,this.frameDelayHandler));
+		if(frameDelay != null && frameDelay > 0) {
+			this._delay = 0;
+			this.frameDelay = frameDelay;
+			this.queuAnimation = animation;
+			this.queuFrame = frame;
+			this.playing = true;
+			Main.instance.tickListeners.push($bind(this,this.frameDelayHandler));
+		} else {
+			this.stop();
+			this.frameListeners = [];
+			this.loopCount = 0;
+			this.queuAnimation = null;
+			this.queuFrame = null;
+			this.frameDelay = 0;
+			this._delay = 0;
+			if(frame == null) {
+				frame = 0;
+			}
+			this._currentTime = frame;
+			if(frame != this.currentFrame || animation != this.currentAnimation) {
+				this.currentFrame = frame;
+				this.currentAnimation = animation;
+				this.updateTextures();
+			}
+			this.play();
+		}
+	}
+	,frameDelayHandler: function(delta) {
+		var elapsed = this.animationSpeed * delta;
+		if(this.frameDelay > 0) {
+			this._delay += elapsed;
+			if(this._delay >= this.frameDelay) {
+				var curListeners = this.frameListeners;
+				this.stop();
+				this.gotoAndPlay(this.queuAnimation,this.queuFrame);
+				this.frameListeners = curListeners;
+				return;
+			}
+		}
+	}
+	,update: function(delta) {
+		if(this._textures == null) {
+			return;
+		}
+		this._currentTime += this.animationSpeed * delta;
+		var targetFrame = Math.floor(this._currentTime);
+		if(targetFrame >= this._textures.length) {
+			if(this.loop && this.targetLoop <= 0 || this.targetLoop < this.loopCount) {
+				this._currentTime -= this._textures.length;
+				this.loopCount++;
+			} else {
+				targetFrame = this._textures.length - 1;
+				this.stop();
+			}
+			if(this.frameDelay <= 0) {
+				this.emit(controls_AnimationController.ON_COMPLETE,this);
+				this.nextQueu();
+			}
+		}
+		if(targetFrame != this.currentFrame) {
+			this.currentFrame = targetFrame;
+			this.updateTextures();
+			this.emit(controls_AnimationController.ON_CHANGE,this);
+		}
+		var _g = 0;
+		var _g1 = this.frameListeners;
+		while(_g < _g1.length) {
+			var flag = _g1[_g];
+			++_g;
+			if(this._currentAnimation.indexOf(flag.animation) == -1) {
+				continue;
+			}
+			var test = this.currentFrame;
+			if(this._currentAnimation.indexOf("instant") >= 0) {
+				test -= this.instantDelay;
+			}
+			if(test >= flag.frame) {
+				flag.handler(test,this);
+				HxOverrides.remove(this.frameListeners,flag);
+			}
+		}
+	}
+	,updateTextures: function(force) {
+		if(this.currentAnimation != this._currentAnimation || force) {
+			var _this = this._textureMap;
+			var key = this.currentAnimation;
+			var nextTextures = __map_reserved[key] != null?_this.getReserved(key):_this.h[key];
+			this._currentAnimation = this.currentAnimation;
+			if(nextTextures == null || nextTextures.length == 0) {
+				this.visible = false;
+				console.log("Anim " + this.currentAnimation + " not found");
+				return;
+			}
+			this.visible = true;
+			this._textures = nextTextures;
+		}
+		this.frameCount = this._textures.length;
+		this.currentFrame = this.currentFrame >= this._textures.length?this._textures.length - 1:this.currentFrame;
+		this.texture = this._textures[this.currentFrame];
+		this.anchor.x = this.anchor.y = 0.5;
+	}
+	,__class__: controls_AnimationController
+});
 var controls_Background = function() {
 	PIXI.Container.call(this);
 	this.initializeControls();
@@ -328,6 +556,41 @@ controls_Character.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,__class__: controls_Character
 });
+var controls_Collectable = function(type) {
+	PIXI.Container.call(this);
+	this.type = type;
+	this.initializeControls();
+};
+controls_Collectable.__name__ = true;
+controls_Collectable.__super__ = PIXI.Container;
+controls_Collectable.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.ac = new controls_AnimationController([util_Asset.getTextures(util_Asset.getResource("img/" + this.type).data,new EReg("Idle/.*","")),util_Asset.getTextures(util_Asset.getResource("img/" + this.type).data,new EReg("Blink/.*",""))],["idle","blink"]);
+		this.addChild(this.ac);
+		this.ac.gotoAndPlay("idle");
+		this.ac.loop = true;
+		this.ac.animationSpeed = 0.083333333333333329;
+		this.scale.x = this.scale.y = 0.5;
+		this.restartTimer();
+	}
+	,restartTimer: function() {
+		if(this.idleTimer != null) {
+			this.idleTimer.stop();
+		}
+		this.idleTimer = new haxe_Timer(Math.floor(Math.random() * 3 + 1) * 500);
+		this.idleTimer.run = $bind(this,this.ontick);
+	}
+	,ontick: function() {
+		var _gthis = this;
+		this.ac.gotoAndPlay("blink");
+		this.restartTimer();
+		var tmp = Math.floor(100 + Math.floor(Math.random() * 100));
+		haxe_Timer.delay(function() {
+			_gthis.ac.gotoAndPlay("idle");
+		},tmp);
+	}
+	,__class__: controls_Collectable
+});
 var controls_DeviceOrientationControl = function() {
 };
 controls_DeviceOrientationControl.__name__ = true;
@@ -402,11 +665,29 @@ controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
 var controls_GameView = function() {
+	this.previousSpawn = 0;
+	this.active = [];
 	this.maxvelocity = 3.0;
 	this.dropSpeed = 0;
 	this.time = 0;
 	this.charpos = new PIXI.Point();
 	PIXI.Container.call(this);
+	this.oxygen = new util_Pool(10,function() {
+		return new controls_Collectable("oxygen.json");
+	});
+	this.lithium = new util_Pool(10,function() {
+		return new controls_Collectable("lithium.json");
+	});
+	this.magnesium = new util_Pool(10,function() {
+		return new controls_Collectable("magnesium.json");
+	});
+	this.aluminium = new util_Pool(10,function() {
+		return new controls_Collectable("aluminium.json");
+	});
+	this.brohm = new util_Pool(10,function() {
+		return new controls_Collectable("brohm.json");
+	});
+	this.allCollectables = [this.oxygen,this.lithium,this.magnesium,this.aluminium,this.brohm];
 	this.initializeControls();
 };
 controls_GameView.__name__ = true;
@@ -418,14 +699,15 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		} else if(angle > 0) {
 			angle = Math.min(8,angle);
 		}
-		this.character.body.velocity.x += angle / 10;
-		this.character.body.velocity.x = Math.min(8,Math.max(-8,this.character.body.velocity.x));
+		Matter.Body.applyForce(this.character.body,{ x : 0, y : 0},{ x : -angle / 15, y : 0});
 		this.charpos.x += angle;
 	}
 	,initializeControls: function() {
+		this.collectables = new PIXI.Container();
 		this.character = new controls_Character();
 		this.blocks = new controls_Blocks();
 		this.addChild(this.blocks);
+		this.addChild(this.collectables);
 		this.addChild(this.character);
 		Main.instance.tickListeners.push($bind(this,this.onTick));
 	}
@@ -433,13 +715,64 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.time += delta;
 		this.charpos.x = this.character.body.position.x;
 		this.charpos.y = this.character.body.position.y;
-		Matter.Body.setVelocity(this.character.body,{ x : Math.min(8,Math.max(-8,this.character.body.velocity.x)), y : Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y))});
+		Matter.Body.setVelocity(this.character.body,{ x : Math.min(this.maxvelocity,Math.max(-this.maxvelocity,this.character.body.velocity.x)), y : Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y))});
 		Main.instance.bg.update(-this.charpos.x,-this.charpos.y);
 		this.blocks.y = -this.charpos.y;
 		this.blocks.x = -this.charpos.x;
+		this.collectables.x = -this.charpos.x;
+		this.collectables.y = -this.charpos.y;
 		this.blocks.update(this.charpos);
+		this.spawnCollectable();
+		this.collect();
+	}
+	,collect: function() {
+		var _gthis = this;
+		var remove = [];
+		var _g = 0;
+		var _g1 = this.active;
+		while(_g < _g1.length) {
+			var c = [_g1[_g]];
+			++_g;
+			var cp = this.collectables.toLocal(new PIXI.Point(this.size.width / 2,this.size.height / 2));
+			var dx = cp.x - c[0].x;
+			var dy = cp.y - c[0].y;
+			if(Math.sqrt(dx * dx + dy * dy) < 150) {
+				remove.push(c[0]);
+				cp.x += this.character.body.velocity.x * 20;
+				cp.y += this.character.body.velocity.y * 20;
+				createjs.Tween.get(c[0]).to({ x : cp.x, y : cp.y},350,createjs.Ease.quadOut);
+				createjs.Tween.get(c[0].scale).to({ x : 0, y : 0},350,createjs.Ease.quadOut).call((function(c1) {
+					return function() {
+						_gthis.collectables.removeChild(c1[0]);
+					};
+				})(c));
+			}
+			if(c[0].getBounds().y < -this.size.height) {
+				remove.push(c[0]);
+				this.collectables.removeChild(c[0]);
+			}
+		}
+		var _g2 = 0;
+		while(_g2 < remove.length) {
+			var c2 = remove[_g2];
+			++_g2;
+			HxOverrides.remove(this.active,c2);
+		}
+	}
+	,spawnCollectable: function() {
+		if(Math.abs(this.previousSpawn - this.charpos.y) > 100) {
+			console.log("spawn");
+			this.previousSpawn = this.charpos.y;
+			var c = this.allCollectables[Math.floor(Math.random() * this.allCollectables.length)].getNext();
+			this.collectables.addChild(c);
+			c.scale.x = c.scale.y = 0.5;
+			this.active.push(c);
+			c.x = this.charpos.x + (Math.random() - 0.5) * this.size.width;
+			c.y = this.charpos.y + this.size.height;
+		}
 	}
 	,resize: function(size) {
+		this.size = size;
 		this.blocks.resize(size);
 	}
 	,__class__: controls_GameView
@@ -720,6 +1053,25 @@ haxe_ds_StringMap.prototype = {
 			return false;
 		}
 		return this.rh.hasOwnProperty("$" + key);
+	}
+	,keys: function() {
+		return HxOverrides.iter(this.arrayKeys());
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) {
+			out.push(key);
+		}
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) {
+				out.push(key.substr(1));
+			}
+			}
+		}
+		return out;
 	}
 	,__class__: haxe_ds_StringMap
 };
@@ -1728,9 +2080,11 @@ if(ArrayBuffer.prototype.slice == null) {
 }
 var Float32Array = $global.Float32Array || js_html_compat_Float32Array._new;
 var Uint8Array = $global.Uint8Array || js_html_compat_Uint8Array._new;
-Config.ASSETS = ["img/black.png","img/bg.jpg","img/ui.json","img/noise.jpg"];
+Config.ASSETS = ["img/black.png","img/bg.jpg","img/noise.jpg","img/ui.json","img/oxygen.json","img/brohm.json","img/lithium.json","img/aluminium.json","img/magnesium.json"];
 Config.VERSION = "chemistry fall 0.1";
 Config.GRAVITY = 0.1;
+controls_AnimationController.ON_COMPLETE = "onComplete";
+controls_AnimationController.ON_CHANGE = "onChange";
 controls_DeviceOrientationControl.lon = 0;
 controls_DeviceOrientationControl.lat = 0;
 controls_DeviceOrientationControl.absolute = true;

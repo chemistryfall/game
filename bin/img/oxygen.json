@@ -1,0 +1,52 @@
+{"frames": {
+
+"black.png":
+{
+	"frame": {"x":1,"y":907,"w":10,"h":10},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":10},
+	"sourceSize": {"w":10,"h":10}
+},
+"Blink/oxygen_blink.png":
+{
+	"frame": {"x":1,"y":1,"w":275,"h":300},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":0,"w":275,"h":300},
+	"sourceSize": {"w":300,"h":300}
+},
+"Idle/oxygen_1.png":
+{
+	"frame": {"x":1,"y":303,"w":275,"h":300},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":0,"w":275,"h":300},
+	"sourceSize": {"w":300,"h":300}
+},
+"Idle/oxygen_2.png":
+{
+	"frame": {"x":1,"y":605,"w":275,"h":300},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":0,"w":275,"h":300},
+	"sourceSize": {"w":300,"h":300}
+},
+"Idle/oxygen_3.png":
+{
+	"frame": {"x":278,"y":1,"w":275,"h":300},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":0,"w":275,"h":300},
+	"sourceSize": {"w":300,"h":300}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "oxygen.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":1024},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:86a6f7d3742663f36727a09752d6635a:4c78cc0e695edffba1a4c2cea5ad0c5a:8fe69a54bbaa03269d050a03de31a591$"
+}
+}

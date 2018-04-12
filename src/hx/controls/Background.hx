@@ -36,7 +36,6 @@ class Background extends Container
 		
 		this.addChild(this.bg);
 		
-		
 	}
 	
 	public function update(charX:Float, charY:Float):Void
