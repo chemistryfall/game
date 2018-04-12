@@ -282,9 +282,10 @@ class GameView extends Container
 				if (requiredPairs == 0 && !ending)
 				{
 					this.ending = true;
-					Tween.get(this.character).to( { alpha:0 }, 2500);
-					Tween.get(this.collectables).wait(1000,true).to( { alpha:0 }, 2500);
-					Tween.get(this.blocks).wait(1000,true).to( { alpha:0 }, 2500).wait(1500,true).call(endgame);
+					Timer.delay(ui.hide, 4000);
+					Tween.get(this.character).wait(1500,true).to( { alpha:0 }, 2500);
+					Tween.get(this.collectables).wait(1500,true).to( { alpha:0 }, 2500);
+					Tween.get(this.blocks).wait(1500,true).to( { alpha:0 }, 2500).wait(1500,true).call(endgame);
 				}
 			}
 		},350 );
@@ -292,7 +293,9 @@ class GameView extends Container
 	
 	private function endgame():Void
 	{
+		
 		running = false;
+		jar.randomize();
 		this.jar.visible = true;
 		Tween.get(this.jar).to( { alpha:1 }, 500);
 	}

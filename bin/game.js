@@ -159,7 +159,7 @@ Main.prototype = {
 		this.start.interactiveChildren = false;
 		this.start.hide();
 		this.game.start();
-		this.ui.start(controls_GameView.CONF.instruction);
+		this.ui.start(controls_GameView.CONF.instruction,controls_GameView.CONF["final"]);
 	}
 	,ongameEnd: function() {
 		this.start.interactiveChildren = true;
@@ -474,7 +474,9 @@ controls_Block.__name__ = true;
 controls_Block.__super__ = PIXI.Container;
 controls_Block.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
-		this.block = util_Asset.getImage("block.png",true);
+		this.type = ++controls_Block.blockType % 3 + 1;
+		this.type = 3;
+		this.block = util_Asset.getImage("block_" + this.type + ".png",true);
 		this.block.anchor.x = this.block.anchor.y = 0.5;
 		this.hitArea = new PIXI.Rectangle(-this.block.width / 2,-this.block.height,this.block.width,this.block.height * 2);
 		this.addChild(this.block);
@@ -486,7 +488,13 @@ controls_Block.prototype = $extend(PIXI.Container.prototype,{
 		} else {
 			this.block.rotation = Math.max(-0.6,this.block.rotation);
 		}
-		this.body = Matter.Bodies.rectangle(x,y,this.block.width,this.block.height,{ isStatic : true, angle : this.block.rotation});
+		if(this.type == 1) {
+			this.body = Matter.Bodies.fromVertices(x,y,[{ x : 62, y : 19},{ x : 119, y : 54},{ x : 137, y : 119},{ x : 109, y : 162},{ x : 46, y : 140},{ x : 32, y : 82}],{ isStatic : true, angle : this.block.rotation});
+		} else if(this.type == 2) {
+			this.body = Matter.Bodies.fromVertices(x,y,[{ x : 42, y : 19},{ x : 216, y : 18},{ x : 246, y : 37},{ x : 247, y : 51},{ x : 227, y : 69},{ x : 208, y : 74},{ x : 30, y : 74},{ x : 14, y : 49}],{ isStatic : true, angle : this.block.rotation});
+		} else {
+			this.body = Matter.Bodies.fromVertices(x,y,[{ x : 76, y : 25},{ x : 123, y : 53},{ x : 118, y : 103},{ x : 58, y : 113},{ x : 41, y : 97},{ x : 40, y : 64}],{ isStatic : true, angle : this.block.rotation});
+		}
 		this.added = true;
 		this.x = x;
 		this.y = y;
@@ -589,7 +597,7 @@ controls_Character.prototype = $extend(PIXI.Container.prototype,{
 		sprite2.blendMode = PIXI.BLEND_MODES.ADD;
 		sprite3.blendMode = PIXI.BLEND_MODES.ADD;
 		sprite4.blendMode = PIXI.BLEND_MODES.ADD;
-		this.sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.1;
+		this.sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.2;
 		var tmp = Math.PI * 2;
 		createjs.Tween.get(this.sprite,{ loop : true}).to({ rotation : tmp},18000);
 		var tmp1 = Math.PI * 2;
@@ -995,15 +1003,17 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 				_gthis.ui.formPair(_gthis.baseconf,_gthis.requiredPairs);
 				if(_gthis.requiredPairs == 0 && !_gthis.ending) {
 					_gthis.ending = true;
-					createjs.Tween.get(_gthis.character).to({ alpha : 0},2500);
-					createjs.Tween.get(_gthis.collectables).wait(1000,true).to({ alpha : 0},2500);
-					createjs.Tween.get(_gthis.blocks).wait(1000,true).to({ alpha : 0},2500).wait(1500,true).call($bind(_gthis,_gthis.endgame));
+					haxe_Timer.delay(($_=_gthis.ui,$bind($_,$_.hide)),4000);
+					createjs.Tween.get(_gthis.character).wait(1500,true).to({ alpha : 0},2500);
+					createjs.Tween.get(_gthis.collectables).wait(1500,true).to({ alpha : 0},2500);
+					createjs.Tween.get(_gthis.blocks).wait(1500,true).to({ alpha : 0},2500).wait(1500,true).call($bind(_gthis,_gthis.endgame));
 				}
 			}
 		},350);
 	}
 	,endgame: function() {
 		this.running = false;
+		this.jar.randomize();
 		this.jar.visible = true;
 		createjs.Tween.get(this.jar).to({ alpha : 1},500);
 	}
@@ -1040,10 +1050,33 @@ controls_Jar.prototype = $extend(PIXI.Container.prototype,{
 		this.jar.anchor.y = 1;
 		this.jar.scale.x = this.jar.scale.y = 0.6;
 		this.addChild(this.jar);
+		this.alu_bromide = this.createcompound(controls_CompoundType.alu_bromide);
+		this.alu_oxide = this.createcompound(controls_CompoundType.alu_oxide);
+		this.lithium_bromide = this.createcompound(controls_CompoundType.lithium_bromide);
+		this.lithium_oxide = this.createcompound(controls_CompoundType.lithium_oxide);
+		this.mag_bromide = this.createcompound(controls_CompoundType.mag_bromide);
+		this.mag_oxide = this.createcompound(controls_CompoundType.mag_oxide);
+	}
+	,createcompound: function(type) {
+		var c = new controls_Compound(controls_CompoundType.alu_bromide);
+		c.pivot.y = c.height;
+		c.scale.x = c.scale.y = 1;
+		c.y = -180;
+		this.jar.addChild(c);
+		return c;
 	}
 	,resize: function(size) {
 		this.jar.scale.x = this.jar.scale.y = 1;
-		this.jar.scale.x = this.jar.scale.y = Math.min(1,Math.min(size.width / Main.instance.viewport.scale.x * 0.75 / this.jar.width,size.height / Main.instance.viewport.scale.x * 0.75 / this.jar.height));
+		this.jar.scale.x = this.jar.scale.y = Math.min(1,Math.min(size.width / Main.instance.viewport.scale.x * 0.9 / this.jar.width,size.height / Main.instance.viewport.scale.x * 0.9 / this.jar.height));
+	}
+	,randomize: function() {
+		this.jar.texture = util_Asset.getTexture("jar_" + Math.floor(Math.random() * 6 + 1) + ".png",true);
+		this.alu_bromide.visible = controls_GameView.CONF.compound == controls_CompoundType.alu_bromide;
+		this.alu_oxide.visible = controls_GameView.CONF.compound == controls_CompoundType.alu_oxide;
+		this.lithium_bromide.visible = controls_GameView.CONF.compound == controls_CompoundType.lithium_bromide;
+		this.lithium_oxide.visible = controls_GameView.CONF.compound == controls_CompoundType.lithium_oxide;
+		this.mag_bromide.visible = controls_GameView.CONF.compound == controls_CompoundType.mag_bromide;
+		this.mag_oxide.visible = controls_GameView.CONF.compound == controls_CompoundType.mag_oxide;
 	}
 	,__class__: controls_Jar
 });
@@ -1172,21 +1205,24 @@ controls_StartView.__super__ = PIXI.Container;
 controls_StartView.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		this.logo = util_Asset.getImage("logo.png",true);
-		this.start = util_Asset.getImage("start.png",true);
-		this.start.y = 200;
+		this.start = util_Asset.getImage("start_button.png",true);
+		this.start.y = 720;
+		this.start.x = 110;
 		this.start.interactive = true;
 		this.addChild(this.logo);
-		this.addChild(this.start);
+		this.logo.addChild(this.start);
 		this.origsize = this.getBounds();
 	}
 	,resize: function(size) {
 		this.scale.x = this.scale.y = 1;
-		this.scale.x = this.scale.y = Math.min((size.width - 100) / this.origsize.width,(size.height - 100) / this.origsize.height);
+		var s = Math.min((size.width - 50) / this.origsize.width,(size.height - 50) / this.origsize.height);
+		this.scale.x = this.scale.y = s;
+		this.logo.y = size.height / s - this.logo.height;
 		this.x = Math.round((size.width - this.width) / 2);
 	}
 	,hide: function() {
-		createjs.Tween.get(this.logo).to({ y : -100, alpha : 0},500);
-		createjs.Tween.get(this.start).to({ y : 100, alpha : 0},500);
+		createjs.Tween.get(this.logo).to({ alpha : 0},250);
+		createjs.Tween.get(this.start).to({ alpha : 0},250);
 	}
 	,show: function() {
 		createjs.Tween.get(this.logo).to({ y : 0, alpha : 1},500);
@@ -1251,6 +1287,11 @@ controls_TargetIndicator.prototype = $extend(PIXI.Container.prototype,{
 		createjs.Tween.get(this.pivot).wait(450,true).to({ x : 0},450,createjs.Ease.backOut);
 		createjs.Tween.get(this.count).wait(900,true).to({ alpha : 1},450);
 	}
+	,hide: function() {
+		var tmp = this.left?100:-100;
+		createjs.Tween.get(this.pivot).wait(450,true).to({ x : tmp},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.count).to({ alpha : 0},450);
+	}
 	,__class__: controls_TargetIndicator
 });
 var controls_UI = function() {
@@ -1273,10 +1314,23 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.addChild(this.target2);
 		this.former = new controls_PairFormer();
 		this.addChild(this.former);
+		this.finalreactionlabel = util_Asset.getImage("label.png",true);
+		this.reactionlabel = util_Asset.getImage("label.png",true);
+		this.finalReactionC = new PIXI.Container();
+		this.reactionC = new PIXI.Container();
+		this.finalReactionC.addChild(this.finalreactionlabel);
+		this.reactionC.addChild(this.reactionlabel);
+		this.reactionlabel.y = -70;
+		this.finalreactionlabel.y = -70;
+		this.addChild(this.reactionC);
+		this.addChild(this.finalReactionC);
+		this.finalReaction = util_Asset.getImage("alumiinibromidin_reaktio.png",true);
 		this.reaction = util_Asset.getImage("alumiinibromidin_reaktio.png",true);
-		this.addChild(this.reaction);
-		this.reaction.pivot.y = 100;
+		this.reactionC.addChild(this.reaction);
+		this.finalReactionC.addChild(this.finalReaction);
+		this.reactionC.pivot.y = 100;
 		this.charge.pivot.y = 100;
+		this.finalReactionC.pivot.y = 100;
 	}
 	,resize: function(size) {
 		this.size = size;
@@ -1284,17 +1338,34 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.reaction.width = size.width - 100;
 		this.reaction.height = 50;
 		this.reaction.scale.x = this.reaction.scale.y = Math.min(1,Math.min(this.reaction.scale.y,this.reaction.scale.x));
-		this.reaction.x = Math.round((size.width - this.reaction.width) / 2);
+		this.reactionlabel.width = this.reaction.width * 2;
+		this.reaction.x = (this.reactionlabel.width - this.reaction.width) / 2;
+		this.reactionC.x = Math.round((size.width - this.reactionC.width) / 2);
+		this.finalReaction.width = size.width - 100;
+		this.finalReaction.height = 50;
+		this.finalReaction.scale.x = this.finalReaction.scale.y = Math.min(1,Math.min(this.finalReaction.scale.y,this.finalReaction.scale.x));
+		this.finalreactionlabel.width = this.finalReaction.width * 2;
+		this.finalReaction.x = (this.finalreactionlabel.width - this.finalReaction.width) / 2;
+		this.finalReactionC.x = Math.round((size.width - this.finalReactionC.width) / 2);
 		this.charge.x = size.width / 2;
 		this.former.resize(size);
 	}
-	,start: function(reaction) {
+	,start: function(reaction,finalReaction) {
 		this.target1.start();
 		this.target2.start();
 		this.reaction.texture = util_Asset.getTexture(reaction,true);
+		this.finalReaction.texture = util_Asset.getTexture(finalReaction,true);
 		this.resize(this.size);
-		createjs.Tween.get(this.reaction.pivot).to({ y : 0},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.reactionC.pivot).to({ y : 0},450,createjs.Ease.backOut);
 		createjs.Tween.get(this.charge.pivot).to({ y : -60},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 100},450,createjs.Ease.backOut);
+	}
+	,hide: function() {
+		createjs.Tween.get(this.charge.pivot).to({ y : 100},450,createjs.Ease.backOut);
+		this.target1.hide();
+		this.target2.hide();
+		createjs.Tween.get(this.reactionC.pivot).to({ y : 100},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 0},450,createjs.Ease.backOut);
 	}
 	,updatePairAmount: function(pairsNeeded) {
 		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
@@ -2209,7 +2280,7 @@ var particles_BgStars = function() {
 	var _gthis = this;
 	particles_BaseParticleEffect.call(this);
 	this.pool = new util_Pool(150,function() {
-		var p = { sprite : util_Asset.getImage("collector.png",true), lifetime : 0, maxlife : 0, sx : 0, sy : 0};
+		var p = { sprite : util_Asset.getImage("UI_little circle.png",true), lifetime : 0, maxlife : 0, sx : 0, sy : 0};
 		_gthis.addChild(p.sprite);
 		p.sprite.scale.x = p.sprite.scale.y = 0.1;
 		p.sprite.anchor.x = p.sprite.anchor.y = 0.5 + Math.random();
@@ -2223,7 +2294,7 @@ particles_BgStars.__name__ = true;
 particles_BgStars.__super__ = particles_BaseParticleEffect;
 particles_BgStars.prototype = $extend(particles_BaseParticleEffect.prototype,{
 	randomizeParticle: function(p) {
-		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.05 + 0.02;
+		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.06 + 0.025;
 		p.lifetime = (Math.random() + 0.5) * 80 + 30;
 		p.maxlife = p.lifetime;
 		p.sprite.x = Math.random() * this.area.width + this.area.x;
@@ -2246,7 +2317,7 @@ particles_BgStars.prototype = $extend(particles_BaseParticleEffect.prototype,{
 			p.sprite.y += p.sy * d;
 			p.sprite.rotation = (p.lifetime + p.maxlife) * p.sprite.scale.x * 0.1;
 			var phase = (p.maxlife - p.lifetime) / p.maxlife;
-			p.sprite.alpha = phase < 0.34?phase / 0.34:1 - (phase - 0.34) / 0.65999999999999992;
+			p.sprite.alpha = (phase < 0.34?phase / 0.34:1 - (phase - 0.34) / 0.65999999999999992) * 0.5;
 		}
 	}
 	,clear: function() {
@@ -2620,9 +2691,8 @@ util_LoaderWrapper.assetLoaded = function() {
 	}
 };
 util_LoaderWrapper.updateText = function() {
-	var sound = Math.floor(sounds_Sounds.soundsLoaded / sounds_Sounds.totalSounds) * 100;
 	var other = Math.floor(util_LoaderWrapper.loadCount / util_LoaderWrapper.totalCount) * 100;
-	window.document.getElementById("preload").innerHTML = Math.min(sound,other) + "%";
+	window.document.getElementById("preload").innerHTML = "Loading: " + Math.min(other,other) + "%";
 };
 util_LoaderWrapper.handleSound = function() {
 	sounds_Sounds.loadChange = util_LoaderWrapper.updateSoundText;
@@ -2739,7 +2809,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZDsNCgl2ZWMyIG51diA9IHZUZXh0dXJlQ29vcmQqMy4wOw0KCQ0KICAgIGZsb2F0IG4gPSB0ZXh0dXJlMkQobm9pc2UsIG51dit2ZWMyKHNpbih0aW1lKi4zKSx0aW1lKSouMDItb2ZmKi40KS5yLS41Ow0KICAgIGZsb2F0IG4yID0gdGV4dHVyZTJEKG5vaXNlLHZlYzIoLjIpKyBudXYrdmVjMihzaW4odGltZSouNSksdGltZSkqLjA0LW9mZiouOCkuci0uNTsNCiAgICBuKz1uMjsNCiAgICANCgludXYueSo9YXNwZWN0Ow0KICAgIHV2LngrPW4vMjUwLjsNCiAgICB1di55Kz1uLzI1MC47DQogICAgDQogICAgZmxvYXQgZCA9IGxlbmd0aCh1di12ZWMyKDAuNSkpOw0KICAgIGQ9c21vb3Roc3RlcCgwLjEsMC42LDEuLWQpOw0KCXZlYzQgYmFzZSA9IHRleHR1cmUyRCh1U2FtcGxlciwgdXYpKmQ7DQogICAgLy8gT3V0cHV0IHRvIHNjcmVlbg0KICAgIHZlYzQgY29sID0gdmVjNCggc2luKHV2LngrdGltZSksIGNvcyh1di55K3RpbWUpLCB1di54LDEuKTsNCiAgICBnbF9GcmFnQ29sb3IgPSBiYXNlK3Ntb290aHN0ZXAoLTEuLCAxLiwgbikqY29sKi4xOw0KCS8vZ2xfRnJhZ0NvbG9yID12ZWM0KG4sbixuLDEuKTsvLw0KfQ0K"}];
+haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZDsNCgl2ZWMyIG51diA9IHZUZXh0dXJlQ29vcmQqMy4wOw0KCQ0KICAgIGZsb2F0IG4gPSB0ZXh0dXJlMkQobm9pc2UsIG51dit2ZWMyKHNpbih0aW1lKi4zKSx0aW1lKSouMDItb2ZmKi40KS5yLS41Ow0KICAgIGZsb2F0IG4yID0gdGV4dHVyZTJEKG5vaXNlLHZlYzIoLjIpKyBudXYrdmVjMihzaW4odGltZSouNSksdGltZSkqLjA0LW9mZiouOCkuci0uNTsNCiAgICBuKz1uMjsNCiAgICANCgludXYueSo9YXNwZWN0Ow0KICAgIHV2LngrPW4vMjUwLjsNCiAgICB1di55Kz1uLzI1MC47DQogICAgDQogICAgZmxvYXQgZCA9IGxlbmd0aCh1di12ZWMyKDAuNSkpOw0KICAgIGQ9c21vb3Roc3RlcCgwLjEsMC42LDEuLWQpOw0KCXZlYzQgYmFzZSA9IHRleHR1cmUyRCh1U2FtcGxlciwgdXYpKmQ7DQoJDQogICAgLy8gT3V0cHV0IHRvIHNjcmVlbg0KICAgIHZlYzQgY29sID0gdmVjNCggc2luKHV2LngrdGltZSksIGNvcyh1di55K3RpbWUpLCB1di54LDEuKTsNCiAgICBnbF9GcmFnQ29sb3IgPSBiYXNlK3Ntb290aHN0ZXAoLTEuLCAxLiwgbikqY29sKi4xOw0KCS8vZ2xfRnJhZ0NvbG9yID12ZWM0KG4sbixuLDEuKTsvLw0KfQ0K"}];
 var __map_reserved = {}
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -2752,6 +2822,7 @@ Config.VERSION = "chemistry fall 0.1";
 Config.GRAVITY = 0.1;
 controls_AnimationController.ON_COMPLETE = "onComplete";
 controls_AnimationController.ON_CHANGE = "onChange";
+controls_Block.blockType = 0;
 controls_DeviceOrientationControl.lon = 0;
 controls_DeviceOrientationControl.lat = 0;
 controls_DeviceOrientationControl.absolute = true;

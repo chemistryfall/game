@@ -218,7 +218,7 @@ class Main
 		this.start.interactiveChildren = false;
 		this.start.hide();
 		this.game.start();
-		this.ui.start(GameView.CONF.instruction);
+		this.ui.start(GameView.CONF.instruction, GameView.CONF.final);
 	}
 	
 	public function ongameEnd():Void

@@ -94,4 +94,9 @@ class TargetIndicator extends Container
 		Tween.get(this.pivot).wait(450, true).to( { x:0 }, 450, Ease.backOut);
 		Tween.get(this.count).wait(900, true).to( { alpha:1 }, 450);
 	}
+	public function hide():Void
+	{
+		Tween.get(this.pivot).wait(450, true).to( { x:left?100:-100 }, 450, Ease.backOut);
+		Tween.get(this.count).to( { alpha:0 }, 450);
+	}
 }

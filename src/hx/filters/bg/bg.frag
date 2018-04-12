@@ -29,6 +29,7 @@ void main(  )
     float d = length(uv-vec2(0.5));
     d=smoothstep(0.1,0.6,1.-d);
 	vec4 base = texture2D(uSampler, uv)*d;
+	
     // Output to screen
     vec4 col = vec4( sin(uv.x+time), cos(uv.y+time), uv.x,1.);
     gl_FragColor = base+smoothstep(-1., 1., n)*col*.1;

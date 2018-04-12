@@ -131,9 +131,9 @@ class LoaderWrapper
 	
 	private static function updateText():Void
 	{
-		var sound:Float = Math.floor(Sounds.soundsLoaded / Sounds.totalSounds) * 100;
+	//	var sound:Float = Math.floor(Sounds.soundsLoaded / Sounds.totalSounds) * 100;
 		var other:Float = Math.floor(loadCount / totalCount) * 100;
-		Browser.document.getElementById("preload").innerHTML = Math.min(sound,other)+"%";
+		Browser.document.getElementById("preload").innerHTML = "Loading: "+ Math.min(other,other)+"%";
 	}
 	
 	public static function handleSound():Void

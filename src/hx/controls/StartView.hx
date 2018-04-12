@@ -26,13 +26,14 @@ class StartView extends Container
 	private function initializeControls():Void
 	{
 		this.logo = Asset.getImage("logo.png", true);
-		this.start = Asset.getImage("start.png", true);
+		this.start = Asset.getImage("start_button.png", true);
 		
-		this.start.y = 200;
+		this.start.y = 720;
+		this.start.x = 110;
 		this.start.interactive = true;
 		
 		this.addChild(this.logo);
-		this.addChild(this.start);
+		this.logo.addChild(this.start);
 		
 		this.origsize = this.getBounds();
 	}
@@ -40,16 +41,17 @@ class StartView extends Container
 	public function resize(size:Rectangle)
 	{
 		this.scale.x = this.scale.y = 1;
-		var s:Float = Math.min( (size.width-100) / origsize.width, (size.height-100) / origsize.height);
+		var s:Float = Math.min( (size.width-50) / origsize.width, (size.height-50) / origsize.height);
 		this.scale.x = this.scale.y = s;
+		this.logo.y = (size.height) / s-logo.height;
 		
 		this.x = Math.round((size.width - this.width) / 2);
 	}
 	
 	public function hide():Void
 	{
-		Tween.get(this.logo).to( { y: -100, alpha:0 }, 500);
-		Tween.get(this.start).to( { y: 100, alpha:0 }, 500);
+		Tween.get(this.logo).to( {  alpha:0 }, 250);
+		Tween.get(this.start).to( { alpha:0 }, 250);
 		
 	}
 	

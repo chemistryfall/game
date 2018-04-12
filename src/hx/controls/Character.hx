@@ -50,7 +50,7 @@ class Character extends Container
 		sprite3.blendMode = Pixi.BLEND_MODES.ADD;
 		sprite4.blendMode = Pixi.BLEND_MODES.ADD;
 		
-		sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.1;
+		sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.2;
 	
 		Tween.get(sprite, { loop:true } ).to( { rotation:Math.PI * 2 }, 18000);
 		Tween.get(sprite2, { loop:true } ).to( { rotation:Math.PI * 2 }, 18300);
