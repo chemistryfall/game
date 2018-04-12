@@ -2,7 +2,7 @@
 
 "alumiini.png":
 {
-	"frame": {"x":1216,"y":866,"w":98,"h":75},
+	"frame": {"x":1621,"y":1225,"w":98,"h":75},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":12,"y":9,"w":98,"h":75},
@@ -10,7 +10,7 @@
 },
 "alumiinibromidi.png":
 {
-	"frame": {"x":792,"y":761,"w":136,"h":73},
+	"frame": {"x":1830,"y":464,"w":136,"h":73},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":9,"y":14,"w":136,"h":73},
@@ -18,7 +18,7 @@
 },
 "alumiinibromidin_reaktio.png":
 {
-	"frame": {"x":1,"y":1965,"w":677,"h":81},
+	"frame": {"x":495,"y":1965,"w":677,"h":81},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":7,"y":9,"w":677,"h":81},
@@ -26,7 +26,7 @@
 },
 "alumiinibromidin_reaktio_intro.png":
 {
-	"frame": {"x":653,"y":416,"w":281,"h":78},
+	"frame": {"x":1486,"y":568,"w":281,"h":78},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":7,"y":9,"w":281,"h":78},
@@ -34,7 +34,7 @@
 },
 "alumiinioksidi.png":
 {
-	"frame": {"x":839,"y":614,"w":149,"h":76},
+	"frame": {"x":1880,"y":96,"w":149,"h":76},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":10,"w":149,"h":76},
@@ -42,7 +42,7 @@
 },
 "alumiinioksidin_reaktio.png":
 {
-	"frame": {"x":136,"y":1817,"w":787,"h":141},
+	"frame": {"x":630,"y":1817,"w":787,"h":141},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":17,"y":0,"w":787,"h":141},
@@ -50,31 +50,15 @@
 },
 "alumiinioksidin_reaktio_intro.png":
 {
-	"frame": {"x":680,"y":1960,"w":310,"h":83},
+	"frame": {"x":1174,"y":1960,"w":310,"h":83},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":10,"y":11,"w":310,"h":83},
 	"sourceSize": {"w":327,"h":94}
 },
-"black.png":
-{
-	"frame": {"x":2026,"y":1,"w":10,"h":10},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":10},
-	"sourceSize": {"w":10,"h":10}
-},
-"block.png":
-{
-	"frame": {"x":839,"y":586,"w":150,"h":26},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":26},
-	"sourceSize": {"w":150,"h":26}
-},
 "block_1.png":
 {
-	"frame": {"x":1,"y":1817,"w":133,"h":146},
+	"frame": {"x":495,"y":1817,"w":133,"h":146},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":17,"y":17,"w":133,"h":146},
@@ -82,7 +66,7 @@
 },
 "block_2.png":
 {
-	"frame": {"x":653,"y":496,"w":246,"h":88},
+	"frame": {"x":1737,"y":1128,"w":246,"h":88},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":6,"w":246,"h":88},
@@ -90,7 +74,7 @@
 },
 "block_3.png":
 {
-	"frame": {"x":992,"y":866,"w":113,"h":99},
+	"frame": {"x":1301,"y":83,"w":113,"h":99},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":15,"y":22,"w":113,"h":99},
@@ -98,7 +82,7 @@
 },
 "bromidi.png":
 {
-	"frame": {"x":1707,"y":686,"w":92,"h":72},
+	"frame": {"x":1621,"y":1371,"w":92,"h":72},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":19,"y":11,"w":92,"h":72},
@@ -106,7 +90,7 @@
 },
 "charge_slider.png":
 {
-	"frame": {"x":1761,"y":251,"w":286,"h":35},
+	"frame": {"x":1,"y":1992,"w":286,"h":35},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":5,"y":34,"w":286,"h":35},
@@ -114,23 +98,15 @@
 },
 "charge_sliderPointer.png":
 {
-	"frame": {"x":925,"y":64,"w":33,"h":79},
+	"frame": {"x":1990,"y":1,"w":33,"h":79},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":130,"y":13,"w":33,"h":79},
 	"sourceSize": {"w":300,"h":105}
 },
-"collector.png":
-{
-	"frame": {"x":992,"y":503,"w":362,"h":361},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":20,"y":20,"w":362,"h":361},
-	"sourceSize": {"w":402,"h":402}
-},
 "collector/collector_1.png":
 {
-	"frame": {"x":1770,"y":1,"w":254,"h":248},
+	"frame": {"x":1769,"y":634,"w":254,"h":248},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":22,"y":8,"w":254,"h":248},
@@ -138,7 +114,7 @@
 },
 "collector/collector_2.png":
 {
-	"frame": {"x":653,"y":96,"w":254,"h":248},
+	"frame": {"x":1486,"y":648,"w":254,"h":248},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":22,"y":8,"w":254,"h":248},
@@ -146,7 +122,7 @@
 },
 "collector/collector_3.png":
 {
-	"frame": {"x":1374,"y":396,"w":249,"h":242},
+	"frame": {"x":1742,"y":884,"w":249,"h":242},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":26,"y":10,"w":249,"h":242},
@@ -154,7 +130,7 @@
 },
 "collector/collector_4.png":
 {
-	"frame": {"x":1356,"y":640,"w":249,"h":242},
+	"frame": {"x":1486,"y":898,"w":249,"h":242},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":26,"y":10,"w":249,"h":242},
@@ -162,7 +138,7 @@
 },
 "collector/collector_arrow.png":
 {
-	"frame": {"x":653,"y":668,"w":175,"h":61},
+	"frame": {"x":1868,"y":243,"w":175,"h":61},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":67,"y":237,"w":175,"h":61},
@@ -170,11 +146,19 @@
 },
 "corner beaker.png":
 {
-	"frame": {"x":653,"y":939,"w":129,"h":138},
+	"frame": {"x":1865,"y":1218,"w":129,"h":138},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":31,"y":22,"w":129,"h":138},
 	"sourceSize": {"w":194,"h":194}
+},
+"help_bg.png":
+{
+	"frame": {"x":1,"y":1817,"w":492,"h":173},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":492,"h":173},
+	"sourceSize": {"w":492,"h":173}
 },
 "instructions jar.png":
 {
@@ -186,7 +170,7 @@
 },
 "label.png":
 {
-	"frame": {"x":992,"y":396,"w":380,"h":105},
+	"frame": {"x":1486,"y":235,"w":380,"h":105},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":44,"y":32,"w":380,"h":105},
@@ -194,7 +178,7 @@
 },
 "litium.png":
 {
-	"frame": {"x":925,"y":1,"w":65,"h":61},
+	"frame": {"x":1419,"y":96,"w":65,"h":61},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":16,"w":65,"h":61},
@@ -202,7 +186,7 @@
 },
 "litiumbromidi.png":
 {
-	"frame": {"x":1607,"y":686,"w":98,"h":67},
+	"frame": {"x":1621,"y":1302,"w":98,"h":67},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":11,"y":16,"w":98,"h":67},
@@ -210,7 +194,7 @@
 },
 "litiumbromidin_reaktio.png":
 {
-	"frame": {"x":992,"y":301,"w":569,"h":93},
+	"frame": {"x":1419,"y":1,"w":569,"h":93},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":0,"w":569,"h":93},
@@ -218,7 +202,7 @@
 },
 "litiumbromidin_reaktio_intro.png":
 {
-	"frame": {"x":653,"y":1,"w":266,"h":93},
+	"frame": {"x":1772,"y":539,"w":266,"h":93},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":0,"w":266,"h":93},
@@ -226,7 +210,7 @@
 },
 "litiumoksidi.png":
 {
-	"frame": {"x":1640,"y":207,"w":119,"h":79},
+	"frame": {"x":1721,"y":1350,"w":119,"h":79},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":1,"y":7,"w":119,"h":79},
@@ -234,7 +218,7 @@
 },
 "litiumoksidin_reaktio.png":
 {
-	"frame": {"x":992,"y":207,"w":646,"h":92},
+	"frame": {"x":653,"y":83,"w":646,"h":92},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":12,"w":646,"h":92},
@@ -242,7 +226,7 @@
 },
 "litiumoksidin_reaktio_intro.png":
 {
-	"frame": {"x":653,"y":346,"w":284,"h":68},
+	"frame": {"x":1486,"y":498,"w":284,"h":68},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":11,"y":10,"w":284,"h":68},
@@ -258,7 +242,7 @@
 },
 "magnesium.png":
 {
-	"frame": {"x":653,"y":731,"w":137,"h":74},
+	"frame": {"x":1868,"y":306,"w":137,"h":74},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":5,"w":137,"h":74},
@@ -266,7 +250,7 @@
 },
 "magnesiumbromidi.png":
 {
-	"frame": {"x":653,"y":586,"w":184,"h":80},
+	"frame": {"x":1846,"y":382,"w":184,"h":80},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":0,"y":11,"w":184,"h":80},
@@ -274,7 +258,7 @@
 },
 "magnesiumbromidin_reaktio.png":
 {
-	"frame": {"x":992,"y":1,"w":776,"h":122},
+	"frame": {"x":653,"y":184,"w":776,"h":122},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":21,"y":0,"w":776,"h":122},
@@ -282,7 +266,7 @@
 },
 "magnesiumbromidin_reaktio_intro.png":
 {
-	"frame": {"x":1625,"y":606,"w":342,"h":78},
+	"frame": {"x":1486,"y":418,"w":342,"h":78},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":9,"w":342,"h":78},
@@ -290,7 +274,7 @@
 },
 "magnesiumoksidi.png":
 {
-	"frame": {"x":830,"y":692,"w":143,"h":67},
+	"frame": {"x":1880,"y":174,"w":143,"h":67},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":10,"y":13,"w":143,"h":67},
@@ -298,7 +282,7 @@
 },
 "magnesiumoksidin_reaktio.png":
 {
-	"frame": {"x":992,"y":125,"w":704,"h":80},
+	"frame": {"x":653,"y":1,"w":704,"h":80},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":0,"w":704,"h":80},
@@ -306,7 +290,7 @@
 },
 "magnesiumoksidin_reaktio_intro.png":
 {
-	"frame": {"x":1625,"y":530,"w":358,"h":74},
+	"frame": {"x":1486,"y":342,"w":358,"h":74},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":6,"w":358,"h":74},
@@ -314,23 +298,15 @@
 },
 "oksidi.png":
 {
-	"frame": {"x":1107,"y":866,"w":107,"h":81},
+	"frame": {"x":1621,"y":1142,"w":107,"h":81},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":10,"w":107,"h":81},
 	"sourceSize": {"w":113,"h":91}
 },
-"start.png":
-{
-	"frame": {"x":1625,"y":427,"w":362,"h":101},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":46,"y":117,"w":362,"h":101},
-	"sourceSize": {"w":463,"h":326}
-},
 "start_button.png":
 {
-	"frame": {"x":1640,"y":288,"w":392,"h":137},
+	"frame": {"x":1486,"y":96,"w":392,"h":137},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":51,"y":50,"w":392,"h":137},
@@ -338,7 +314,7 @@
 },
 "UI_info button.png":
 {
-	"frame": {"x":653,"y":807,"w":133,"h":130},
+	"frame": {"x":1486,"y":1142,"w":133,"h":130},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":23,"y":20,"w":133,"h":130},
@@ -346,11 +322,19 @@
 },
 "UI_little circle.png":
 {
-	"frame": {"x":788,"y":836,"w":133,"h":130},
+	"frame": {"x":1730,"y":1218,"w":133,"h":130},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":22,"y":14,"w":133,"h":130},
 	"sourceSize": {"w":175,"h":175}
+},
+"UI_replay.png":
+{
+	"frame": {"x":1486,"y":1274,"w":133,"h":130},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":23,"y":20,"w":133,"h":130},
+	"sourceSize": {"w":174,"h":175}
 }},
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
@@ -359,6 +343,6 @@
 	"format": "RGBA8888",
 	"size": {"w":2048,"h":2048},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:4d45958b421e9475636535e5c65b8988:ed530b74bde36e4fb96b7041c3d799a1:5b04aa198265472a3c5f56958d78e97b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:c68fc0a56c74d5df338b4fd71f987557:2e6a693b3e829a51d9a19e1f9eb58024:5b04aa198265472a3c5f56958d78e97b$"
 }
 }

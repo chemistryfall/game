@@ -4,3 +4,8 @@ body, div
 	border:0px;
 	overflow:hidden;
 }
+
+body
+{
+	font-family: 'pigment_demoregular';
+}

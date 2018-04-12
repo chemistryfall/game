@@ -27,6 +27,8 @@ class UI extends Container
 	private var reactionC:Container;
 	private var finalReactionC:Container;
 	
+	private var endUI:EndUi;
+	
 	public function new() 
 	{
 		super();
@@ -72,6 +74,10 @@ class UI extends Container
 		this.finalReactionC.addChild(this.finalReaction);
 		this.reactionC.pivot.y = 100;
 		this.finalReactionC.pivot.y = 100; 
+		
+		this.endUI = new EndUi();
+		this.addChild(this.endUI);
+		this.endUI.visible = false;
 	}
 	
 	public function resize(size:Rectangle):Void
@@ -94,6 +100,7 @@ class UI extends Container
 		
 		this.charge.resize(size);
 		this.former.resize(size);
+		this.endUI.resize(size);
 	}
 	
 	public function start(reaction:String, finalReaction:String):Void
@@ -110,12 +117,19 @@ class UI extends Container
 	
 	public function hide():Void
 	{
-		Tween.get(this.charge.pivot).to( { y: 100 }, 450, Ease.backIn);
 		this.target1.hide();
 		this.target2.hide();
 		this.charge.hide();
 		Tween.get(this.reactionC.pivot).to( { y:100 }, 450, Ease.backIn);
 		Tween.get(this.finalReactionC.pivot).to( { y:0 }, 450, Ease.backIn);
+		
+		this.endUI.show();
+	}
+	
+	public function backToSelect():Void
+	{
+		Tween.get(this.finalReactionC.pivot).to( { y:100 }, 450, Ease.getBackOut(0.3));
+		this.endUI.hide();
 	}
 	
 	public function updatePairAmount(pairsNeeded:Int):Void
@@ -125,6 +139,7 @@ class UI extends Container
 	
 	public function formPair(items:Array<CType>, pairsNeeded:Int):Void
 	{
+		trace("Foorm pari");
 		this.charge.count.text = Std.string(Math.max(0, pairsNeeded));
 		this.former.formPairs(items, this.target1.type, this.target2.type);
 	}

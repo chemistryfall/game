@@ -217,15 +217,19 @@ class Main
 	{
 		this.start.interactiveChildren = false;
 		this.start.hide();
+		
 		Timer.delay(function(){
 			this.game.start();
 			this.ui.start(GameView.CONF.instruction, GameView.CONF.final);
 		},500);
 	}
 	
-	public function ongameEnd():Void
+	public function replay():Void
 	{
+		this.game.hide();
+		this.ui.backToSelect();
 		this.start.interactiveChildren = true;
+		this.start.show();
 	}
 	
 	/**

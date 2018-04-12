@@ -126,7 +126,7 @@ class PairFormer extends Container
 					for (cr in cols) Tween.get(cr).to( { alpha:0 }, 400);
 					var com:Compound = this.comPools.get(GameView.CONF.compound).getNext();
 					com.x = size.width / 2;
-					com.y = 150;
+					com.y = 200;
 					this.addChild(com);
 					com.visible = true;
 					com.alpha = 0;

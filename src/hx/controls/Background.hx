@@ -18,6 +18,8 @@ class Background extends Container
 	public var filter: BgFilter;
 
 	private var bg:TilingSprite;
+	private var offx:Float = 0;
+	private var offy:Float = 0;
 	
 	public function new() 
 	{
@@ -38,10 +40,15 @@ class Background extends Container
 		
 	}
 	
+	public function rememberPosition(charpos:Point):Void
+	{
+		offx += -charpos.x;
+		offy += -charpos.y;
+	}
 	public function update(charX:Float, charY:Float):Void
 	{
-		this.bg.tilePosition.x = charX;
-		this.bg.tilePosition.y = charY;
+		this.bg.tilePosition.x = charX+offx;
+		this.bg.tilePosition.y = charY+offy;
 	}
 	
 	

@@ -46,7 +46,7 @@ class Jar extends Container
 	
 	private function createcompound(type:CompoundType):Compound
 	{
-		var c:Compound = new Compound(CompoundType.alu_bromide);
+		var c:Compound = new Compound(type);
 		c.pivot.y = c.height;
 		c.scale.x = c.scale.y = 1;
 		c.y = -180;

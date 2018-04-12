@@ -78,6 +78,10 @@ class GameView extends Container
 	
 	public function start():Void
 	{
+		Body.setPosition(character.body, cast { x:0, y:0 } );
+		this.blocks.alpha = 1;
+		this.collectables.alpha = 1;
+		Main.instance.bg.rememberPosition(charpos);
 		Tween.get(this.character).to( { alpha:1 }, 1000);
 		Tween.get(this.jar).to( { alpha:0 }, 1000);
 		this.ending = false;
@@ -175,11 +179,9 @@ class GameView extends Container
 	{
 		time+= delta;
 		
-		
+		if (!running) return;
 		this.charpos.x = character.body.position.x;
 		this.charpos.y = character.body.position.y;
-		
-		if (!running) return;
 		
 		Body.setVelocity(this.character.body,cast {
 			x:Math.min(maxvelocity, Math.max( -maxvelocity, this.character.body.velocity.x)),
@@ -213,7 +215,7 @@ class GameView extends Container
 			var dy:Float = cp.y - c.y;
 			var d:Float = Math.sqrt(dx * dx + dy * dy);
 			
-			if (d < 85)
+			if (d < 95)
 			{
 				var wrong:Bool  = false;
 				//Hit
@@ -322,17 +324,30 @@ class GameView extends Container
 		Tween.get(this.jar).to( { alpha:1 }, 500);
 	}
 	
+	public function hide():Void
+	{
+		Tween.get(this.jar).to( { alpha:0 }, 250);
+	}
+	
+	private var xspawn:Array<Float> = [];
 	private function spawnCollectable():Void
 	{
 		if (!ending && Math.abs(previousSpawn - charpos.y) > 100)
 		{
+			if (xspawn.length == 0)
+			{
+				for ( i in 0...20)
+					xspawn.push(Math.random() / 20 + i * 1 / 20);
+				xspawn = MathUtil.shuffle(xspawn, cast Date.now().getTime());
+			}
 			trace("spawn");
 			previousSpawn = charpos.y;
 			var c:Collectable = this.allCollectables[Math.floor(Math.random() * allCollectables.length)].getNext();
 			this.collectables.addChild(c);
 			c.scale.x = c.scale.y = 0.5;
 			active.push(c);
-			c.x = charpos.x + (Math.random() - 0.5) * size.width*2;
+			c.x = charpos.x + xspawn.pop() * size.width*2;
+			
 			c.y = charpos.y + size.height/Main.instance.viewport.scale.x;
 		}
 	}

@@ -64,6 +64,7 @@ class TargetIndicator extends Container
 		this.cAluminium.y = 50;
 		
 		var ts:TextStyleObject = { };
+		ts.fontFamily = 'pigment_demoregular';
 		this.count = new Text("7", ts);
 		this.addChild(this.count);
 		

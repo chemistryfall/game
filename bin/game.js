@@ -164,8 +164,11 @@ Main.prototype = {
 			_gthis.ui.start(controls_GameView.CONF.instruction,controls_GameView.CONF["final"]);
 		},500);
 	}
-	,ongameEnd: function() {
+	,replay: function() {
+		this.game.hide();
+		this.ui.backToSelect();
 		this.start.interactiveChildren = true;
+		this.start.show();
 	}
 	,onTickerTick: function() {
 		Matter.Engine.update(this.engine,16.666666666666668);
@@ -443,6 +446,8 @@ controls_AnimationController.prototype = $extend(PIXI.Sprite.prototype,{
 	,__class__: controls_AnimationController
 });
 var controls_Background = function() {
+	this.offy = 0;
+	this.offx = 0;
 	PIXI.Container.call(this);
 	this.initializeControls();
 };
@@ -457,9 +462,13 @@ controls_Background.prototype = $extend(PIXI.Container.prototype,{
 		this.filters = [this.filter];
 		this.addChild(this.bg);
 	}
+	,rememberPosition: function(charpos) {
+		this.offx += -charpos.x;
+		this.offy += -charpos.y;
+	}
 	,update: function(charX,charY) {
-		this.bg.tilePosition.x = charX;
-		this.bg.tilePosition.y = charY;
+		this.bg.tilePosition.x = charX + this.offx;
+		this.bg.tilePosition.y = charY + this.offy;
 	}
 	,resize: function(size) {
 		this.filter.resize(size);
@@ -480,7 +489,7 @@ controls_Block.prototype = $extend(PIXI.Container.prototype,{
 		this.type = ++controls_Block.blockType % 3 + 1;
 		this.block = util_Asset.getImage("block_" + this.type + ".png",true);
 		this.block.anchor.x = this.block.anchor.y = 0.5;
-		this.hitArea = new PIXI.Rectangle(-this.block.width / 2,-this.block.height,this.block.width,this.block.height * 2);
+		this.hitArea = new PIXI.Rectangle(-this.block.width / 2,-this.block.height / 2,this.block.width,this.block.height);
 		this.addChild(this.block);
 	}
 	,randomize: function(x,y) {
@@ -643,9 +652,10 @@ controls_Charge.prototype = $extend(PIXI.Container.prototype,{
 		this.beaker.anchor.x = 0.0;
 		var ts = { };
 		ts.fontSize = 70;
+		ts.fontFamily = "pigment_demoregular";
 		this.count = new PIXI.Text("5",ts);
-		this.count.x = 60;
-		this.count.y = 50;
+		this.count.x = 70;
+		this.count.y = 58;
 		this.beaker.addChild(this.count);
 		this.charge = util_Asset.getImage("charge_slider.png",true);
 		this.slider = util_Asset.getImage("charge_sliderPointer.png",true);
@@ -862,7 +872,69 @@ controls_DeviceOrientationControl.Quat2Angle = function(x,y,z,w) {
 controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
+var controls_EndUi = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_EndUi.__name__ = true;
+controls_EndUi.__super__ = PIXI.Container;
+controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.replay = util_Asset.getImage("UI_replay.png",true);
+		this.info = util_Asset.getImage("UI_info button.png",true);
+		this.infoLabel = util_Asset.getImage("help_bg.png",true);
+		this.replay.scale.x = this.replay.scale.y = 0.5;
+		this.info.scale.x = this.info.scale.y = 0.5;
+		this.replay.interactive = true;
+		var ts = { };
+		ts.wordWrap = false;
+		ts.fontSize = 24;
+		ts.fontFamily = "pigment_demoregular";
+		this.infoText = new PIXI.Text("Lithium oxide or lithia is an\ninorganic chemical compound.\nIt is a white solid.",ts);
+		this.infoC = new PIXI.Container();
+		this.infoC.addChild(this.infoLabel);
+		this.infoC.addChild(this.infoText);
+		this.infoLabel.x = 0;
+		this.infoLabel.y = 0;
+		this.infoLabel.width = this.infoText.width;
+		this.infoLabel.height = this.infoText.height;
+		this.infoC.visible = false;
+		this.info.interactive = true;
+		this.info.addListener("click",$bind(this,this.onInfoclick));
+		this.info.addListener("tap",$bind(this,this.onInfoclick));
+		this.infoC.interactive = true;
+		this.infoC.addListener("click",$bind(this,this.onInfoclick));
+		this.infoC.addListener("tap",$bind(this,this.onInfoclick));
+		this.replay.addListener("click",$bind(this,this.onreplay));
+		this.replay.addListener("tap",$bind(this,this.onreplay));
+		this.addChild(this.infoC);
+		this.addChild(this.info);
+		this.addChild(this.replay);
+	}
+	,onreplay: function(e) {
+		Main.instance.replay();
+	}
+	,onInfoclick: function(e) {
+		this.infoC.visible = !this.infoC.visible;
+	}
+	,resize: function(size) {
+		this.info.x = size.width - this.info.width;
+		this.info.y = 50;
+		this.replay.x = 0;
+		this.replay.y = 50;
+		this.infoC.x = (size.width - this.infoC.width) / 2;
+		this.infoC.y = size.height - this.infoC.height - 10;
+	}
+	,hide: function() {
+		this.visible = false;
+	}
+	,show: function() {
+		this.visible = true;
+	}
+	,__class__: controls_EndUi
+});
 var controls_GameView = $hx_exports["GV"] = function() {
+	this.xspawn = [];
 	this.ending = false;
 	this.running = false;
 	this.previousSpawn = 0;
@@ -894,6 +966,10 @@ controls_GameView.__name__ = true;
 controls_GameView.__super__ = PIXI.Container;
 controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	start: function() {
+		Matter.Body.setPosition(this.character.body,{ x : 0, y : 0});
+		this.blocks.alpha = 1;
+		this.collectables.alpha = 1;
+		Main.instance.bg.rememberPosition(this.charpos);
 		createjs.Tween.get(this.character).to({ alpha : 1},1000);
 		createjs.Tween.get(this.jar).to({ alpha : 0},1000);
 		this.ending = false;
@@ -949,11 +1025,11 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,onTick: function(delta) {
 		this.time += delta;
-		this.charpos.x = this.character.body.position.x;
-		this.charpos.y = this.character.body.position.y;
 		if(!this.running) {
 			return;
 		}
+		this.charpos.x = this.character.body.position.x;
+		this.charpos.y = this.character.body.position.y;
 		Matter.Body.setVelocity(this.character.body,{ x : Math.min(this.maxvelocity,Math.max(-this.maxvelocity,this.character.body.velocity.x)), y : Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y))});
 		Main.instance.bg.update(-this.charpos.x,-this.charpos.y);
 		this.blocks.y = -this.charpos.y;
@@ -977,7 +1053,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 			var cp = this.collectables.toLocal(new PIXI.Point(this.size.width / 2,this.size.height / 2));
 			var dx = cp.x - c[0].x;
 			var dy = cp.y - c[0].y;
-			if(Math.sqrt(dx * dx + dy * dy) < 85) {
+			if(Math.sqrt(dx * dx + dy * dy) < 95) {
 				var wrong = false;
 				if(this.baseconf.indexOf(c[0].type) >= 0) {
 					this.current.push(c[0].type);
@@ -1084,15 +1160,26 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.jar.visible = true;
 		createjs.Tween.get(this.jar).to({ alpha : 1},500);
 	}
+	,hide: function() {
+		createjs.Tween.get(this.jar).to({ alpha : 0},250);
+	}
 	,spawnCollectable: function() {
 		if(!this.ending && Math.abs(this.previousSpawn - this.charpos.y) > 100) {
+			if(this.xspawn.length == 0) {
+				var _g = 0;
+				while(_g < 20) {
+					var i = _g++;
+					this.xspawn.push(Math.random() / 20 + i / 20);
+				}
+				this.xspawn = util_MathUtil.shuffle(this.xspawn,new Date().getTime());
+			}
 			console.log("spawn");
 			this.previousSpawn = this.charpos.y;
 			var c = this.allCollectables[Math.floor(Math.random() * this.allCollectables.length)].getNext();
 			this.collectables.addChild(c);
 			c.scale.x = c.scale.y = 0.5;
 			this.active.push(c);
-			c.x = this.charpos.x + (Math.random() - 0.5) * this.size.width * 2;
+			c.x = this.charpos.x + this.xspawn.pop() * this.size.width * 2;
 			c.y = this.charpos.y + this.size.height / Main.instance.viewport.scale.x;
 		}
 	}
@@ -1103,6 +1190,40 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.jar.resize(size);
 	}
 	,__class__: controls_GameView
+});
+var controls_Help = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_Help.__name__ = true;
+controls_Help.__super__ = PIXI.Container;
+controls_Help.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.info = util_Asset.getImage("UI_info button.png",true);
+		this.helpJar = util_Asset.getImage("instructions jar.png",true);
+		this.info.interactive = true;
+		this.helpJar.visible = false;
+		this.info.scale.x = this.info.scale.y = 0.5;
+		this.addChild(this.info);
+		this.addChild(this.helpJar);
+		var ts = { };
+		ts.wordWrap = false;
+		ts.fontSize = 36;
+		ts.fontFamily = "pigment_demoregular";
+		this.helpText = new PIXI.Text("Form 3 elements by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nA game made during\nEduGameJam 2018.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nCode\n    Henri Sarasvirta",ts);
+		this.helpJar.addChild(this.helpText);
+		this.helpText.x = 160;
+		this.helpText.y = 290;
+	}
+	,resize: function(size) {
+		this.info.x = size.width - this.info.width;
+		this.info.y = 0;
+		this.helpJar.scale.x = this.helpJar.scale.y = 1;
+		this.helpJar.scale.x = this.helpJar.scale.y = Math.min(1,Math.min((size.width - 50) / this.helpJar.width,(size.height - 50) / this.helpJar.height));
+		this.helpJar.x = Math.round((size.width - this.helpJar.width) / 2);
+		this.helpJar.y = size.height - this.helpJar.height;
+	}
+	,__class__: controls_Help
 });
 var controls_Jar = function() {
 	PIXI.Container.call(this);
@@ -1125,7 +1246,7 @@ controls_Jar.prototype = $extend(PIXI.Container.prototype,{
 		this.mag_oxide = this.createcompound(controls_CompoundType.mag_oxide);
 	}
 	,createcompound: function(type) {
-		var c = new controls_Compound(controls_CompoundType.alu_bromide);
+		var c = new controls_Compound(type);
 		c.pivot.y = c.height;
 		c.scale.x = c.scale.y = 1;
 		c.y = -180;
@@ -1249,7 +1370,7 @@ controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
 				}
 				var com = _gthis.comPools.get(controls_GameView.CONF.compound).getNext();
 				com.x = _gthis.size.width / 2;
-				com.y = 150;
+				com.y = 200;
 				_gthis.addChild(com);
 				com.visible = true;
 				com.alpha = 0;
@@ -1278,22 +1399,32 @@ controls_StartView.prototype = $extend(PIXI.Container.prototype,{
 		this.start.interactive = true;
 		this.addChild(this.logo);
 		this.logo.addChild(this.start);
+		this.help = new controls_Help();
+		this.addChild(this.help);
+		this.help.info.addListener("click",$bind(this,this.onHelpClick));
+		this.help.info.addListener("tap",$bind(this,this.onHelpClick));
 		this.origsize = this.getBounds();
+	}
+	,onHelpClick: function(e) {
+		this.logo.visible = !this.logo.visible;
+		this.help.helpJar.visible = !this.help.helpJar.visible;
 	}
 	,resize: function(size) {
 		this.scale.x = this.scale.y = 1;
-		var s = Math.min((size.width - 50) / this.origsize.width,(size.height - 50) / this.origsize.height);
-		this.scale.x = this.scale.y = s;
-		this.logo.y = size.height / s - this.logo.height;
-		this.x = Math.round((size.width - this.width) / 2);
+		this.logo.scale.x = this.logo.scale.y = Math.min((size.width - 50) / this.origsize.width,(size.height - 50) / this.origsize.height);
+		this.logo.y = size.height - this.logo.height;
+		this.logo.x = Math.round((size.width - this.logo.width) / 2);
+		this.help.resize(size);
 	}
 	,hide: function() {
 		createjs.Tween.get(this.logo).to({ alpha : 0},450);
 		createjs.Tween.get(this.start).to({ alpha : 0},450);
+		createjs.Tween.get(this.help).to({ alpha : 0},450);
 	}
 	,show: function() {
-		createjs.Tween.get(this.logo).to({ y : 0, alpha : 1},500);
-		createjs.Tween.get(this.start).to({ y : 200, alpha : 1},500);
+		createjs.Tween.get(this.logo).to({ alpha : 1},500);
+		createjs.Tween.get(this.start).to({ alpha : 1},500);
+		createjs.Tween.get(this.help).to({ alpha : 1},500);
 	}
 	,__class__: controls_StartView
 });
@@ -1333,6 +1464,7 @@ controls_TargetIndicator.prototype = $extend(PIXI.Container.prototype,{
 		this.cAluminium.x = 50;
 		this.cAluminium.y = 50;
 		var ts = { };
+		ts.fontFamily = "pigment_demoregular";
 		this.count = new PIXI.Text("7",ts);
 		this.addChild(this.count);
 		this.pivot.y = -50;
@@ -1397,6 +1529,9 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.finalReactionC.addChild(this.finalReaction);
 		this.reactionC.pivot.y = 100;
 		this.finalReactionC.pivot.y = 100;
+		this.endUI = new controls_EndUi();
+		this.addChild(this.endUI);
+		this.endUI.visible = false;
 	}
 	,resize: function(size) {
 		this.size = size;
@@ -1415,6 +1550,7 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.finalReactionC.x = Math.round((size.width - this.finalReactionC.width) / 2);
 		this.charge.resize(size);
 		this.former.resize(size);
+		this.endUI.resize(size);
 	}
 	,start: function(reaction,finalReaction) {
 		this.target1.start();
@@ -1427,17 +1563,22 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 100},450,createjs.Ease.getBackOut(0.3));
 	}
 	,hide: function() {
-		createjs.Tween.get(this.charge.pivot).to({ y : 100},450,createjs.Ease.backIn);
 		this.target1.hide();
 		this.target2.hide();
 		this.charge.hide();
 		createjs.Tween.get(this.reactionC.pivot).to({ y : 100},450,createjs.Ease.backIn);
 		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 0},450,createjs.Ease.backIn);
+		this.endUI.show();
+	}
+	,backToSelect: function() {
+		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 100},450,createjs.Ease.getBackOut(0.3));
+		this.endUI.hide();
 	}
 	,updatePairAmount: function(pairsNeeded) {
 		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
 	}
 	,formPair: function(items,pairsNeeded) {
+		console.log("Foorm pari");
 		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
 		this.former.formPairs(items,this.target1.type,this.target2.type);
 	}
@@ -2841,6 +2982,21 @@ util_MathUtil.cubicInterpolation = function(array,t,tangentFactor) {
 	var t3 = t * t2;
 	return (2 * t3 - 3 * t2 + 1) * p_0 + (t3 - 2 * t2 + t) * m_0 + (-2 * t3 + 3 * t2) * p_1 + (t3 - t2) * m_1;
 };
+util_MathUtil.shuffle = function(array,key) {
+	var index;
+	var result = [];
+	var copy = array.slice(0);
+	while(copy.length > 0) {
+		if(!isNaN(key)) {
+			index = key % copy.length;
+		} else {
+			index = Math.floor(Math.random() * copy.length);
+		}
+		result.push(copy[index]);
+		copy.splice(index,1);
+	}
+	return result;
+};
 util_MathUtil.prototype = {
 	__class__: util_MathUtil
 };
@@ -2873,6 +3029,8 @@ function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id
 String.prototype.__class__ = String;
 String.__name__ = true;
 Array.__name__ = true;
+Date.prototype.__class__ = Date;
+Date.__name__ = ["Date"];
 var Int = { __name__ : ["Int"]};
 var Dynamic = { __name__ : ["Dynamic"]};
 var Float = Number;

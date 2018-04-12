@@ -37,7 +37,7 @@ class Block extends Container
 		
 		this.block.anchor.x = this.block.anchor.y = 0.5;
 		
-		this.hitArea = new Rectangle( -block.width / 2, -block.height, block.width, block.height * 2);
+		this.hitArea = new Rectangle( -block.width / 2, -block.height/2, block.width, block.height);
 		
 		this.addChild(this.block);
 	}

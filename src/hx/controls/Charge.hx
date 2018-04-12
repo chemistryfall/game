@@ -35,9 +35,10 @@ class Charge extends Container
 		
 		var ts:TextStyleObject = { };
 		ts.fontSize = 70;
+		ts.fontFamily = 'pigment_demoregular';
 		this.count = new Text("5", ts);
-		this.count.x = 60;
-		this.count.y = 50;
+		this.count.x = 70;
+		this.count.y = 58;
 		this.beaker.addChild(this.count);
 		
 		this.charge = Asset.getImage("charge_slider.png", true);
