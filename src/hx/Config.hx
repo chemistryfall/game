@@ -17,7 +17,9 @@ class Config
 		"img/bg.jpg",
 		"img/noise.jpg",
 		
+		"img/jars.json",
 		"img/ui.json",
+		
 		"img/oxygen.json",
 		"img/brohm.json",
 		"img/lithium.json",

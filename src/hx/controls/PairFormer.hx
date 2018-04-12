@@ -108,7 +108,7 @@ class PairFormer extends Container
 	{
 		Tween.get(c).wait(cc * 250 + 50, true).call(function() { 
 				c.visible = true; 
-				Tween.get(c.scale).to( { x:0.25, y:0.25 }, 500);
+				Tween.get(c.scale).to( { x:0.25, y:0.25 }, 500).wait(items.length*100-cc*80).to({x:0, y:0},1000);
 				Tween.get(c.pivot).to( { 
 					x: Math.sin(Math.PI * 2 * cc / items.length) * 200, 
 					y:  Math.cos(Math.PI*2*cc/items.length)*200 
@@ -118,7 +118,7 @@ class PairFormer extends Container
 				}, 750+250*items.length-cc*250,Ease.quadIn);
 			} ).to( { 
 				x:size.width / 2,
-				y:150
+				y:125
 			}, 250, Ease.quadOut).wait(500,true).call(function() {
 				
 				if (last)
@@ -131,8 +131,8 @@ class PairFormer extends Container
 					com.visible = true;
 					com.alpha = 0;
 					com.scale.x = com.scale.y = 0.7;
-					Tween.get(com).to( { alpha:1 }, 250, Ease.quadOut).wait(250, true).to( { alpha:0 }, 500).call(function() { removeChild(com); } );
-					Tween.get(com.scale).to( { x:1, y:1 }, 500, Ease.quadOut).to( { x:1.3, y:1.3 }, 500, Ease.quadIn);
+					Tween.get(com).to( { alpha:1 }, 250, Ease.quadOut).wait(500, true).to( { alpha:0 }, 500).call(function() { removeChild(com); } );
+					Tween.get(com.scale).to( { x:1, y:1 }, 500, Ease.quadOut).to( { x:1.3, y:1.3 }, 750, Ease.quadIn);
 				}
 			});
 			

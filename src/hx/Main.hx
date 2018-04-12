@@ -212,8 +212,10 @@ class Main
 		this.start.start.addListener("click", onStartClick);
 		this.start.start.addListener("tap", onStartClick);
 	}
+	
 	private function onStartClick():Void
 	{
+		this.start.interactiveChildren = false;
 		this.start.hide();
 		this.game.start();
 		this.ui.start(GameView.CONF.instruction);
@@ -221,7 +223,7 @@ class Main
 	
 	public function ongameEnd():Void
 	{
-		
+		this.start.interactiveChildren = true;
 	}
 	
 	/**

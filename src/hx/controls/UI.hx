@@ -49,6 +49,7 @@ class UI extends Container
 		this.reaction = Asset.getImage("alumiinibromidin_reaktio.png", true);
 		this.addChild(this.reaction);
 		this.reaction.pivot.y = 100;
+		this.charge.pivot.y = 100;
 	}
 	
 	public function resize(size:Rectangle):Void
@@ -59,6 +60,7 @@ class UI extends Container
 		this.reaction.height = 50;
 		this.reaction.scale.x = this.reaction.scale.y = Math.min(1, Math.min(this.reaction.scale.y,this.reaction.scale.x));
 		this.reaction.x = Math.round((size.width - reaction.width) / 2);
+		this.charge.x = size.width / 2;
 		this.former.resize(size);
 	}
 	
@@ -69,10 +71,17 @@ class UI extends Container
 		this.reaction.texture = Asset.getTexture(reaction, true);
 		this.resize(size);
 		Tween.get(this.reaction.pivot).to( { y:0 }, 450, Ease.backOut);
+		Tween.get(this.charge.pivot).to( { y: -60 }, 450, Ease.backOut);
 	}
 	
-	public function formPair(items:Array<CType>):Void
+	public function updatePairAmount(pairsNeeded:Int):Void
 	{
+		this.charge.count.text = Std.string(Math.max(0, pairsNeeded));
+	}
+	
+	public function formPair(items:Array<CType>, pairsNeeded:Int):Void
+	{
+		this.charge.count.text = Std.string(Math.max(0, pairsNeeded));
 		this.former.formPairs(items, this.target1.type, this.target2.type);
 	}
 	

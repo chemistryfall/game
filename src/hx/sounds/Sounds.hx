@@ -25,7 +25,7 @@ class Sounds
 	public static var LOSE:String = "loss";
 
 	
-	public static var BACKGROUND:String = "background";
+	public static var BACKGROUND:String = "Ion_in_A_Jar_01";
 
 	private static var bg_volume:Float = 1;
 	
@@ -61,7 +61,7 @@ class Sounds
 		soundMap = new StringMap();
 		
 		var base:String = "snd/";
-		Sound.alternateExtensions = ["mp3"];
+	//	Sound.alternateExtensions = ["mp3"];
 		
 		sounds = [
 			{s:BACKGROUND, c:1 }
@@ -70,7 +70,7 @@ class Sounds
 		//Load single sounds
 		for (s in sounds)
 		{
-			Sound.registerSound(base + s.s+".ogg", s.s, s.c);
+			Sound.registerSound(base + s.s+".mp3", s.s, s.c);
 		}
 		
 		//Listen for ios unlock. Soundjs does the initial unlocking automatically in 6.2 and forwards. This is used to start bg loop.

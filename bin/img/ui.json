@@ -10,7 +10,7 @@
 },
 "alumiinibromidi.png":
 {
-	"frame": {"x":394,"y":622,"w":136,"h":73},
+	"frame": {"x":626,"y":1256,"w":136,"h":73},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":9,"y":14,"w":136,"h":73},
@@ -26,7 +26,7 @@
 },
 "alumiinibromidin_reaktio_intro.png":
 {
-	"frame": {"x":365,"y":822,"w":281,"h":78},
+	"frame": {"x":1,"y":968,"w":281,"h":78},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":7,"y":9,"w":281,"h":78},
@@ -72,41 +72,33 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":26},
 	"sourceSize": {"w":150,"h":26}
 },
-"bomb_blast_blue.png":
+"block_1.png":
 {
-	"frame": {"x":1,"y":995,"w":256,"h":256},
+	"frame": {"x":888,"y":966,"w":133,"h":146},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
-	"sourceSize": {"w":256,"h":256}
+	"trimmed": true,
+	"spriteSourceSize": {"x":17,"y":17,"w":133,"h":146},
+	"sourceSize": {"w":172,"h":172}
 },
-"bomb_blast_green.png":
+"block_2.png":
 {
-	"frame": {"x":633,"y":939,"w":256,"h":256},
+	"frame": {"x":378,"y":1204,"w":246,"h":88},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
-	"sourceSize": {"w":256,"h":256}
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":6,"w":246,"h":88},
+	"sourceSize": {"w":275,"h":119}
 },
-"bomb_blast_orange.png":
+"block_3.png":
 {
-	"frame": {"x":259,"y":997,"w":256,"h":256},
+	"frame": {"x":257,"y":1224,"w":113,"h":99},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
-	"sourceSize": {"w":256,"h":256}
-},
-"bomb_blast_red.png":
-{
-	"frame": {"x":1,"y":1253,"w":256,"h":256},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
-	"sourceSize": {"w":256,"h":256}
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":22,"w":113,"h":99},
+	"sourceSize": {"w":159,"h":160}
 },
 "bromidi.png":
 {
-	"frame": {"x":515,"y":705,"w":92,"h":72},
+	"frame": {"x":287,"y":898,"w":92,"h":72},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":19,"y":11,"w":92,"h":72},
@@ -119,6 +111,46 @@
 	"trimmed": true,
 	"spriteSourceSize": {"x":20,"y":20,"w":362,"h":361},
 	"sourceSize": {"w":402,"h":402}
+},
+"collector/collector_1.png":
+{
+	"frame": {"x":381,"y":912,"w":254,"h":290},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":8,"w":254,"h":290},
+	"sourceSize": {"w":300,"h":300}
+},
+"collector/collector_2.png":
+{
+	"frame": {"x":1,"y":1143,"w":254,"h":290},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":8,"w":254,"h":290},
+	"sourceSize": {"w":300,"h":300}
+},
+"collector/collector_3.png":
+{
+	"frame": {"x":394,"y":622,"w":249,"h":288},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":26,"y":10,"w":249,"h":288},
+	"sourceSize": {"w":300,"h":300}
+},
+"collector/collector_4.png":
+{
+	"frame": {"x":637,"y":966,"w":249,"h":288},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":26,"y":10,"w":249,"h":288},
+	"sourceSize": {"w":300,"h":300}
+},
+"corner beaker.png":
+{
+	"frame": {"x":888,"y":1246,"w":129,"h":138},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":31,"y":22,"w":129,"h":138},
+	"sourceSize": {"w":194,"h":194}
 },
 "litium.png":
 {
@@ -146,7 +178,7 @@
 },
 "litiumbromidin_reaktio_intro.png":
 {
-	"frame": {"x":365,"y":902,"w":266,"h":93},
+	"frame": {"x":1,"y":1048,"w":266,"h":93},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":0,"w":266,"h":93},
@@ -154,7 +186,7 @@
 },
 "litiumoksidi.png":
 {
-	"frame": {"x":394,"y":697,"w":119,"h":79},
+	"frame": {"x":257,"y":1143,"w":119,"h":79},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":1,"y":7,"w":119,"h":79},
@@ -170,7 +202,7 @@
 },
 "litiumoksidin_reaktio_intro.png":
 {
-	"frame": {"x":1,"y":925,"w":284,"h":68},
+	"frame": {"x":1,"y":898,"w":284,"h":68},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":11,"y":10,"w":284,"h":68},
@@ -234,7 +266,7 @@
 },
 "magnesiumoksidin_reaktio_intro.png":
 {
-	"frame": {"x":648,"y":863,"w":358,"h":74},
+	"frame": {"x":1,"y":822,"w":358,"h":74},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":8,"y":6,"w":358,"h":74},
@@ -242,7 +274,7 @@
 },
 "oksidi.png":
 {
-	"frame": {"x":532,"y":622,"w":107,"h":81},
+	"frame": {"x":269,"y":1048,"w":107,"h":81},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":10,"w":107,"h":81},
@@ -250,11 +282,19 @@
 },
 "start.png":
 {
-	"frame": {"x":1,"y":822,"w":362,"h":101},
+	"frame": {"x":645,"y":863,"w":362,"h":101},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":46,"y":117,"w":362,"h":101},
 	"sourceSize": {"w":463,"h":326}
+},
+"UI_little circle.png":
+{
+	"frame": {"x":888,"y":1114,"w":133,"h":130},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":14,"w":133,"h":130},
+	"sourceSize": {"w":175,"h":175}
 }},
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
@@ -263,6 +303,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1024,"h":2048},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:81a450399eb6941eb73a1f6fde79eeba:2850f515d6a2b84ab769d4416b2ae354:5b04aa198265472a3c5f56958d78e97b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a4b179bc1d86e00f2e054d4d47472197:84128f8c7fd67bfc60bc4d80cc2d999f:5b04aa198265472a3c5f56958d78e97b$"
 }
 }

@@ -52,7 +52,9 @@ class GameView extends Container
 	public var extra:Array<CType>;
 	private var baseconf:Array<CType>;
 	
+	private var jar:Jar;
 	private var requiredPairs:Int;
+	private var ending:Bool = false;
 	
 	public function new() 
 	{
@@ -77,6 +79,12 @@ class GameView extends Container
 	
 	public function start():Void
 	{
+		Tween.get(this.jar).to( { alpha:0 }, 1000);
+		this.ending = false;
+		this.collectables.removeChildren();
+		this.blocks.clear();
+		this.charpos.x = this.charpos.y = 0;
+		this.active = [];
 		this.extra = [];
 		this.current = [];
 		GameView.CONF = [
@@ -121,8 +129,8 @@ class GameView extends Container
 		this.baseconf = conf;
 		Body.setStatic(this.character.body, false);
 		var amount:Int = Math.round(20 / conf.length);
-		this.requiredPairs = amount;
-		
+		this.requiredPairs = 1;
+		this.ui.updatePairAmount(this.requiredPairs);
 		var types:Array<CType> = [];
 		for (t in conf) if (types.indexOf(t) == -1) types.push(t);
 		
@@ -154,6 +162,9 @@ class GameView extends Container
 		this.addChild(this.collectables);
 		this.addChild(this.character);
 		
+		this.jar = new Jar();
+		this.addChild(this.jar);
+		this.jar.visible = false;
 		Main.instance.tickListeners.push(onTick);
 	}
 	
@@ -178,10 +189,13 @@ class GameView extends Container
 		this.collectables.x = -charpos.x;
 		this.collectables.y = -charpos.y;
 		
-		this.blocks.update(charpos);
-		this.spawnCollectable();
+		if (!ending)
+		{
+			this.blocks.update(charpos);
+			this.spawnCollectable();
+			this.collect();
+		}
 		
-		this.collect();
 	}
 	
 	private function collect():Void
@@ -257,21 +271,31 @@ class GameView extends Container
 			if (conf.length == 0)
 			{
 				requiredPairs--;
+				
 				updatePairs();
 				//Animate pair forming
-				ui.formPair(baseconf);
+				ui.formPair(baseconf,requiredPairs);
 				
-				if (requiredPairs == 0)
+				if (requiredPairs == 0 && !ending)
 				{
-					running = false;
+					this.ending = true;
+					Tween.get(this.blocks).to( { alpha:0 }, 2500).call(endgame);
 				}
 			}
 		},350 );
 	}
 	
+	private function endgame():Void
+	{
+		running = false;
+		Tween.get(this.collectables).to( { alpha:0 }, 500);
+		this.jar.visible = true;
+		Tween.get(this.jar).to( { alpha:1 }, 500);
+	}
+	
 	private function spawnCollectable():Void
 	{
-		if (Math.abs(previousSpawn - charpos.y) > 100)
+		if (!ending && Math.abs(previousSpawn - charpos.y) > 100)
 		{
 			trace("spawn");
 			previousSpawn = charpos.y;
@@ -288,6 +312,8 @@ class GameView extends Container
 	{
 		this.size = size;
 		this.blocks.resize(size);
+		jar.y = size.height / 2 / Main.instance.viewport.scale.x;
+		jar.resize(size);
 	}
 }
 

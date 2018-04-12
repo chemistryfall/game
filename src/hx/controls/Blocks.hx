@@ -29,10 +29,10 @@ class Blocks extends Container
 	
 	private function initializeControls():Void
 	{
-	//	this.composite = Composite.create( { } );
-	//	World.add(Main.instance.world, this.composite);
+		blocks = [];
 		this.pool = new Pool<Block>(50, function():Block { 
 			var b:Block = new Block(0, -999);
+			blocks.push(b);
 			b.visible = false;
 			b.interactive = true;
 			b.addListener("click", onBlockClick);
@@ -57,6 +57,15 @@ class Blocks extends Container
 	{
 		this.size = size;
 	}
+	public function clear():Void
+	{
+		for (b in blocks)
+		{
+			if (b.body != null) untyped World.remove(Main.instance.world, b.body);
+			b.visible = false;
+		}
+	}
+	
 	
 	public function update(charpos:Point):Void
 	{

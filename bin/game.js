@@ -156,11 +156,13 @@ Main.prototype = {
 		this.start.start.addListener("tap",$bind(this,this.onStartClick));
 	}
 	,onStartClick: function() {
+		this.start.interactiveChildren = false;
 		this.start.hide();
 		this.game.start();
 		this.ui.start(controls_GameView.CONF.instruction);
 	}
 	,ongameEnd: function() {
+		this.start.interactiveChildren = true;
 	}
 	,onTickerTick: function() {
 		Matter.Engine.update(this.engine,16.666666666666668);
@@ -502,8 +504,10 @@ controls_Blocks.__super__ = PIXI.Container;
 controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		var _gthis = this;
+		this.blocks = [];
 		this.pool = new util_Pool(50,function() {
 			var b = new controls_Block(0,-999);
+			_gthis.blocks.push(b);
 			b.visible = false;
 			b.interactive = true;
 			b.addListener("click",$bind(_gthis,_gthis.onBlockClick));
@@ -524,6 +528,18 @@ controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,resize: function(size) {
 		this.size = size;
+	}
+	,clear: function() {
+		var _g = 0;
+		var _g1 = this.blocks;
+		while(_g < _g1.length) {
+			var b = _g1[_g];
+			++_g;
+			if(b.body != null) {
+				Matter.World.remove(Main.instance.world,b.body);
+			}
+			b.visible = false;
+		}
 	}
 	,update: function(charpos) {
 		if(Math.abs(this.previousSpawn - charpos.y) > 100) {
@@ -553,31 +569,23 @@ controls_Character.__name__ = true;
 controls_Character.__super__ = PIXI.Container;
 controls_Character.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
-		this.sprite = util_Asset.getImage("bomb_blast_blue.png",true);
+		this.sprite = util_Asset.getImage("collector/collector_1.png",true);
 		this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
 		this.sprite.scale.x = this.sprite.scale.y = 0.7;
-		var sprite2 = util_Asset.getImage("bomb_blast_red.png",true);
+		var sprite2 = util_Asset.getImage("collector/collector_2.png",true);
 		sprite2.anchor.x = sprite2.anchor.y = 0.5;
 		sprite2.scale.x = sprite2.scale.y = 0.7;
-		var sprite3 = util_Asset.getImage("bomb_blast_green.png",true);
+		var sprite3 = util_Asset.getImage("collector/collector_3.png",true);
 		sprite3.anchor.x = sprite3.anchor.y = 0.5;
 		sprite3.scale.x = sprite3.scale.y = 0.7;
-		var sprite4 = util_Asset.getImage("bomb_blast_orange.png",true);
+		var sprite4 = util_Asset.getImage("collector/collector_4.png",true);
 		sprite4.anchor.x = sprite4.anchor.y = 0.5;
 		sprite4.scale.x = sprite4.scale.y = 0.7;
 		this.sprite.blendMode = PIXI.BLEND_MODES.ADD;
 		sprite2.blendMode = PIXI.BLEND_MODES.ADD;
 		sprite3.blendMode = PIXI.BLEND_MODES.ADD;
 		sprite4.blendMode = PIXI.BLEND_MODES.ADD;
-		this.sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.1;
-		var tmp = Math.PI * 2;
-		createjs.Tween.get(this.sprite,{ loop : true}).to({ rotation : tmp},8000);
-		var tmp1 = Math.PI * 2;
-		createjs.Tween.get(sprite2,{ loop : true}).to({ rotation : tmp1},8300);
-		var tmp2 = -Math.PI * 2;
-		createjs.Tween.get(sprite3,{ loop : true}).to({ rotation : tmp2},8200);
-		var tmp3 = -Math.PI * 2;
-		createjs.Tween.get(sprite4,{ loop : true}).to({ rotation : tmp3},8100);
+		this.sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.3;
 		this.addChild(sprite2);
 		this.addChild(sprite2);
 		this.addChild(sprite3);
@@ -589,11 +597,24 @@ controls_Character.prototype = $extend(PIXI.Container.prototype,{
 });
 var controls_Charge = function() {
 	PIXI.Container.call(this);
+	this.initializeControls();
 };
 controls_Charge.__name__ = true;
 controls_Charge.__super__ = PIXI.Container;
 controls_Charge.prototype = $extend(PIXI.Container.prototype,{
-	__class__: controls_Charge
+	initializeControls: function() {
+		this.beaker = util_Asset.getImage("corner beaker.png",true);
+		this.beaker.scale.x = this.beaker.scale.y = 0.4;
+		this.beaker.anchor.x = 0.5;
+		var ts = { };
+		ts.fontSize = 70;
+		this.count = new PIXI.Text("5",ts);
+		this.count.x = -this.count.width / 2 - 6;
+		this.count.y = 50;
+		this.beaker.addChild(this.count);
+		this.addChild(this.beaker);
+	}
+	,__class__: controls_Charge
 });
 var controls_CType = { __ename__ : true, __constructs__ : ["oxygen","lithium","aluminium","magnesium","brohm"] };
 controls_CType.oxygen = ["oxygen",0];
@@ -774,6 +795,7 @@ controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
 var controls_GameView = $hx_exports["GV"] = function() {
+	this.ending = false;
 	this.running = false;
 	this.previousSpawn = 0;
 	this.active = [];
@@ -804,13 +826,21 @@ controls_GameView.__name__ = true;
 controls_GameView.__super__ = PIXI.Container;
 controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	start: function() {
+		createjs.Tween.get(this.jar).to({ alpha : 0},1000);
+		this.ending = false;
+		this.collectables.removeChildren();
+		this.blocks.clear();
+		this.charpos.x = this.charpos.y = 0;
+		this.active = [];
 		this.extra = [];
 		this.current = [];
 		controls_GameView.CONF = [{ instruction : "litiumoksidin_reaktio_intro.png", 'final' : "litiumoksidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.lithium,controls_CType.oxygen], compound : controls_CompoundType.lithium_oxide},{ instruction : "litiumbromidin_reaktio_intro.png", 'final' : "litiumbromidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.brohm], compound : controls_CompoundType.lithium_bromide},{ instruction : "magnesiumbromidin_reaktio_intro.png", 'final' : "magnesiumbromidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.mag_bromide},{ instruction : "magnesiumoksidin_reaktio_intro.png", 'final' : "magnesiumoksidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.oxygen], compound : controls_CompoundType.mag_oxide},{ instruction : "alumiinibromidin_reaktio_intro.png", 'final' : "alumiinibromidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.brohm,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.alu_bromide},{ instruction : "alumiinioksidin_reaktio_intro.png", 'final' : "alumiinioksidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.aluminium,controls_CType.oxygen,controls_CType.oxygen,controls_CType.oxygen], compound : controls_CompoundType.alu_oxide}][Math.floor(Math.random() * 6)];
 		var conf = controls_GameView.CONF.conf;
 		this.baseconf = conf;
 		Matter.Body.setStatic(this.character.body,false);
-		this.requiredPairs = Math.round(20 / conf.length);
+		Math.round(20 / conf.length);
+		this.requiredPairs = 1;
+		this.ui.updatePairAmount(this.requiredPairs);
 		var types = [];
 		var _g = 0;
 		while(_g < conf.length) {
@@ -842,6 +872,9 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.addChild(this.blocks);
 		this.addChild(this.collectables);
 		this.addChild(this.character);
+		this.jar = new controls_Jar();
+		this.addChild(this.jar);
+		this.jar.visible = false;
 		Main.instance.tickListeners.push($bind(this,this.onTick));
 	}
 	,onTick: function(delta) {
@@ -857,9 +890,11 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.blocks.x = -this.charpos.x;
 		this.collectables.x = -this.charpos.x;
 		this.collectables.y = -this.charpos.y;
-		this.blocks.update(this.charpos);
-		this.spawnCollectable();
-		this.collect();
+		if(!this.ending) {
+			this.blocks.update(this.charpos);
+			this.spawnCollectable();
+			this.collect();
+		}
 	}
 	,collect: function() {
 		var _gthis = this;
@@ -936,15 +971,22 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 			if(conf.length == 0) {
 				_gthis.requiredPairs--;
 				_gthis.updatePairs();
-				_gthis.ui.formPair(_gthis.baseconf);
-				if(_gthis.requiredPairs == 0) {
-					_gthis.running = false;
+				_gthis.ui.formPair(_gthis.baseconf,_gthis.requiredPairs);
+				if(_gthis.requiredPairs == 0 && !_gthis.ending) {
+					_gthis.ending = true;
+					createjs.Tween.get(_gthis.blocks).to({ alpha : 0},2500).call($bind(_gthis,_gthis.endgame));
 				}
 			}
 		},350);
 	}
+	,endgame: function() {
+		this.running = false;
+		createjs.Tween.get(this.collectables).to({ alpha : 0},500);
+		this.jar.visible = true;
+		createjs.Tween.get(this.jar).to({ alpha : 1},500);
+	}
 	,spawnCollectable: function() {
-		if(Math.abs(this.previousSpawn - this.charpos.y) > 100) {
+		if(!this.ending && Math.abs(this.previousSpawn - this.charpos.y) > 100) {
 			console.log("spawn");
 			this.previousSpawn = this.charpos.y;
 			var c = this.allCollectables[Math.floor(Math.random() * this.allCollectables.length)].getNext();
@@ -958,8 +1000,30 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 	,resize: function(size) {
 		this.size = size;
 		this.blocks.resize(size);
+		this.jar.y = size.height / 2 / Main.instance.viewport.scale.x;
+		this.jar.resize(size);
 	}
 	,__class__: controls_GameView
+});
+var controls_Jar = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_Jar.__name__ = true;
+controls_Jar.__super__ = PIXI.Container;
+controls_Jar.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.jar = util_Asset.getImage("jar_1.png",true);
+		this.jar.anchor.x = 0.5;
+		this.jar.anchor.y = 1;
+		this.jar.scale.x = this.jar.scale.y = 0.6;
+		this.addChild(this.jar);
+	}
+	,resize: function(size) {
+		this.jar.scale.x = this.jar.scale.y = 1;
+		this.jar.scale.x = this.jar.scale.y = Math.min(1,Math.min(size.width / Main.instance.viewport.scale.x * 0.75 / this.jar.width,size.height / Main.instance.viewport.scale.x * 0.75 / this.jar.height));
+	}
+	,__class__: controls_Jar
 });
 var controls_PairFormer = function() {
 	PIXI.Container.call(this);
@@ -1050,10 +1114,10 @@ controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
 		var tmp2 = this.size.width / 2;
 		tmp.wait(tmp1,true).call(function() {
 			c.visible = true;
-			createjs.Tween.get(c.scale).to({ x : 0.25, y : 0.25},500);
+			createjs.Tween.get(c.scale).to({ x : 0.25, y : 0.25},500).wait(items.length * 100 - cc * 80).to({ x : 0, y : 0},1000);
 			createjs.Tween.get(c.pivot).to({ x : Math.sin(Math.PI * 2 * cc / items.length) * 200, y : Math.cos(Math.PI * 2 * cc / items.length) * 200},500).wait(items.length * 100).to({ x : 0, y : 0},250);
 			createjs.Tween.get(c).to({ rotation : Math.PI / 2 * 16},750 + 250 * items.length - cc * 250,createjs.Ease.quadIn);
-		}).to({ x : tmp2, y : 150},250,createjs.Ease.quadOut).wait(500,true).call(function() {
+		}).to({ x : tmp2, y : 125},250,createjs.Ease.quadOut).wait(500,true).call(function() {
 			if(last) {
 				var _g = 0;
 				while(_g < cols.length) {
@@ -1068,10 +1132,10 @@ controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
 				com.visible = true;
 				com.alpha = 0;
 				com.scale.x = com.scale.y = 0.7;
-				createjs.Tween.get(com).to({ alpha : 1},250,createjs.Ease.quadOut).wait(250,true).to({ alpha : 0},500).call(function() {
+				createjs.Tween.get(com).to({ alpha : 1},250,createjs.Ease.quadOut).wait(500,true).to({ alpha : 0},500).call(function() {
 					_gthis.removeChild(com);
 				});
-				createjs.Tween.get(com.scale).to({ x : 1, y : 1},500,createjs.Ease.quadOut).to({ x : 1.3, y : 1.3},500,createjs.Ease.quadIn);
+				createjs.Tween.get(com.scale).to({ x : 1, y : 1},500,createjs.Ease.quadOut).to({ x : 1.3, y : 1.3},750,createjs.Ease.quadIn);
 			}
 		});
 	}
@@ -1190,6 +1254,7 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.reaction = util_Asset.getImage("alumiinibromidin_reaktio.png",true);
 		this.addChild(this.reaction);
 		this.reaction.pivot.y = 100;
+		this.charge.pivot.y = 100;
 	}
 	,resize: function(size) {
 		this.size = size;
@@ -1198,6 +1263,7 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.reaction.height = 50;
 		this.reaction.scale.x = this.reaction.scale.y = Math.min(1,Math.min(this.reaction.scale.y,this.reaction.scale.x));
 		this.reaction.x = Math.round((size.width - this.reaction.width) / 2);
+		this.charge.x = size.width / 2;
 		this.former.resize(size);
 	}
 	,start: function(reaction) {
@@ -1206,8 +1272,13 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.reaction.texture = util_Asset.getTexture(reaction,true);
 		this.resize(this.size);
 		createjs.Tween.get(this.reaction.pivot).to({ y : 0},450,createjs.Ease.backOut);
+		createjs.Tween.get(this.charge.pivot).to({ y : -60},450,createjs.Ease.backOut);
 	}
-	,formPair: function(items) {
+	,updatePairAmount: function(pairsNeeded) {
+		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
+	}
+	,formPair: function(items,pairsNeeded) {
+		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
 		this.former.formPairs(items,this.target1.type,this.target2.type);
 	}
 	,__class__: controls_UI
@@ -2183,14 +2254,13 @@ sounds_Sounds.initSounds = function() {
 	sounds_Sounds.loaded = [];
 	sounds_Sounds.soundMap = new haxe_ds_StringMap();
 	var base = "snd/";
-	createjs.Sound.alternateExtensions = ["mp3"];
 	sounds_Sounds.sounds = [{ s : sounds_Sounds.BACKGROUND, c : 1}];
 	var _g = 0;
 	var _g1 = sounds_Sounds.sounds;
 	while(_g < _g1.length) {
 		var s = _g1[_g];
 		++_g;
-		createjs.Sound.registerSound(base + Std.string(s.s) + ".ogg",s.s,s.c);
+		createjs.Sound.registerSound(base + Std.string(s.s) + ".mp3",s.s,s.c);
 	}
 	var iOS = new RegExp("iPad|iPhone|iPod").test(window.navigator.userAgent) && !window.MSStream;
 	if(iOS) {
@@ -2655,7 +2725,7 @@ if(ArrayBuffer.prototype.slice == null) {
 }
 var Float32Array = $global.Float32Array || js_html_compat_Float32Array._new;
 var Uint8Array = $global.Uint8Array || js_html_compat_Uint8Array._new;
-Config.ASSETS = ["img/black.png","img/bg.jpg","img/noise.jpg","img/ui.json","img/oxygen.json","img/brohm.json","img/lithium.json","img/aluminium.json","img/magnesium.json","img/alu_bromide.json","img/alu_oxide.json","img/lithium_bromide.json","img/lithium_oxide.json","img/mag_bromide.json","img/mag_oxide.json"];
+Config.ASSETS = ["img/black.png","img/bg.jpg","img/noise.jpg","img/jars.json","img/ui.json","img/oxygen.json","img/brohm.json","img/lithium.json","img/aluminium.json","img/magnesium.json","img/alu_bromide.json","img/alu_oxide.json","img/lithium_bromide.json","img/lithium_oxide.json","img/mag_bromide.json","img/mag_oxide.json"];
 Config.VERSION = "chemistry fall 0.1";
 Config.GRAVITY = 0.1;
 controls_AnimationController.ON_COMPLETE = "onComplete";
@@ -2676,7 +2746,7 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 sounds_Sounds.WIN = "win";
 sounds_Sounds.LOSE = "loss";
-sounds_Sounds.BACKGROUND = "background";
+sounds_Sounds.BACKGROUND = "Ion_in_A_Jar_01";
 sounds_Sounds.bg_volume = 1;
 sounds_Sounds.totalSounds = 0;
 sounds_Sounds.initok = false;
