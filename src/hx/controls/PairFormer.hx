@@ -99,23 +99,34 @@ class PairFormer extends Container
 			}
 			var last:Bool = cc == items.length-1;
 			c.visible = false;
-			animateform(c, cols, last,cc);
+			animateform(c, cols, last,cc, items);
 			cc++;
 		}
 	}
 	
-	private function animateform(c:Collectable, cols:Array<Collectable>, last:Bool, cc:Int):Void
+	private function animateform(c:Collectable, cols:Array<Collectable>, last:Bool, cc:Int, items:Array<CType>):Void
 	{
-		Tween.get(c).wait(cc * 100 + 50, true).call(function() { 
+		Tween.get(c).wait(cc * 250 + 50, true).call(function() { 
 				c.visible = true; 
-			} ).to( { x:size.width / 2, y:100 }, 250, Ease.quadOut).call(function() {
+				Tween.get(c.scale).to( { x:0.25, y:0.25 }, 500);
+				Tween.get(c.pivot).to( { 
+					x: Math.sin(Math.PI * 2 * cc / items.length) * 200, 
+					y:  Math.cos(Math.PI*2*cc/items.length)*200 
+				}, 500).wait(items.length*100).to({x:0,y:0},250);
+				Tween.get(c).to( {
+					rotation:Math.PI / 2*16
+				}, 750+250*items.length-cc*250,Ease.quadIn);
+			} ).to( { 
+				x:size.width / 2,
+				y:150
+			}, 250, Ease.quadOut).wait(500,true).call(function() {
 				
 				if (last)
 				{
-					for (cr in cols) cr.visible = false;
+					for (cr in cols) Tween.get(cr).to( { alpha:0 }, 400);
 					var com:Compound = this.comPools.get(GameView.CONF.compound).getNext();
 					com.x = size.width / 2;
-					com.y = 50;
+					com.y = 150;
 					this.addChild(com);
 					com.visible = true;
 					com.alpha = 0;

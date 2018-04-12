@@ -934,8 +934,12 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		}
 		haxe_Timer.delay(function() {
 			if(conf.length == 0) {
+				_gthis.requiredPairs--;
 				_gthis.updatePairs();
 				_gthis.ui.formPair(_gthis.baseconf);
+				if(_gthis.requiredPairs == 0) {
+					_gthis.running = false;
+				}
 			}
 		},350);
 	}
@@ -1035,28 +1039,31 @@ controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
 			}
 			var last = cc == items.length - 1;
 			c.visible = false;
-			this.animateform(c,cols,last,cc);
+			this.animateform(c,cols,last,cc,items);
 			++cc;
 		}
 	}
-	,animateform: function(c,cols,last,cc) {
+	,animateform: function(c,cols,last,cc,items) {
 		var _gthis = this;
 		var tmp = createjs.Tween.get(c);
-		var tmp1 = cc * 100 + 50;
+		var tmp1 = cc * 250 + 50;
 		var tmp2 = this.size.width / 2;
 		tmp.wait(tmp1,true).call(function() {
 			c.visible = true;
-		}).to({ x : tmp2, y : 100},250,createjs.Ease.quadOut).call(function() {
+			createjs.Tween.get(c.scale).to({ x : 0.25, y : 0.25},500);
+			createjs.Tween.get(c.pivot).to({ x : Math.sin(Math.PI * 2 * cc / items.length) * 200, y : Math.cos(Math.PI * 2 * cc / items.length) * 200},500).wait(items.length * 100).to({ x : 0, y : 0},250);
+			createjs.Tween.get(c).to({ rotation : Math.PI / 2 * 16},750 + 250 * items.length - cc * 250,createjs.Ease.quadIn);
+		}).to({ x : tmp2, y : 150},250,createjs.Ease.quadOut).wait(500,true).call(function() {
 			if(last) {
 				var _g = 0;
 				while(_g < cols.length) {
 					var cr = cols[_g];
 					++_g;
-					cr.visible = false;
+					createjs.Tween.get(cr).to({ alpha : 0},400);
 				}
 				var com = _gthis.comPools.get(controls_GameView.CONF.compound).getNext();
 				com.x = _gthis.size.width / 2;
-				com.y = 50;
+				com.y = 150;
 				_gthis.addChild(com);
 				com.visible = true;
 				com.alpha = 0;

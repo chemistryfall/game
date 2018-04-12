@@ -40,14 +40,6 @@
 	"spriteSourceSize": {"x":8,"y":10,"w":149,"h":76},
 	"sourceSize": {"w":167,"h":91}
 },
-"alumiinioksidin reaktio_intro.png":
-{
-	"frame": {"x":707,"y":335,"w":310,"h":83},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":10,"y":11,"w":310,"h":83},
-	"sourceSize": {"w":327,"h":94}
-},
 "alumiinioksidin_reaktio.png":
 {
 	"frame": {"x":1,"y":1,"w":787,"h":141},
@@ -55,6 +47,14 @@
 	"trimmed": true,
 	"spriteSourceSize": {"x":17,"y":0,"w":787,"h":141},
 	"sourceSize": {"w":804,"h":141}
+},
+"alumiinioksidin_reaktio_intro.png":
+{
+	"frame": {"x":707,"y":335,"w":310,"h":83},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":10,"y":11,"w":310,"h":83},
+	"sourceSize": {"w":327,"h":94}
 },
 "black.png":
 {
@@ -263,6 +263,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1024,"h":2048},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:0fc7f4051ee6108f2ffe5e21e1385184:904c5ecef2eaaef12a86cdc43df3adc3:5b04aa198265472a3c5f56958d78e97b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:81a450399eb6941eb73a1f6fde79eeba:2850f515d6a2b84ab769d4416b2ae354:5b04aa198265472a3c5f56958d78e97b$"
 }
 }

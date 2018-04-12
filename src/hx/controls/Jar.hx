@@ -1,17 +1,17 @@
 package controls;
 
 import pixi.core.display.Container;
-import pixi.core.text.Text;
+import pixi.core.sprites.Sprite;
+import util.Asset;
 
 /**
  * ...
  * @author Henri Sarasvirta
  */
-class Charge extends Container
+class Jar extends Container
 {
-	public var count:Text;
-	
-	
+	private var jar:Sprite;
+
 	public function new() 
 	{
 		super();
@@ -20,10 +20,8 @@ class Charge extends Container
 	
 	private function initializeControls():Void
 	{
-		var ts:TextStyleObject = { };
-		this.count = new Text("5", ts);
-		
-		this.addChild(this.count);
+		this.jar = Asset.getImage("jar_1.png", true);
+		this.addChild(this.jar);
 	}
 	
 }

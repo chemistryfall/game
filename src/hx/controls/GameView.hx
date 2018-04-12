@@ -256,13 +256,18 @@ class GameView extends Container
 			//check if pair is formed.
 			if (conf.length == 0)
 			{
+				requiredPairs--;
 				updatePairs();
 				//Animate pair forming
 				ui.formPair(baseconf);
+				
+				if (requiredPairs == 0)
+				{
+					running = false;
+				}
 			}
 		},350 );
 	}
-	
 	
 	private function spawnCollectable():Void
 	{
