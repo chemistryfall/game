@@ -33,6 +33,7 @@ class Sounds
 	public static var LITHIUM_OXIDE:String = "lithium_oxide";
 	public static var MAG_BROMIDE:String = "mag_bromide";
 	public static var MAG_OXIDE:String = "mag_oxide";
+	public static var VICTORY:String = "victory";
 	
 
 	
@@ -88,6 +89,7 @@ class Sounds
 			{s:LITHIUM_OXIDE, c:1 },
 			{s:MAG_BROMIDE, c:1 },
 			{s:MAG_OXIDE, c:1},
+			{s:VICTORY, c:1},
 			
 		];
 		

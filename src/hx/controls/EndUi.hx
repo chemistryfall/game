@@ -146,5 +146,6 @@ class EndUi extends Container
 		Tween.get(this.rating, { loop:true } ).to( { rotation: -0.2 }, 600, Ease.quadInOut)
 		.to( { rotation:0.2 }, 600, Ease.quadInOut);
 		
+		Sounds.playEffect(Sounds.VICTORY, 0, 1, 2250);
 	}
 }

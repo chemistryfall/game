@@ -974,6 +974,7 @@ controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
 		createjs.Tween.get(this.rating.scale).wait(2000,true).to({ x : 1, y : 1},500,createjs.Ease.backOut);
 		this.rating.rotation = 0.2;
 		createjs.Tween.get(this.rating,{ loop : true}).to({ rotation : -0.2},600,createjs.Ease.quadInOut).to({ rotation : 0.2},600,createjs.Ease.quadInOut);
+		sounds_Sounds.playEffect(sounds_Sounds.VICTORY,0,1,2250);
 	}
 	,__class__: controls_EndUi
 });
@@ -1274,10 +1275,10 @@ controls_Help.prototype = $extend(PIXI.Container.prototype,{
 		this.addChild(this.helpJar);
 		var ts = { };
 		ts.wordWrap = false;
-		ts.fontSize = 36;
+		ts.fontSize = 35;
 		ts.lineHeight = 30;
 		ts.fontFamily = "pigment_demoregular";
-		this.helpText = new PIXI.Text("Form 3 elements by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nMusic\n    Lauri\nCode\n    Henri Sarasvirta\n\n       EduGameJam 2018",ts);
+		this.helpText = new PIXI.Text("Form 3 compounds by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nMusic\n    Lauri\nCode\n    Henri Sarasvirta\n\n       EduGameJam 2018",ts);
 		this.helpJar.addChild(this.helpText);
 		this.helpText.x = 160;
 		this.helpText.y = 280;
@@ -2703,7 +2704,7 @@ sounds_Sounds.initSounds = function() {
 	sounds_Sounds.loaded = [];
 	sounds_Sounds.soundMap = new haxe_ds_StringMap();
 	var base = "snd/";
-	sounds_Sounds.sounds = [{ s : sounds_Sounds.BACKGROUND, c : 1},{ s : sounds_Sounds.BLOB_WRONG, c : 4},{ s : sounds_Sounds.BLOB_SUCK, c : 4},{ s : sounds_Sounds.BLOBS_COMBINE, c : 4},{ s : sounds_Sounds.BLOCK_BREAK, c : 4},{ s : sounds_Sounds.BLOCK_HIT, c : 4},{ s : sounds_Sounds.TOGGLE, c : 4},{ s : sounds_Sounds.ALU_BROMIDE, c : 1},{ s : sounds_Sounds.ALU_OXIDE, c : 1},{ s : sounds_Sounds.LITHIUM_BROMIDE, c : 1},{ s : sounds_Sounds.LITHIUM_OXIDE, c : 1},{ s : sounds_Sounds.MAG_BROMIDE, c : 1},{ s : sounds_Sounds.MAG_OXIDE, c : 1}];
+	sounds_Sounds.sounds = [{ s : sounds_Sounds.BACKGROUND, c : 1},{ s : sounds_Sounds.BLOB_WRONG, c : 4},{ s : sounds_Sounds.BLOB_SUCK, c : 4},{ s : sounds_Sounds.BLOBS_COMBINE, c : 4},{ s : sounds_Sounds.BLOCK_BREAK, c : 4},{ s : sounds_Sounds.BLOCK_HIT, c : 4},{ s : sounds_Sounds.TOGGLE, c : 4},{ s : sounds_Sounds.ALU_BROMIDE, c : 1},{ s : sounds_Sounds.ALU_OXIDE, c : 1},{ s : sounds_Sounds.LITHIUM_BROMIDE, c : 1},{ s : sounds_Sounds.LITHIUM_OXIDE, c : 1},{ s : sounds_Sounds.MAG_BROMIDE, c : 1},{ s : sounds_Sounds.MAG_OXIDE, c : 1},{ s : sounds_Sounds.VICTORY, c : 1}];
 	var _g = 0;
 	var _g1 = sounds_Sounds.sounds;
 	while(_g < _g1.length) {
@@ -3249,6 +3250,7 @@ sounds_Sounds.LITHIUM_BROMIDE = "lithium_bromide";
 sounds_Sounds.LITHIUM_OXIDE = "lithium_oxide";
 sounds_Sounds.MAG_BROMIDE = "mag_bromide";
 sounds_Sounds.MAG_OXIDE = "mag_oxide";
+sounds_Sounds.VICTORY = "victory";
 sounds_Sounds.BACKGROUND = "Ion_in_A_Jar_01";
 sounds_Sounds.bg_volume = 1;
 sounds_Sounds.totalSounds = 0;
