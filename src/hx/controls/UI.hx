@@ -123,8 +123,8 @@ class UI extends Container
 		this.charge.hide();
 		Tween.get(this.reactionC.pivot).to( { y:100 }, 450, Ease.backIn);
 		Tween.get(this.finalReactionC.pivot).to( { y:0 }, 450, Ease.backIn);
-		
-		this.endUI.show();
+		 
+		this.endUI.show(Main.instance.game.rating);
 	}
 	
 	public function backToSelect():Void

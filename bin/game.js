@@ -100,7 +100,7 @@ Main.prototype = {
 		}
 		this.resizeTimer = haxe_Timer.delay(function() {
 			var size = _gthis.getGameSize();
-			_gthis.viewport.scale.x = _gthis.viewport.scale.y = Math.min(size.width / 475,size.height / 475);
+			_gthis.viewport.scale.x = _gthis.viewport.scale.y = Math.min(size.width / 550,size.height / 550);
 			_gthis.bg.resize(size);
 			_gthis.game.resize(size);
 			_gthis.renderer.resize(size.width,size.height);
@@ -108,6 +108,7 @@ Main.prototype = {
 			_gthis.viewport.y = size.height / 2;
 			_gthis.start.resize(size);
 			_gthis.ui.resize(size);
+			_gthis.mainContainer.visible = true;
 		},50);
 	}
 	,getGameSize: function() {
@@ -147,6 +148,7 @@ Main.prototype = {
 		this.viewport.pivot.y = 1024;
 		this.game.x = 1024;
 		this.game.y = 1024;
+		this.mainContainer.visible = false;
 		this.onResize(null);
 		this.ticker = new PIXI.ticker.Ticker();
 		this.ticker.start();
@@ -458,9 +460,11 @@ controls_Background.__super__ = PIXI.Container;
 controls_Background.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		this.bg = new PIXI.extras.TilingSprite(util_Asset.getTexture("bg.jpg",false),2048,2048);
+		this.bg.texture.baseTexture.mipmap = false;
 		this.bg.tileScale.x = this.bg.tileScale.y = 0.5;
 		this.filter = new filters_bg_BgFilter();
 		this.filterArea = Main.instance.renderer.screen;
+		this.filters = [this.filter];
 		this.addChild(this.bg);
 	}
 	,rememberPosition: function(charpos) {
@@ -903,6 +907,12 @@ controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
 		ts.fontSize = 24;
 		ts.fontFamily = "pigment_demoregular";
 		this.infoText = new PIXI.Text("Lithium oxide or lithia is an\ninorganic chemical compound.\nIt is a white solid.",ts);
+		var ts1 = { };
+		ts1.wordWrap = false;
+		ts1.fontSize = 34;
+		ts1.align = "center";
+		ts1.fontFamily = "pigment_demoregular";
+		this.rating = new PIXI.Text("Perfect!",ts1);
 		this.infoC = new PIXI.Container();
 		this.infoC.addChild(this.infoLabel);
 		this.infoC.addChild(this.infoText);
@@ -922,6 +932,7 @@ controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
 		this.addChild(this.infoC);
 		this.addChild(this.info);
 		this.addChild(this.replay);
+		this.addChild(this.rating);
 	}
 	,onreplay: function(e) {
 		Main.instance.replay();
@@ -938,17 +949,38 @@ controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
 		this.replay.y = 50;
 		this.infoC.x = (size.width - this.infoC.width) / 2;
 		this.infoC.y = size.height - this.infoC.height - 10;
+		this.rating.x = size.width / 2;
+		this.rating.y = 300;
 	}
 	,hide: function() {
+		createjs.Tween.removeTweens(this.rating.scale);
+		createjs.Tween.removeTweens(this.rating);
+		createjs.Tween.get(this.rating.scale).to({ x : 0, y : 0},300);
 		this.visible = false;
 	}
-	,show: function() {
+	,show: function(rating) {
 		this.visible = true;
+		if(rating == 0) {
+			this.rating.text = "Extra materials\ndetected.";
+		} else if(rating == 1) {
+			this.rating.text = "Ions not in\nequilibrium!";
+		} else {
+			this.rating.text = "Perfect!";
+		}
+		this.rating.scale.x = this.rating.scale.y = 1;
+		this.rating.pivot.x = this.rating.width / 2;
+		this.rating.pivot.y = this.rating.height / 2;
+		this.rating.scale.x = this.rating.scale.y = 0;
+		createjs.Tween.get(this.rating.scale).wait(2000,true).to({ x : 1, y : 1},500,createjs.Ease.backOut);
+		this.rating.rotation = 0.2;
+		createjs.Tween.get(this.rating,{ loop : true}).to({ rotation : -0.2},600,createjs.Ease.quadInOut).to({ rotation : 0.2},600,createjs.Ease.quadInOut);
 	}
 	,__class__: controls_EndUi
 });
 var controls_GameView = $hx_exports["GV"] = function() {
 	this.xspawn = [];
+	this.roundrobin = [];
+	this.rating = 0;
 	this.ending = false;
 	this.running = false;
 	this.previousSpawn = 0;
@@ -999,11 +1031,15 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.active = [];
 		this.extra = [];
 		this.current = [];
-		controls_GameView.CONF = [{ instruction : "litiumoksidin_reaktio_intro.png", 'final' : "litiumoksidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.lithium,controls_CType.oxygen], compound : controls_CompoundType.lithium_oxide},{ instruction : "litiumbromidin_reaktio_intro.png", 'final' : "litiumbromidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.brohm], compound : controls_CompoundType.lithium_bromide},{ instruction : "magnesiumbromidin_reaktio_intro.png", 'final' : "magnesiumbromidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.mag_bromide},{ instruction : "magnesiumoksidin_reaktio_intro.png", 'final' : "magnesiumoksidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.oxygen], compound : controls_CompoundType.mag_oxide},{ instruction : "alumiinibromidin_reaktio_intro.png", 'final' : "alumiinibromidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.brohm,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.alu_bromide},{ instruction : "alumiinioksidin_reaktio_intro.png", 'final' : "alumiinioksidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.aluminium,controls_CType.oxygen,controls_CType.oxygen,controls_CType.oxygen], compound : controls_CompoundType.alu_oxide}][Math.floor(Math.random() * 6)];
+		if(this.roundrobin.length == 0) {
+			this.roundrobin = [0,1,2,3,4,5];
+			this.roundrobin = util_MathUtil.shuffle(this.roundrobin,new Date().getTime());
+		}
+		controls_GameView.CONF = [{ instruction : "litiumoksidin_reaktio_intro.png", 'final' : "litiumoksidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.lithium,controls_CType.oxygen], compound : controls_CompoundType.lithium_oxide},{ instruction : "litiumbromidin_reaktio_intro.png", 'final' : "litiumbromidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.brohm], compound : controls_CompoundType.lithium_bromide},{ instruction : "magnesiumbromidin_reaktio_intro.png", 'final' : "magnesiumbromidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.mag_bromide},{ instruction : "magnesiumoksidin_reaktio_intro.png", 'final' : "magnesiumoksidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.oxygen], compound : controls_CompoundType.mag_oxide},{ instruction : "alumiinibromidin_reaktio_intro.png", 'final' : "alumiinibromidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.brohm,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.alu_bromide},{ instruction : "alumiinioksidin_reaktio_intro.png", 'final' : "alumiinioksidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.aluminium,controls_CType.oxygen,controls_CType.oxygen,controls_CType.oxygen], compound : controls_CompoundType.alu_oxide}][this.roundrobin.pop()];
 		var conf = controls_GameView.CONF.conf;
 		this.baseconf = conf;
 		Matter.Body.setStatic(this.character.body,false);
-		Math.round(20 / conf.length);
+		var amount = Math.round(20 / conf.length);
 		this.requiredPairs = 3;
 		this.ui.updatePairAmount(this.requiredPairs);
 		var types = [];
@@ -1167,6 +1203,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 				_gthis.updatePairs();
 				_gthis.ui.formPair(_gthis.baseconf,_gthis.requiredPairs);
 				if(_gthis.requiredPairs == 0 && !_gthis.ending) {
+					_gthis.rating = _gthis.extra.length > 0?0:charge == 0?2:1;
 					_gthis.ending = true;
 					haxe_Timer.delay(($_=_gthis.ui,$bind($_,$_.hide)),4000);
 					createjs.Tween.get(_gthis.character).wait(1500,true).to({ alpha : 0},2500);
@@ -1238,6 +1275,7 @@ controls_Help.prototype = $extend(PIXI.Container.prototype,{
 		var ts = { };
 		ts.wordWrap = false;
 		ts.fontSize = 36;
+		ts.lineHeight = 30;
 		ts.fontFamily = "pigment_demoregular";
 		this.helpText = new PIXI.Text("Form 3 elements by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nMusic\n    Lauri\nCode\n    Henri Sarasvirta\n\n       EduGameJam 2018",ts);
 		this.helpJar.addChild(this.helpText);
@@ -1287,7 +1325,11 @@ controls_Jar.prototype = $extend(PIXI.Container.prototype,{
 		this.jar.scale.x = this.jar.scale.y = Math.min(1,Math.min(size.width / Main.instance.viewport.scale.x * 0.9 / this.jar.width,size.height / Main.instance.viewport.scale.x * 0.9 / this.jar.height));
 	}
 	,randomize: function() {
-		this.jar.texture = util_Asset.getTexture("jar_" + Math.floor(Math.random() * 6 + 1) + ".png",true);
+		if(controls_Jar.textures.length == 0) {
+			controls_Jar.textures = ["1","2","3","4","5","6"];
+			controls_Jar.textures = util_MathUtil.shuffle(controls_Jar.textures,new Date().getTime());
+		}
+		this.jar.texture = util_Asset.getTexture("jar_" + controls_Jar.textures.pop() + ".png",true);
 		this.alu_bromide.visible = controls_GameView.CONF.compound == controls_CompoundType.alu_bromide;
 		this.alu_oxide.visible = controls_GameView.CONF.compound == controls_CompoundType.alu_oxide;
 		this.lithium_bromide.visible = controls_GameView.CONF.compound == controls_CompoundType.lithium_bromide;
@@ -1431,6 +1473,7 @@ controls_StartView.prototype = $extend(PIXI.Container.prototype,{
 		this.addChild(this.logo);
 		this.logo.addChild(this.start);
 		this.help = new controls_Help();
+		this.addChild(this.help);
 		this.help.info.addListener("click",$bind(this,this.onHelpClick));
 		this.help.info.addListener("tap",$bind(this,this.onHelpClick));
 		this.origsize = this.getBounds();
@@ -1599,7 +1642,7 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 		this.charge.hide();
 		createjs.Tween.get(this.reactionC.pivot).to({ y : 100},450,createjs.Ease.backIn);
 		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 0},450,createjs.Ease.backIn);
-		this.endUI.show();
+		this.endUI.show(Main.instance.game.rating);
 	}
 	,backToSelect: function() {
 		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 100},450,createjs.Ease.getBackOut(0.3));
@@ -3188,6 +3231,7 @@ controls_DeviceOrientationControl.gamma = 0;
 controls_DeviceOrientationControl.deviceOrientation = { };
 controls_DeviceOrientationControl.screenOrientation = 0;
 controls_DeviceOrientationControl.alphaOffset = 0;
+controls_Jar.textures = [];
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 js_Boot.__toStr = { }.toString;

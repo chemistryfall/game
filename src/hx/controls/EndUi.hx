@@ -1,5 +1,7 @@
 package controls;
 
+import createjs.tweenjs.Ease;
+import createjs.tweenjs.Tween;
 import pixi.core.display.Container;
 import pixi.core.math.shapes.Rectangle;
 import pixi.core.sprites.Sprite;
@@ -19,6 +21,8 @@ class EndUi extends Container
 	private var infoLabel:Sprite;
 	private var infoText:Sprite;
 	private var infoC:Container;
+	
+	private var rating:Text;
 	
 	public function new() 
 	{
@@ -43,6 +47,15 @@ class EndUi extends Container
 		ts.fontSize = 24;
 		ts.fontFamily = 'pigment_demoregular';
 		this.infoText = new Text("Lithium oxide or lithia is an\ninorganic chemical compound.\nIt is a white solid.", ts);
+		
+		
+		var ts:TextStyleObject = { };
+		ts.wordWrap = false;
+		//ts.wordWrapWidth = 400;
+		ts.fontSize = 34;
+		ts.align = "center";
+		ts.fontFamily = 'pigment_demoregular';
+		this.rating = new Text("Perfect!", ts);
 		
 		this.infoC = new Container();
 		this.infoC.addChild(this.infoLabel);
@@ -70,6 +83,7 @@ class EndUi extends Container
 		this.addChild(this.infoC);
 		this.addChild(this.info);
 		this.addChild(this.replay);
+		this.addChild(this.rating);
 	}
 	private function onreplay(e:Dynamic):Void
 	{
@@ -94,18 +108,43 @@ class EndUi extends Container
 		this.infoC.x = (size.width - infoC.width) / 2;
 		this.infoC.y = size.height-infoC.height-10;
 		
+		this.rating.x = size.width / 2;
+		this.rating.y = 300;
 	}
 	
 	public function hide():Void
 	{
-		
+		Tween.removeTweens(this.rating.scale);
+		Tween.removeTweens(this.rating);
+		Tween.get(this.rating.scale).to( { x:0, y:0 }, 300);
 		this.visible = false;
 	}
 	
-	public function show():Void
+	public function show(rating:Int):Void
 	{
 		this.visible = true;
 		
 		//TODO - update compound text & position label
+		
+		if (rating == 0) {
+			this.rating.text = "Extra materials\ndetected.";
+		}
+		else if (rating == 1)
+		{
+			this.rating.text = "Ions not in\nequilibrium!";
+		}
+		else
+			this.rating.text = "Perfect!";
+			
+		this.rating.scale.x = this.rating.scale.y = 1;
+		this.rating.pivot.x = this.rating.width/2;
+		this.rating.pivot.y = this.rating.height/2;
+		
+		this.rating.scale.x = this.rating.scale.y = 0;
+		Tween.get(this.rating.scale).wait(2000,true).to( { x:1, y:1 }, 500, Ease.backOut);
+		this.rating.rotation = 0.2;
+		Tween.get(this.rating, { loop:true } ).to( { rotation: -0.2 }, 600, Ease.quadInOut)
+		.to( { rotation:0.2 }, 600, Ease.quadInOut);
+		
 	}
 }

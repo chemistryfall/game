@@ -5,6 +5,7 @@ import pixi.core.math.shapes.Rectangle;
 import pixi.core.sprites.Sprite;
 import util.Asset;
 import controls.Compound.CompoundType;
+import util.MathUtil;
 
 /**
  * ...
@@ -20,6 +21,8 @@ class Jar extends Container
 	private var lithium_oxide:Compound;
 	private var mag_bromide:Compound;
 	private var mag_oxide:Compound;
+	
+	private static var textures:Array<String>=[];
 	
 	public function new() 
 	{
@@ -66,7 +69,15 @@ class Jar extends Container
 	
 	public function randomize():Void
 	{
-		this.jar.texture = Asset.getTexture("jar_" + (Math.floor(Math.random() * 6 + 1)) + ".png", true);
+		if (textures.length == 0)
+		{
+			textures = [
+				"1","2","3","4","5","6"
+			];
+			textures = MathUtil.shuffle(textures,cast Date.now().getTime());
+		}
+		
+		this.jar.texture = Asset.getTexture("jar_" +textures.pop() + ".png", true);
 		
 		alu_bromide.visible = GameView.CONF.compound == CompoundType.alu_bromide;
 		alu_oxide.visible = GameView.CONF.compound == CompoundType.alu_oxide;

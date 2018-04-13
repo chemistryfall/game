@@ -59,6 +59,10 @@ class GameView extends Container
 	private var requiredPairs:Int;
 	private var ending:Bool = false;
 	
+	public var rating:Int  = 0;
+	
+	private var roundrobin:Array<Int> = [];
+	
 	public function new() 
 	{
 		super();
@@ -100,6 +104,10 @@ class GameView extends Container
 		this.active = [];
 		this.extra = [];
 		this.current = [];
+		if (roundrobin.length == 0) {
+			roundrobin = [0, 1, 2, 3, 4, 5];
+			roundrobin = MathUtil.shuffle(roundrobin, cast Date.now().getTime());
+		}
 		GameView.CONF = [
 			{   //Li2O
 				instruction:"litiumoksidin_reaktio_intro.png",
@@ -137,7 +145,7 @@ class GameView extends Container
 				conf:[CType.aluminium, CType.aluminium, CType.oxygen, CType.oxygen, CType.oxygen],
 				compound:CompoundType.alu_oxide
 			} 
-		][Math.floor(Math.random() * 6)];
+		][roundrobin.pop()];
 		var conf:Array<CType> = CONF.conf;
 		this.baseconf = conf;
 		Body.setStatic(this.character.body, false);
@@ -316,6 +324,8 @@ class GameView extends Container
 				
 				if (requiredPairs == 0 && !ending)
 				{
+					rating = extra.length > 0 ? 0 : charge == 0 ? 2 :1;
+					
 					this.ending = true;
 					Timer.delay(ui.hide, 4000);
 					Tween.get(this.character).wait(1500,true).to( { alpha:0 }, 2500);

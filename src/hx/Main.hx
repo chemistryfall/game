@@ -122,7 +122,7 @@ class Main
 		{
 			var size:Rectangle = this.getGameSize();
 			
-			var s:Float = Math.min( size.width / 475, size.height / 475);
+			var s:Float = Math.min( size.width / 550, size.height / 550);
 			this.viewport.scale.x = this.viewport.scale.y = s;
 			
 			this.bg.resize(size);
@@ -134,7 +134,7 @@ class Main
 			
 			this.start.resize(size);
 			this.ui.resize(size);
-	//		this.mainContainer.visible = true;
+			this.mainContainer.visible = true;
 		},
 		50);
 	}
@@ -202,7 +202,7 @@ class Main
 		this.game.x = 1024;
 		this.game.y = 1024;
 		
-	//	this.mainContainer.visible = false;
+		this.mainContainer.visible = false;
 		this.onResize(null);
 		this.ticker = new Ticker();
 		this.ticker.start();

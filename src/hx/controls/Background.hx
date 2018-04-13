@@ -29,12 +29,13 @@ class Background extends Container
 	
 	private function initializeControls():Void
 	{
-		this.bg = new TilingSprite( Asset.getTexture("bg.jpg", false), 2048,2048);
+		this.bg = new TilingSprite( Asset.getTexture("bg.jpg", false), 2048, 2048);
+		this.bg.texture.baseTexture.mipmap = false;
 		this.bg.tileScale.x = this.bg.tileScale.y = 0.5;
 		
 		this.filter = new BgFilter();
 		this.filterArea =untyped Main.instance.renderer.screen;
-	//	this.filters = [filter];
+		this.filters = [filter];
 		
 		this.addChild(this.bg);
 		
