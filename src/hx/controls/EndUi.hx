@@ -36,7 +36,7 @@ class EndUi extends Container
 	{
 		this.replay = Asset.getImage("UI_replay.png", true);
 		this.info = Asset.getImage("UI_info button.png", true);
-		this.infoLabel = Asset.getImage("help_bg.png", true);
+		this.infoLabel = Asset.getImage("end_InfoLabel.png", true);
 		
 		this.replay.scale.x = this.replay.scale.y = 0.5;
 		this.info.scale.x = this.info.scale.y = 0.5;
@@ -129,22 +129,22 @@ class EndUi extends Container
 		
 		//TODO - update compound text & position label
 		if (GameView.CONF.compound == CompoundType.alu_bromide)
-			this.infoText.text = "Aluminium bromide is any chemical compound with the empirical formula AlBr. Aluminium tribromide is the most common form of aluminium bromide.";
+			this.infoText.text = "Aluminium bromide is any chemical compound\nwith the empirical formula AlBr.\nAluminium tribromide is the most common\nform of aluminium bromide.";
 		else if (GameView.CONF.compound == CompoundType.alu_oxide)
-			this.infoText.text = "Aluminium oxide is a chemical compound of aluminium and oxygen. It is the most commonly occurring of several aluminium oxides";
+			this.infoText.text = "Aluminium oxide is a chemical\ncompound of aluminium and oxygen.\nIt is the most commonly occurring of\nseveral aluminium oxides";
 		else if (GameView.CONF.compound == CompoundType.lithium_bromide)
-			this.infoText.text = "Lithium bromide is a chemical compound of lithium and bromine. Its extreme hygroscopic character makes LiBr useful as a desiccant in certain air conditioning systems.";
+			this.infoText.text = "Lithium bromide is a chemical\ncompound of lithium and bromine.\nIts extreme hygroscopic character makes\nLiBr useful as a desiccant in\ncertain air conditioning systems.";
 		else if (GameView.CONF.compound == CompoundType.lithium_oxide)
-			this.infoText.text = "Lithium oxide or lithia is an inorganic chemical compound. It is a white solid. ";
+			this.infoText.text = "Lithium oxide or lithia is an\ninorganic chemical compound.\nIt is a white solid. ";
 		else if (GameView.CONF.compound == CompoundType.mag_bromide)
-			this.infoText.text = "Magnesium bromide is a chemical compound of magnesium and bromine that is white and deliquescent. It is often used as a mild sedative and as an anticonvulsant for treatment of nervous disorders.";
+			this.infoText.text = "Magnesium bromide is a chemical compound\nof magnesium and bromine that is\nwhite and deliquescent.\nIt is often used as a mild sedative and\nas an anticonvulsant for treatment\nof nervous disorders.";
 		else if (GameView.CONF.compound == CompoundType.mag_oxide)
-			this.infoText.text = "Magnesium oxide, or magnesia, is a white hygroscopic solid mineral that occurs naturally as periclase and is a source of magnesium.";
+			this.infoText.text = "Magnesium oxide, or magnesia,\nis a white hygroscopic solid mineral that\noccurs naturally as periclase\nand is a source of magnesium.";
 		
-		infoLabel.width = infoText.width+10;
-		infoLabel.height = infoText.height+10;
-		infoText.x = 5;
-		infoText.y = 5;
+		infoLabel.width = infoText.width+220;
+		infoLabel.height = infoText.height+120;
+		infoText.x = 110;
+		infoText.y = 60;
 		
 		this.infoC.x = (size.width - infoC.width) / 2;
 		this.infoC.y = size.height-infoC.height-10;
