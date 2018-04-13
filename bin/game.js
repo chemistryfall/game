@@ -159,6 +159,7 @@ Main.prototype = {
 		var _gthis = this;
 		this.start.interactiveChildren = false;
 		this.start.hide();
+		particles_ParticleManager.words.hide();
 		haxe_Timer.delay(function() {
 			_gthis.game.start();
 			_gthis.ui.start(controls_GameView.CONF.instruction,controls_GameView.CONF["final"]);
@@ -1155,6 +1156,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		},350);
 	}
 	,endgame: function() {
+		particles_ParticleManager.words.show();
 		this.running = false;
 		this.jar.randomize();
 		this.jar.visible = true;
@@ -2538,6 +2540,64 @@ particles_BgStars.prototype = $extend(particles_BaseParticleEffect.prototype,{
 	}
 	,__class__: particles_BgStars
 });
+var particles_BgWords = function() {
+	this.area = new PIXI.Rectangle(0,0,2048,2048);
+	var _gthis = this;
+	particles_BaseParticleEffect.call(this);
+	var pos = ["alumiini.png","alumiinibromidi.png","alumiinioksidi.png","bromidi.png","litium.png","litiumbromidi.png","litiumoksidi.png","magnesium.png","magnesiumbromidi.png","magnesiumoksidi.png","oksidi.png"];
+	var c = 0;
+	this.pool = new util_Pool(150,function() {
+		var p = { sprite : util_Asset.getImage(pos[c % pos.length],true), lifetime : 0, maxlife : 0, sx : 0, sy : 0};
+		_gthis.addChild(p.sprite);
+		p.sprite.scale.x = p.sprite.scale.y = 0.1;
+		p.sprite.anchor.x = p.sprite.anchor.y = 0.5 + Math.random();
+		_gthis.randomizeParticle(p);
+		++c;
+		return p;
+	});
+	Main.instance.tickListeners.push($bind(this,this.update));
+};
+particles_BgWords.__name__ = true;
+particles_BgWords.__super__ = particles_BaseParticleEffect;
+particles_BgWords.prototype = $extend(particles_BaseParticleEffect.prototype,{
+	randomizeParticle: function(p) {
+		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.4 + 0.2;
+		p.lifetime = (Math.random() + 0.5) * 160 + 80;
+		p.maxlife = p.lifetime;
+		p.sprite.x = Math.random() * this.area.width + this.area.x;
+		p.sprite.y = Math.random() * this.area.height + this.area.y;
+		p.sprite.rotation = (Math.random() - 0.5) * 0.25;
+		p.sx = (Math.random() - 0.5) * 0.5;
+		p.sy = (Math.random() - 1.5) * 0.5;
+	}
+	,update: function(d) {
+		particles_BaseParticleEffect.prototype.update.call(this,d);
+		var _g = 0;
+		var _g1 = this.pool.get_all();
+		while(_g < _g1.length) {
+			var p = _g1[_g];
+			++_g;
+			p.lifetime -= d;
+			if(p.lifetime < 0) {
+				this.randomizeParticle(p);
+			}
+			p.sprite.x += p.sx * d;
+			p.sprite.y += p.sy * d;
+			var phase = (p.maxlife - p.lifetime) / p.maxlife;
+			p.sprite.alpha = (phase < 0.34?phase / 0.34:1 - (phase - 0.34) / 0.65999999999999992) * 0.5;
+		}
+	}
+	,show: function() {
+		createjs.Tween.get(this).to({ alpha : 1},500);
+	}
+	,hide: function() {
+		createjs.Tween.get(this).to({ alpha : 0},500);
+	}
+	,clear: function() {
+		particles_BaseParticleEffect.prototype.clear.call(this);
+	}
+	,__class__: particles_BgWords
+});
 var particles_ParticleManager = $hx_exports["ParticleManager"] = function() {
 	throw new js__$Boot_HaxeError("Particle manager is static.");
 };
@@ -2546,6 +2606,8 @@ particles_ParticleManager.init = function() {
 	particles_ParticleManager.stars = new PIXI.Container();
 	particles_ParticleManager.bgStars = new particles_BgStars();
 	particles_ParticleManager.stars.addChild(particles_ParticleManager.bgStars);
+	particles_ParticleManager.words = new particles_BgWords();
+	particles_ParticleManager.stars.addChild(particles_ParticleManager.words);
 };
 particles_ParticleManager.rand = function(min,max) {
 	return Math.floor(min + Math.random() * (max - min));
@@ -2574,6 +2636,29 @@ sounds_Sounds.initSounds = function() {
 		window.addEventListener("click",sounds_Sounds.handleInitClick,true);
 		window.addEventListener("touchstart",sounds_Sounds.handleInitClick,true);
 	}
+	var hidden = null;
+	var visibilityChange = null;
+	if(window.document.hidden != null) {
+		hidden = "hidden";
+		visibilityChange = "visibilitychange";
+	} else if(window.document.msHidden != null) {
+		hidden = "msHidden";
+		visibilityChange = "msvisibilitychange";
+	} else if(window.document.webkitHidden != null) {
+		hidden = "webkitHidden";
+		visibilityChange = "webkitvisibilitychange";
+	}
+	window.document.addEventListener(visibilityChange,function() {
+		if(Reflect.field(window.document,hidden)) {
+			sounds_Sounds.stopSound(sounds_Sounds.BACKGROUND);
+			createjs.Sound.setMute(true);
+		} else {
+			createjs.Sound.setMute(false);
+			if(!createjs.Sound.getMute() && !sounds_Sounds.waitingForIOS) {
+				sounds_Sounds.playEffect(sounds_Sounds.BACKGROUND,-1,1);
+			}
+		}
+	});
 	sounds_Sounds.initok = true;
 	sounds_Sounds.totalSounds = 0;
 	return true;

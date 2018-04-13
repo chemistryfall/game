@@ -16,7 +16,7 @@ class ParticleManager
 {
 	//Effects
 	public static var bgStars:BgStars;
-	
+	public static var words:BgWords;
 	public static var stars:Container;
 	
 	public function new() 
@@ -31,6 +31,9 @@ class ParticleManager
 		//Effects
 		bgStars = new BgStars();
 		stars.addChild(bgStars);
+		
+		words = new BgWords();
+		stars.addChild(words);
 		
 	}
 	

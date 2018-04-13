@@ -82,6 +82,41 @@ class Sounds
 			Browser.window.addEventListener("touchstart", handleInitClick, true);
 		}
 		
+		var hidden:String=null;
+		var visibilityChange:String=null; 
+		if (untyped Browser.document.hidden != null)
+		{ // Opera 12.10 and Firefox 18 and later support 
+			hidden = "hidden";
+			visibilityChange = "visibilitychange";
+		} 
+		else if (untyped Browser.document.msHidden != null)
+		{
+			hidden = "msHidden";
+			visibilityChange = "msvisibilitychange";
+		} 
+		else if (untyped Browser.document.webkitHidden != null) 
+		{
+			hidden = "webkitHidden";
+			visibilityChange = "webkitvisibilitychange";
+		}
+		Browser.document.addEventListener(visibilityChange, function() {
+			if (Reflect.field(Browser.document, hidden))
+			{
+				Sounds.stopSound(Sounds.BACKGROUND); 
+				Sound.setMute(true);
+			}
+			else
+			{
+				Sound.setMute(false);
+				
+				if (!Sound.getMute() && ( !waitingForIOS ))
+				{
+					Sounds.playEffect(Sounds.BACKGROUND, -1, 1);
+				}
+			}
+		});
+		
+		
 		initok = true;
 		
 		//Skip sound preload

@@ -6,6 +6,7 @@ import haxe.Timer;
 import js.Lib;
 import matter.Body;
 import matter.Vector;
+import particles.ParticleManager;
 import pixi.core.display.Container;
 import pixi.core.math.Point;
 import pixi.core.math.shapes.Rectangle;
@@ -317,7 +318,8 @@ class GameView extends Container
 	
 	private function endgame():Void
 	{
-		
+		ParticleManager.words.show();
+
 		running = false;
 		jar.randomize();
 		this.jar.visible = true;

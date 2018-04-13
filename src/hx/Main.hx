@@ -217,7 +217,7 @@ class Main
 	{
 		this.start.interactiveChildren = false;
 		this.start.hide();
-		
+		ParticleManager.words.hide();
 		Timer.delay(function(){
 			this.game.start();
 			this.ui.start(GameView.CONF.instruction, GameView.CONF.final);
