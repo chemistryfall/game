@@ -2,13 +2,16 @@ package controls;
 
 import createjs.tweenjs.Ease;
 import createjs.tweenjs.Tween;
+import js.Browser;
 import matter.Bodies;
 import matter.Body;
 import matter.World;
 import pixi.core.Pixi;
 import pixi.core.display.Container;
 import pixi.core.sprites.Sprite;
+import sounds.Sounds;
 import util.Asset;
+import matter.Matter;
 
 /**
  * ...
@@ -73,8 +76,22 @@ class Character extends Container
 		this.addChild(this.sprite);
 		
 		Main.instance.tickListeners.push(ontick);
+		
+		
+		untyped Browser.window.Matter.Events.on(Main.instance.engine, "collisionStart", function(e:Dynamic) {
+			/*var arr:Array<Dynamic> = Reflect.field(e, "pairs");
+			for ( p in arr)
+			{
+				if (p.bodyB != prev)
+				{
+				*/	Sounds.playEffect(Sounds.BLOCK_HIT,0,0.3);/*
+					prev = p.bodyB;
+				}
+			}*/
+		});
 	}
 	
+	private var prev:Dynamic = null;
 	private function ontick(d:Float):Void
 	{
 		/*

@@ -100,7 +100,7 @@ Main.prototype = {
 		}
 		this.resizeTimer = haxe_Timer.delay(function() {
 			var size = _gthis.getGameSize();
-			_gthis.viewport.scale.x = _gthis.viewport.scale.y = Math.min(size.width / 450,size.height / 450);
+			_gthis.viewport.scale.x = _gthis.viewport.scale.y = Math.min(size.width / 480,size.height / 480);
 			_gthis.bg.resize(size);
 			_gthis.game.resize(size);
 			_gthis.renderer.resize(size.width,size.height);
@@ -108,6 +108,7 @@ Main.prototype = {
 			_gthis.viewport.y = size.height / 2;
 			_gthis.start.resize(size);
 			_gthis.ui.resize(size);
+			_gthis.mainContainer.visible = true;
 		},50);
 	}
 	,getGameSize: function() {
@@ -147,6 +148,7 @@ Main.prototype = {
 		this.viewport.pivot.y = 1024;
 		this.game.x = 1024;
 		this.game.y = 1024;
+		this.mainContainer.visible = false;
 		this.onResize(null);
 		this.ticker = new PIXI.ticker.Ticker();
 		this.ticker.start();
@@ -157,6 +159,7 @@ Main.prototype = {
 	}
 	,onStartClick: function() {
 		var _gthis = this;
+		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
 		this.start.interactiveChildren = false;
 		this.start.hide();
 		particles_ParticleManager.words.hide();
@@ -550,6 +553,7 @@ controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 		createjs.Tween.get(b.scale).to({ x : 1.5, y : 1.5},75,createjs.Ease.quadOut).call(function() {
 			b.visible = false;
 		});
+		sounds_Sounds.playEffect(sounds_Sounds.BLOCK_BREAK);
 	}
 	,resize: function(size) {
 		this.size = size;
@@ -587,6 +591,7 @@ controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 	,__class__: controls_Blocks
 });
 var controls_Character = function() {
+	this.prev = null;
 	PIXI.Container.call(this);
 	this.initializeControls();
 };
@@ -634,6 +639,9 @@ controls_Character.prototype = $extend(PIXI.Container.prototype,{
 		Matter.World.add(Main.instance.world,this.body);
 		this.addChild(this.sprite);
 		Main.instance.tickListeners.push($bind(this,this.ontick));
+		window.Matter.Events.on(Main.instance.engine,"collisionStart",function(e) {
+			sounds_Sounds.playEffect(sounds_Sounds.BLOCK_HIT,0,0.3);
+		});
 	}
 	,ontick: function(d) {
 	}
@@ -914,9 +922,11 @@ controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,onreplay: function(e) {
 		Main.instance.replay();
+		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
 	}
 	,onInfoclick: function(e) {
 		this.infoC.visible = !this.infoC.visible;
+		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
 	}
 	,resize: function(size) {
 		this.info.x = size.width - this.info.width;
@@ -1067,6 +1077,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 				cp.x += this.character.body.velocity.x * 20;
 				cp.y += this.character.body.velocity.y * 20;
 				if(!wrong) {
+					sounds_Sounds.playEffect(sounds_Sounds.BLOB_SUCK,0,0.6);
 					createjs.Tween.get(c[0]).to({ x : cp.x, y : cp.y},350,createjs.Ease.quadOut);
 					createjs.Tween.get(c[0].scale).to({ x : 0, y : 0},350,createjs.Ease.quadOut).call((function(c1) {
 						return function() {
@@ -1075,6 +1086,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 						};
 					})(c));
 				} else {
+					sounds_Sounds.playEffect(sounds_Sounds.BLOB_WRONG);
 					createjs.Tween.get(c[0]).to({ alpha : 0},350);
 					createjs.Tween.get(c[0].scale).to({ x : 1.5, y : 1.5},350,createjs.Ease.quadOut).call((function(c2) {
 						return function() {
@@ -1212,10 +1224,10 @@ controls_Help.prototype = $extend(PIXI.Container.prototype,{
 		ts.wordWrap = false;
 		ts.fontSize = 36;
 		ts.fontFamily = "pigment_demoregular";
-		this.helpText = new PIXI.Text("Form 3 elements by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nA game made during\nEduGameJam 2018.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nCode\n    Henri Sarasvirta",ts);
+		this.helpText = new PIXI.Text("Form 3 elements by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nMusic\n    Lauri\nCode\n    Henri Sarasvirta\n\n       EduGameJam 2018",ts);
 		this.helpJar.addChild(this.helpText);
 		this.helpText.x = 160;
-		this.helpText.y = 290;
+		this.helpText.y = 280;
 	}
 	,resize: function(size) {
 		this.info.x = size.width - this.info.width;
@@ -1351,6 +1363,7 @@ controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
 			this.animateform(c,cols,last,cc,items);
 			++cc;
 		}
+		sounds_Sounds.playEffect(sounds_Sounds.BLOBS_COMBINE);
 	}
 	,animateform: function(c,cols,last,cc,items) {
 		var _gthis = this;
@@ -1364,6 +1377,7 @@ controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
 			createjs.Tween.get(c).to({ rotation : Math.PI / 2 * 16},750 + 250 * items.length - cc * 250,createjs.Ease.quadIn);
 		}).to({ x : tmp2, y : 125},250,createjs.Ease.quadOut).wait(500,true).call(function() {
 			if(last) {
+				sounds_Sounds.playEffect(controls_GameView.CONF.compound[0]);
 				var _g = 0;
 				while(_g < cols.length) {
 					var cr = cols[_g];
@@ -1410,6 +1424,7 @@ controls_StartView.prototype = $extend(PIXI.Container.prototype,{
 	,onHelpClick: function(e) {
 		this.logo.visible = !this.logo.visible;
 		this.help.helpJar.visible = !this.help.helpJar.visible;
+		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
 	}
 	,resize: function(size) {
 		this.scale.x = this.scale.y = 1;
@@ -2615,14 +2630,14 @@ particles_ParticleManager.rand = function(min,max) {
 particles_ParticleManager.prototype = {
 	__class__: particles_ParticleManager
 };
-var sounds_Sounds = function() { };
+var sounds_Sounds = $hx_exports["Sounds"] = function() { };
 sounds_Sounds.__name__ = true;
 sounds_Sounds.initSounds = function() {
 	createjs.Sound.addEventListener("fileload",sounds_Sounds.soundLoadHandler);
 	sounds_Sounds.loaded = [];
 	sounds_Sounds.soundMap = new haxe_ds_StringMap();
 	var base = "snd/";
-	sounds_Sounds.sounds = [{ s : sounds_Sounds.BACKGROUND, c : 1}];
+	sounds_Sounds.sounds = [{ s : sounds_Sounds.BACKGROUND, c : 1},{ s : sounds_Sounds.BLOB_WRONG, c : 4},{ s : sounds_Sounds.BLOB_SUCK, c : 4},{ s : sounds_Sounds.BLOBS_COMBINE, c : 4},{ s : sounds_Sounds.BLOCK_BREAK, c : 4},{ s : sounds_Sounds.BLOCK_HIT, c : 4},{ s : sounds_Sounds.TOGGLE, c : 4},{ s : sounds_Sounds.ALU_BROMIDE, c : 1},{ s : sounds_Sounds.ALU_OXIDE, c : 1},{ s : sounds_Sounds.LITHIUM_BROMIDE, c : 1},{ s : sounds_Sounds.LITHIUM_OXIDE, c : 1},{ s : sounds_Sounds.MAG_BROMIDE, c : 1},{ s : sounds_Sounds.MAG_OXIDE, c : 1}];
 	var _g = 0;
 	var _g1 = sounds_Sounds.sounds;
 	while(_g < _g1.length) {
@@ -2689,6 +2704,9 @@ sounds_Sounds.handleInitClick = function(event) {
 	}
 };
 sounds_Sounds.playEffect = function(name,loops,volume,delay) {
+	if(!sounds_Sounds.soundRegistered(name)) {
+		console.log("sound " + name + " not found");
+	}
 	if(!createjs.Sound.getMute() && sounds_Sounds.initok && sounds_Sounds.soundRegistered(name)) {
 		if(volume == null) {
 			volume = 1;
@@ -3152,8 +3170,18 @@ haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 js_Boot.__toStr = { }.toString;
 js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
-sounds_Sounds.WIN = "win";
-sounds_Sounds.LOSE = "loss";
+sounds_Sounds.BLOB_SUCK = "blob_suck";
+sounds_Sounds.BLOB_WRONG = "blob_wrong";
+sounds_Sounds.BLOBS_COMBINE = "blobs_combine";
+sounds_Sounds.BLOCK_BREAK = "block_break";
+sounds_Sounds.BLOCK_HIT = "block_hit";
+sounds_Sounds.TOGGLE = "toggle";
+sounds_Sounds.ALU_BROMIDE = "alu_bromide";
+sounds_Sounds.ALU_OXIDE = "alu_oxide";
+sounds_Sounds.LITHIUM_BROMIDE = "lithium_bromide";
+sounds_Sounds.LITHIUM_OXIDE = "lithium_oxide";
+sounds_Sounds.MAG_BROMIDE = "mag_bromide";
+sounds_Sounds.MAG_OXIDE = "mag_oxide";
 sounds_Sounds.BACKGROUND = "Ion_in_A_Jar_01";
 sounds_Sounds.bg_volume = 1;
 sounds_Sounds.totalSounds = 0;

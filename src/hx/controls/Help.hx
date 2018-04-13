@@ -40,11 +40,11 @@ class Help extends Container
 		//ts.wordWrapWidth = 400;
 		ts.fontSize = 36;
 		ts.fontFamily = 'pigment_demoregular';
-		this.helpText = new Text("Form 3 elements by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nA game made during\nEduGameJam 2018.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nCode\n    Henri Sarasvirta", ts);
+		this.helpText = new Text("Form 3 elements by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nMusic\n    Lauri\nCode\n    Henri Sarasvirta\n\n       EduGameJam 2018", ts);
 		this.helpJar.addChild(this.helpText);
 		
 		this.helpText.x = 160;
-		this.helpText.y = 290;
+		this.helpText.y = 280;
 		
 	}
 	

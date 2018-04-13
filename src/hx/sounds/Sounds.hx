@@ -15,14 +15,25 @@ import util.BrowserDetect;
 /**
 * Simple sound manager for sounds.
 */
+@:expose("Sounds")
 class Sounds
 {
 	/**
 	 * Possible sounds. Mapped to id.
 	 */
+	public static var BLOB_SUCK:String = "blob_suck";
+	public static var BLOB_WRONG:String = "blob_wrong";
+	public static var BLOBS_COMBINE:String = "blobs_combine";
+	public static var BLOCK_BREAK:String = "block_break";
+	public static var BLOCK_HIT:String = "block_hit";
+	public static var TOGGLE:String = "toggle";
+	public static var ALU_BROMIDE:String = "alu_bromide";
+	public static var ALU_OXIDE:String = "alu_oxide";
+	public static var LITHIUM_BROMIDE:String = "lithium_bromide";
+	public static var LITHIUM_OXIDE:String = "lithium_oxide";
+	public static var MAG_BROMIDE:String = "mag_bromide";
+	public static var MAG_OXIDE:String = "mag_oxide";
 	
-	public static var WIN:String = "win";
-	public static var LOSE:String = "loss";
 
 	
 	public static var BACKGROUND:String = "Ion_in_A_Jar_01";
@@ -62,9 +73,22 @@ class Sounds
 		
 		var base:String = "snd/";
 	//	Sound.alternateExtensions = ["mp3"];
-		
+
 		sounds = [
-			{s:BACKGROUND, c:1 }
+			{s:BACKGROUND, c:1 },
+			{s:BLOB_WRONG, c:4 },
+			{s:BLOB_SUCK, c:4 },
+			{s:BLOBS_COMBINE, c:4 },
+			{s:BLOCK_BREAK, c:4 },
+			{s:BLOCK_HIT, c:4 },
+			{s:TOGGLE, c:4 },
+			{s:ALU_BROMIDE, c:1 },
+			{s:ALU_OXIDE, c:1 },
+			{s:LITHIUM_BROMIDE, c:1},
+			{s:LITHIUM_OXIDE, c:1 },
+			{s:MAG_BROMIDE, c:1 },
+			{s:MAG_OXIDE, c:1},
+			
 		];
 		
 		//Load single sounds
@@ -172,6 +196,7 @@ class Sounds
 	 */
 	static public function playEffect(name:String,?loops:Int, ?volume:Float, ?delay:Float):AbstractSoundInstance
 	{
+		if (!Sounds.soundRegistered(name)) trace("sound " + name+" not found");
 		if (!Sound.getMute() && initok && Sounds.soundRegistered(name))
 		{
 			if (volume == null)

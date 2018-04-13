@@ -6,6 +6,7 @@ import pixi.core.display.Container;
 import controls.Collectable.CType;
 import controls.Compound.CompoundType;
 import pixi.core.math.shapes.Rectangle;
+import sounds.Sounds;
 import util.Pool;
 
 /**
@@ -102,6 +103,7 @@ class PairFormer extends Container
 			animateform(c, cols, last,cc, items);
 			cc++;
 		}
+		Sounds.playEffect(Sounds.BLOBS_COMBINE);
 	}
 	
 	private function animateform(c:Collectable, cols:Array<Collectable>, last:Bool, cc:Int, items:Array<CType>):Void
@@ -123,6 +125,7 @@ class PairFormer extends Container
 				
 				if (last)
 				{
+					Sounds.playEffect(GameView.CONF.compound.getName());
 					for (cr in cols) Tween.get(cr).to( { alpha:0 }, 400);
 					var com:Compound = this.comPools.get(GameView.CONF.compound).getNext();
 					com.x = size.width / 2;

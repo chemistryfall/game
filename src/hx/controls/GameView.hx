@@ -10,6 +10,7 @@ import particles.ParticleManager;
 import pixi.core.display.Container;
 import pixi.core.math.Point;
 import pixi.core.math.shapes.Rectangle;
+import sounds.Sounds;
 import util.MathUtil;
 import util.Pool;
 import controls.Collectable.CType;
@@ -236,6 +237,7 @@ class GameView extends Container
 				cp.y += this.character.body.velocity.y * 20;
 				if (!wrong)
 				{
+					Sounds.playEffect(Sounds.BLOB_SUCK,0,0.6);
 					Tween.get(c).to( { x:cp.x, y:cp.y }, 350, Ease.quadOut);
 					Tween.get(c.scale).to( { x:0, y:0 }, 350, Ease.quadOut).call(function(){
 						collectables.removeChild(c);
@@ -244,6 +246,7 @@ class GameView extends Container
 				}
 				else
 				{
+					Sounds.playEffect(Sounds.BLOB_WRONG);
 					Tween.get(c).to( { alpha:0 }, 350);
 					Tween.get(c.scale).to( { x:1.5, y:1.5 }, 350, Ease.quadOut).call(function(){
 						collectables.removeChild(c);

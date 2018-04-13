@@ -122,7 +122,7 @@ class Main
 		{
 			var size:Rectangle = this.getGameSize();
 			
-			var s:Float = Math.min( size.width / 450, size.height / 450);
+			var s:Float = Math.min( size.width / 480, size.height / 480);
 			this.viewport.scale.x = this.viewport.scale.y = s;
 			
 			this.bg.resize(size);
@@ -134,6 +134,7 @@ class Main
 			
 			this.start.resize(size);
 			this.ui.resize(size);
+			this.mainContainer.visible = true;
 		},
 		50);
 	}
@@ -201,8 +202,8 @@ class Main
 		this.game.x = 1024;
 		this.game.y = 1024;
 		
+		this.mainContainer.visible = false;
 		this.onResize(null);
-		
 		this.ticker = new Ticker();
 		this.ticker.start();
 		this.ticker.add(onTickerTick);
@@ -215,6 +216,7 @@ class Main
 	
 	private function onStartClick():Void
 	{
+		Sounds.playEffect(Sounds.TOGGLE);
 		this.start.interactiveChildren = false;
 		this.start.hide();
 		ParticleManager.words.hide();

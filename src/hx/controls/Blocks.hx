@@ -8,6 +8,7 @@ import matter.World;
 import pixi.core.display.Container;
 import pixi.core.math.Point;
 import pixi.core.math.shapes.Rectangle;
+import sounds.Sounds;
 import util.Pool;
 
 /**
@@ -54,6 +55,7 @@ class Blocks extends Container
 		b.body = null;
 		Tween.get(b).to( { alpha:0 }, 75);
 		Tween.get(b.scale).to( { x:1.5, y:1.5 }, 75, Ease.quadOut).call(function() { b.visible = false; } );
+		Sounds.playEffect(Sounds.BLOCK_BREAK);
 	}
 	
 	public function resize(size:Rectangle):Void

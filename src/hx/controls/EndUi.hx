@@ -5,6 +5,7 @@ import pixi.core.math.shapes.Rectangle;
 import pixi.core.sprites.Sprite;
 import pixi.core.text.Text;
 import pixi.core.text.TextStyleObject;
+import sounds.Sounds;
 import util.Asset;
 
 /**
@@ -73,11 +74,13 @@ class EndUi extends Container
 	private function onreplay(e:Dynamic):Void
 	{
 		Main.instance.replay();
+		Sounds.playEffect(Sounds.TOGGLE);
 	}
 	
 	private function onInfoclick(e:Dynamic):Void
 	{
 		this.infoC.visible = !infoC.visible;
+		Sounds.playEffect(Sounds.TOGGLE);
 	}
 	
 	public function resize(size:Rectangle):Void

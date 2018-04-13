@@ -4,6 +4,7 @@ import createjs.tweenjs.Tween;
 import pixi.core.display.Container;
 import pixi.core.math.shapes.Rectangle;
 import pixi.core.sprites.Sprite;
+import sounds.Sounds;
 import util.Asset;
 
 /**
@@ -48,7 +49,7 @@ class StartView extends Container
 	{
 		this.logo.visible = !this.logo.visible;
 		this.help.helpJar.visible = !this.help.helpJar.visible;
-		
+		Sounds.playEffect(Sounds.TOGGLE);
 	}
 	
 	public function resize(size:Rectangle)
