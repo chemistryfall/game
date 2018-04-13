@@ -65,6 +65,13 @@ HxOverrides.remove = function(a,obj) {
 	a.splice(i,1);
 	return true;
 };
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
+};
 var Main = $hx_exports["Game"] = function() {
 	this.tickListeners = [];
 	console.log("new game");
@@ -93,11 +100,14 @@ Main.prototype = {
 		}
 		this.resizeTimer = haxe_Timer.delay(function() {
 			var size = _gthis.getGameSize();
+			_gthis.viewport.scale.x = _gthis.viewport.scale.y = Math.min(size.width / 475,size.height / 475);
 			_gthis.bg.resize(size);
 			_gthis.game.resize(size);
 			_gthis.renderer.resize(size.width,size.height);
 			_gthis.viewport.x = size.width / 2;
 			_gthis.viewport.y = size.height / 2;
+			_gthis.start.resize(size);
+			_gthis.ui.resize(size);
 		},50);
 	}
 	,getGameSize: function() {
@@ -123,13 +133,16 @@ Main.prototype = {
 		this.bg = new controls_Background();
 		this.game = new controls_GameView();
 		this.start = new controls_StartView();
+		this.ui = new controls_UI();
+		this.game.ui = this.ui;
 		particles_ParticleManager.init();
 		this.bg.addChild(particles_ParticleManager.stars);
 		this.viewport = new PIXI.Container();
 		this.viewport.addChild(this.bg);
-		this.viewport.addChild(this.start);
 		this.viewport.addChild(this.game);
 		this.mainContainer.addChild(this.viewport);
+		this.mainContainer.addChild(this.ui);
+		this.ui.addChild(this.start);
 		this.viewport.pivot.x = 1024;
 		this.viewport.pivot.y = 1024;
 		this.game.x = 1024;
@@ -138,11 +151,29 @@ Main.prototype = {
 		this.ticker = new PIXI.ticker.Ticker();
 		this.ticker.start();
 		this.ticker.add($bind(this,this.onTickerTick));
-		this.runner = Matter.Runner.create();
-		Matter.Runner.run(this.runner,this.engine);
 		controls_DeviceOrientationControl.initialize();
+		this.start.start.addListener("click",$bind(this,this.onStartClick));
+		this.start.start.addListener("tap",$bind(this,this.onStartClick));
+	}
+	,onStartClick: function() {
+		var _gthis = this;
+		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
+		this.start.interactiveChildren = false;
+		this.start.hide();
+		particles_ParticleManager.words.hide();
+		haxe_Timer.delay(function() {
+			_gthis.game.start();
+			_gthis.ui.start(controls_GameView.CONF.instruction,controls_GameView.CONF["final"]);
+		},500);
+	}
+	,replay: function() {
+		this.game.hide();
+		this.ui.backToSelect();
+		this.start.interactiveChildren = true;
+		this.start.show();
 	}
 	,onTickerTick: function() {
+		Matter.Engine.update(this.engine,16.666666666666668);
 		var delta = this.ticker.deltaTime;
 		createjs.Tween.tick(this.ticker.elapsedMS,false);
 		var _g = 0;
@@ -182,12 +213,243 @@ Reflect.fields = function(o) {
 	}
 	return a;
 };
+Reflect.compare = function(a,b) {
+	if(a == b) {
+		return 0;
+	} else if(a > b) {
+		return 1;
+	} else {
+		return -1;
+	}
+};
+Reflect.isEnumValue = function(v) {
+	if(v != null) {
+		return v.__enum__ != null;
+	} else {
+		return false;
+	}
+};
 var Std = function() { };
 Std.__name__ = true;
 Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
 };
+var controls_AnimationController = function(textures,animations,name) {
+	this._queu = [];
+	this.sheet = null;
+	this._delay = 0;
+	this.instantDelay = 0;
+	this.frameDelay = 0;
+	this.frameListeners = [];
+	this._currentTime = 0;
+	this.targetLoop = 0;
+	this.frameCount = 0;
+	this.playing = false;
+	this.animationSpeed = 1;
+	this.loop = false;
+	PIXI.Sprite.call(this,textures == null || textures.length == 0?null:textures[0][0]);
+	this._textureMap = new haxe_ds_StringMap();
+	var _g1 = 0;
+	var _g = animations.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(textures == null || textures[i] == null || textures[i].length == 0) {
+			continue;
+		}
+		var _this = this._textureMap;
+		var key = animations[i];
+		var value = textures[i];
+		if(__map_reserved[key] != null) {
+			_this.setReserved(key,value);
+		} else {
+			_this.h[key] = value;
+		}
+	}
+	this.currentAnimation = animations[0];
+	this.currentFrame = 0;
+	this.animationSpeed = 0.5;
+	this.updateTextures();
+};
+controls_AnimationController.__name__ = true;
+controls_AnimationController.__super__ = PIXI.Sprite;
+controls_AnimationController.prototype = $extend(PIXI.Sprite.prototype,{
+	changeAnimations: function(textures,animations) {
+		this.frameDelay = 0;
+		this.frameListeners = [];
+		this._textureMap = new haxe_ds_StringMap();
+		var _g1 = 0;
+		var _g = animations.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(textures == null || textures[i] == null || textures[i].length == 0) {
+				continue;
+			}
+			var _this = this._textureMap;
+			var key = animations[i];
+			var value = textures[i];
+			if(__map_reserved[key] != null) {
+				_this.setReserved(key,value);
+			} else {
+				_this.h[key] = value;
+			}
+		}
+		this.currentAnimation = animations[0];
+		this.currentFrame = 0;
+		this.updateTextures(true);
+	}
+	,stop: function() {
+		if(!this.playing) {
+			return;
+		}
+		this.playing = false;
+		HxOverrides.remove(Main.instance.tickListeners,$bind(this,this.update));
+	}
+	,play: function() {
+		if(this.playing) {
+			return;
+		}
+		this.playing = true;
+		Main.instance.tickListeners.push($bind(this,this.update));
+	}
+	,playAll: function() {
+		this.loop = false;
+		this._queu = [];
+		var tmp = this._textureMap.keys();
+		while(tmp.hasNext()) this._queu.push(tmp.next());
+		if(this._queu.length > 0) {
+			this.gotoAndPlay(this._queu[0]);
+		}
+	}
+	,nextQueu: function() {
+		if(this._queu.length > 0) {
+			this.gotoAndPlay(this._queu[0]);
+		}
+	}
+	,gotoAndStop: function(animation,frame) {
+		this.frameListeners = [];
+		this.loopCount = 0;
+		this.frameDelay = 0;
+		this.stop();
+		if(frame == null) {
+			frame = 0;
+		}
+		this._currentTime = frame;
+		if(frame != this.currentFrame || (animation != this.currentAnimation || animation == null)) {
+			this.currentFrame = frame;
+			if(animation != null) {
+				this.currentAnimation = animation;
+			}
+			this.updateTextures();
+		}
+	}
+	,gotoAndPlay: function(animation,frame,frameDelay) {
+		HxOverrides.remove(Main.instance.tickListeners,$bind(this,this.frameDelayHandler));
+		if(frameDelay != null && frameDelay > 0) {
+			this._delay = 0;
+			this.frameDelay = frameDelay;
+			this.queuAnimation = animation;
+			this.queuFrame = frame;
+			this.playing = true;
+			Main.instance.tickListeners.push($bind(this,this.frameDelayHandler));
+		} else {
+			this.stop();
+			this.frameListeners = [];
+			this.loopCount = 0;
+			this.queuAnimation = null;
+			this.queuFrame = null;
+			this.frameDelay = 0;
+			this._delay = 0;
+			if(frame == null) {
+				frame = 0;
+			}
+			this._currentTime = frame;
+			if(frame != this.currentFrame || animation != this.currentAnimation) {
+				this.currentFrame = frame;
+				this.currentAnimation = animation;
+				this.updateTextures();
+			}
+			this.play();
+		}
+	}
+	,frameDelayHandler: function(delta) {
+		var elapsed = this.animationSpeed * delta;
+		if(this.frameDelay > 0) {
+			this._delay += elapsed;
+			if(this._delay >= this.frameDelay) {
+				var curListeners = this.frameListeners;
+				this.stop();
+				this.gotoAndPlay(this.queuAnimation,this.queuFrame);
+				this.frameListeners = curListeners;
+				return;
+			}
+		}
+	}
+	,update: function(delta) {
+		if(this._textures == null) {
+			return;
+		}
+		this._currentTime += this.animationSpeed * delta;
+		var targetFrame = Math.floor(this._currentTime);
+		if(targetFrame >= this._textures.length) {
+			if(this.loop && this.targetLoop <= 0 || this.targetLoop < this.loopCount) {
+				this._currentTime -= this._textures.length;
+				this.loopCount++;
+			} else {
+				targetFrame = this._textures.length - 1;
+				this.stop();
+			}
+			if(this.frameDelay <= 0) {
+				this.emit(controls_AnimationController.ON_COMPLETE,this);
+				this.nextQueu();
+			}
+		}
+		if(targetFrame != this.currentFrame) {
+			this.currentFrame = targetFrame;
+			this.updateTextures();
+			this.emit(controls_AnimationController.ON_CHANGE,this);
+		}
+		var _g = 0;
+		var _g1 = this.frameListeners;
+		while(_g < _g1.length) {
+			var flag = _g1[_g];
+			++_g;
+			if(this._currentAnimation.indexOf(flag.animation) == -1) {
+				continue;
+			}
+			var test = this.currentFrame;
+			if(this._currentAnimation.indexOf("instant") >= 0) {
+				test -= this.instantDelay;
+			}
+			if(test >= flag.frame) {
+				flag.handler(test,this);
+				HxOverrides.remove(this.frameListeners,flag);
+			}
+		}
+	}
+	,updateTextures: function(force) {
+		if(this.currentAnimation != this._currentAnimation || force) {
+			var _this = this._textureMap;
+			var key = this.currentAnimation;
+			var nextTextures = __map_reserved[key] != null?_this.getReserved(key):_this.h[key];
+			this._currentAnimation = this.currentAnimation;
+			if(nextTextures == null || nextTextures.length == 0) {
+				this.visible = false;
+				console.log("Anim " + this.currentAnimation + " not found");
+				return;
+			}
+			this.visible = true;
+			this._textures = nextTextures;
+		}
+		this.frameCount = this._textures.length;
+		this.currentFrame = this.currentFrame >= this._textures.length?this._textures.length - 1:this.currentFrame;
+		this.texture = this._textures[this.currentFrame];
+		this.anchor.x = this.anchor.y = 0.5;
+	}
+	,__class__: controls_AnimationController
+});
 var controls_Background = function() {
+	this.offy = 0;
+	this.offx = 0;
 	PIXI.Container.call(this);
 	this.initializeControls();
 };
@@ -199,12 +461,15 @@ controls_Background.prototype = $extend(PIXI.Container.prototype,{
 		this.bg.tileScale.x = this.bg.tileScale.y = 0.5;
 		this.filter = new filters_bg_BgFilter();
 		this.filterArea = Main.instance.renderer.screen;
-		this.filters = [this.filter];
 		this.addChild(this.bg);
 	}
+	,rememberPosition: function(charpos) {
+		this.offx += -charpos.x;
+		this.offy += -charpos.y;
+	}
 	,update: function(charX,charY) {
-		this.bg.tilePosition.x = charX;
-		this.bg.tilePosition.y = charY;
+		this.bg.tilePosition.x = (charX + this.offx) % 2048;
+		this.bg.tilePosition.y = (charY + this.offy) % 2048;
 	}
 	,resize: function(size) {
 		this.filter.resize(size);
@@ -222,19 +487,29 @@ controls_Block.__name__ = true;
 controls_Block.__super__ = PIXI.Container;
 controls_Block.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
-		this.block = util_Asset.getImage("block.png",true);
+		this.type = ++controls_Block.blockType % 3 + 1;
+		this.block = util_Asset.getImage("block_" + this.type + ".png",true);
 		this.block.anchor.x = this.block.anchor.y = 0.5;
+		this.hitArea = new PIXI.Rectangle(-this.block.width / 2,-this.block.height / 2,this.block.width,this.block.height);
 		this.addChild(this.block);
 	}
 	,randomize: function(x,y) {
+		this.scale.x = this.scale.y = 1;
+		this.alpha = 1;
+		this.visible = true;
 		this.block.rotation = (Math.random() - 0.5) * 2.5;
 		if(this.block.rotation < 0) {
 			this.block.rotation = Math.min(-0.6,this.block.rotation);
 		} else {
 			this.block.rotation = Math.max(-0.6,this.block.rotation);
 		}
-		this.body = Matter.Bodies.rectangle(x,y,this.block.width,this.block.height,{ isStatic : true, angle : this.block.rotation});
-		Matter.World.add(Main.instance.world,this.body);
+		if(this.type == 1) {
+			this.body = Matter.Bodies.fromVertices(x,y,[{ x : 62, y : 19},{ x : 119, y : 54},{ x : 137, y : 119},{ x : 109, y : 162},{ x : 46, y : 140},{ x : 32, y : 82}],{ isStatic : true, angle : this.block.rotation});
+		} else if(this.type == 2) {
+			this.body = Matter.Bodies.fromVertices(x,y,[{ x : 42, y : 19},{ x : 216, y : 18},{ x : 246, y : 37},{ x : 247, y : 51},{ x : 227, y : 69},{ x : 208, y : 74},{ x : 30, y : 74},{ x : 14, y : 49}],{ isStatic : true, angle : this.block.rotation});
+		} else {
+			this.body = Matter.Bodies.fromVertices(x,y,[{ x : 76, y : 25},{ x : 123, y : 53},{ x : 118, y : 103},{ x : 58, y : 113},{ x : 41, y : 97},{ x : 40, y : 64}],{ isStatic : true, angle : this.block.rotation});
+		}
 		this.added = true;
 		this.x = x;
 		this.y = y;
@@ -252,33 +527,69 @@ controls_Blocks.__super__ = PIXI.Container;
 controls_Blocks.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
 		var _gthis = this;
-		this.composite = Matter.Composite.create({ });
-		Matter.World.add(Main.instance.world,this.composite);
+		this.blocks = [];
 		this.pool = new util_Pool(50,function() {
 			var b = new controls_Block(0,-999);
+			_gthis.blocks.push(b);
 			b.visible = false;
+			b.interactive = true;
+			b.addListener("click",$bind(_gthis,_gthis.onBlockClick));
+			b.addListener("tap",$bind(_gthis,_gthis.onBlockClick));
 			_gthis.addChild(b);
 			return b;
 		});
 	}
+	,onBlockClick: function(e) {
+		var b = e.currentTarget;
+		if(b.body == null) {
+			return;
+		}
+		console.log("Remove body");
+		Matter.World.remove(Main.instance.world,b.body);
+		b.body = null;
+		createjs.Tween.get(b).to({ alpha : 0},75);
+		createjs.Tween.get(b.scale).to({ x : 1.5, y : 1.5},75,createjs.Ease.quadOut).call(function() {
+			b.visible = false;
+		});
+		sounds_Sounds.playEffect(sounds_Sounds.BLOCK_BREAK);
+	}
 	,resize: function(size) {
 		this.size = size;
+	}
+	,clear: function() {
+		var _g = 0;
+		var _g1 = this.blocks;
+		while(_g < _g1.length) {
+			var b = _g1[_g];
+			++_g;
+			if(b.body != null) {
+				Matter.World.remove(Main.instance.world,b.body);
+			}
+			b.visible = false;
+		}
 	}
 	,update: function(charpos) {
 		if(Math.abs(this.previousSpawn - charpos.y) > 100) {
 			this.previousSpawn = charpos.y;
 			var b = this.pool.getNext();
-			if(this.composite.bodies.indexOf(b.body) >= 0) {
-				HxOverrides.remove(this.composite.bodies,b.body);
+			if(b.body != null) {
+				Matter.World.remove(Main.instance.world,b.body);
 			}
-			b.randomize(charpos.x + (Math.random() - 0.5) * this.size.width,charpos.y + this.size.height);
-			this.composite.bodies.push(b.body);
+			b.randomize(charpos.x + (Math.random() - 0.5) * this.size.width * 2,charpos.y + this.size.height / Main.instance.viewport.scale.x);
+			Matter.World.add(Main.instance.world,b.body);
 			b.visible = true;
+		}
+		var _g = 0;
+		var _g1 = this.pool.get_all();
+		while(_g < _g1.length) {
+			var b1 = _g1[_g];
+			++_g;
 		}
 	}
 	,__class__: controls_Blocks
 });
 var controls_Character = function() {
+	this.prev = null;
 	PIXI.Container.call(this);
 	this.initializeControls();
 };
@@ -286,14 +597,219 @@ controls_Character.__name__ = true;
 controls_Character.__super__ = PIXI.Container;
 controls_Character.prototype = $extend(PIXI.Container.prototype,{
 	initializeControls: function() {
-		this.sprite = util_Asset.getImage("collector.png",true);
-		this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
-		this.sprite.scale.x = this.sprite.scale.y = 0.2;
-		this.body = Matter.Bodies.circle(0,0,this.sprite.width / 2,{ friction : 0.00001, restitution : 0.5, density : 0.001});
+		this.sprite = util_Asset.getImage("collector/collector_1.png",true);
+		this.sprite.anchor.x = 0.5;
+		this.sprite.anchor.y = 0.45;
+		this.sprite.scale.x = this.sprite.scale.y = 0.7;
+		var sprite2 = util_Asset.getImage("collector/collector_2.png",true);
+		sprite2.anchor.x = 0.5;
+		sprite2.anchor.y = this.sprite.anchor.y;
+		sprite2.scale.x = sprite2.scale.y = 0.7;
+		var sprite3 = util_Asset.getImage("collector/collector_3.png",true);
+		sprite3.anchor.x = 0.5;
+		sprite3.anchor.y = this.sprite.anchor.y;
+		sprite3.scale.x = sprite3.scale.y = 0.7;
+		var sprite4 = util_Asset.getImage("collector/collector_4.png",true);
+		sprite4.anchor.x = 0.5;
+		sprite4.anchor.y = this.sprite.anchor.y;
+		sprite4.scale.x = sprite4.scale.y = 0.7;
+		this.sprite.blendMode = PIXI.BLEND_MODES.ADD;
+		sprite2.blendMode = PIXI.BLEND_MODES.ADD;
+		sprite3.blendMode = PIXI.BLEND_MODES.ADD;
+		sprite4.blendMode = PIXI.BLEND_MODES.ADD;
+		this.sprite.alpha = sprite2.alpha = sprite3.alpha = sprite4.alpha = 0.2;
+		var tmp = Math.PI * 2;
+		createjs.Tween.get(this.sprite,{ loop : true}).to({ rotation : tmp},18000);
+		var tmp1 = Math.PI * 2;
+		createjs.Tween.get(sprite2,{ loop : true}).to({ rotation : tmp1},18300);
+		var tmp2 = -Math.PI * 2;
+		createjs.Tween.get(sprite3,{ loop : true}).to({ rotation : tmp2},18200);
+		var tmp3 = -Math.PI * 2;
+		createjs.Tween.get(sprite4,{ loop : true}).to({ rotation : tmp3},18100);
+		this.addChild(sprite2);
+		this.addChild(sprite2);
+		this.addChild(sprite3);
+		this.arrow = util_Asset.getImage("collector/collector_arrow.png",true);
+		this.arrow.scale = this.sprite.scale;
+		this.arrow.anchor = this.sprite.anchor;
+		this.addChild(this.arrow);
+		this.body = Matter.Bodies.circle(0,0,this.sprite.width / 2 * 0.8,{ friction : 0.00001, restitution : 0.5, density : 0.001});
 		Matter.World.add(Main.instance.world,this.body);
 		this.addChild(this.sprite);
+		Main.instance.tickListeners.push($bind(this,this.ontick));
+		window.Matter.Events.on(Main.instance.engine,"collisionStart",function(e) {
+			sounds_Sounds.playEffect(sounds_Sounds.BLOCK_HIT,0,0.3);
+		});
+	}
+	,ontick: function(d) {
 	}
 	,__class__: controls_Character
+});
+var controls_Charge = function() {
+	this.amount = 0;
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_Charge.__name__ = true;
+controls_Charge.__super__ = PIXI.Container;
+controls_Charge.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.beaker = util_Asset.getImage("corner beaker.png",true);
+		this.beaker.scale.x = this.beaker.scale.y = 0.4;
+		this.beaker.anchor.x = 0.0;
+		var ts = { };
+		ts.fontSize = 70;
+		ts.fontFamily = "pigment_demoregular";
+		this.count = new PIXI.Text("5",ts);
+		this.count.x = 70;
+		this.count.y = -140;
+		this.beaker.addChild(this.count);
+		this.beaker.anchor.y = 1;
+		this.charge = util_Asset.getImage("charge_slider.png",true);
+		this.slider = util_Asset.getImage("charge_sliderPointer.png",true);
+		this.slider.anchor.x = 0.5;
+		this.charge.anchor.x = 0.5;
+		this.charge.scale.x = this.charge.scale.y = 0.7;
+		this.charge.addChild(this.slider);
+		this.addChild(this.beaker);
+		this.addChild(this.charge);
+		this.charge.pivot.y = 100;
+		this.beaker.pivot.x = 200;
+	}
+	,updateCharge: function(amount) {
+		if(Math.abs(amount) > 5 && Math.abs(this.amount) == 5) {
+			amount = Math.min(5,Math.max(-5,amount));
+			createjs.Tween.get(this.slider).to({ x : amount * 28},350,createjs.Ease.backInOut).to({ x : amount * 27},350,createjs.Ease.backInOut);
+		} else {
+			amount = Math.min(5,Math.max(-5,amount));
+			createjs.Tween.get(this.slider).to({ x : amount * 27},350,createjs.Ease.backInOut);
+			this.amount = amount;
+		}
+	}
+	,show: function() {
+		this.amount = 0;
+		createjs.Tween.get(this.charge.pivot).to({ y : -90},450,createjs.Ease.getBackOut(0.3));
+		createjs.Tween.get(this.beaker.pivot).to({ x : 0},450,createjs.Ease.getBackOut(0.3));
+	}
+	,hide: function() {
+		createjs.Tween.get(this.charge.pivot).to({ y : 100},450,createjs.Ease.backIn);
+		createjs.Tween.get(this.beaker.pivot).to({ x : 200},450,createjs.Ease.backIn);
+	}
+	,resize: function(size) {
+		this.charge.x = size.width / 2;
+		this.beaker.y = size.height;
+		this.beaker.x = 0;
+	}
+	,shake: function() {
+		createjs.Tween.get(this.beaker).to({ rotation : 0.2},100).to({ rotation : 0},100).to({ rotation : 0.2},100).to({ rotation : 0},100).to({ rotation : 0.2},100).to({ rotation : 0},100).to({ rotation : 0.2},100).to({ rotation : 0},100);
+		createjs.Tween.get(this.beaker.scale).to({ x : 0.45, y : 0.45},100).to({ x : 0.4, y : 0.4},100).to({ x : 0.45, y : 0.45},100).to({ x : 0.4, y : 0.4},100).to({ x : 0.45, y : 0.45},100).to({ x : 0.4, y : 0.4},100).to({ x : 0.45, y : 0.45},100).to({ x : 0.4, y : 0.4},100);
+	}
+	,__class__: controls_Charge
+});
+var controls_CType = { __ename__ : true, __constructs__ : ["oxygen","lithium","aluminium","magnesium","brohm"] };
+controls_CType.oxygen = ["oxygen",0];
+controls_CType.oxygen.toString = $estr;
+controls_CType.oxygen.__enum__ = controls_CType;
+controls_CType.lithium = ["lithium",1];
+controls_CType.lithium.toString = $estr;
+controls_CType.lithium.__enum__ = controls_CType;
+controls_CType.aluminium = ["aluminium",2];
+controls_CType.aluminium.toString = $estr;
+controls_CType.aluminium.__enum__ = controls_CType;
+controls_CType.magnesium = ["magnesium",3];
+controls_CType.magnesium.toString = $estr;
+controls_CType.magnesium.__enum__ = controls_CType;
+controls_CType.brohm = ["brohm",4];
+controls_CType.brohm.toString = $estr;
+controls_CType.brohm.__enum__ = controls_CType;
+var controls_Collectable = function(type) {
+	PIXI.Container.call(this);
+	this.type = type;
+	this.initializeControls();
+};
+controls_Collectable.__name__ = true;
+controls_Collectable.__super__ = PIXI.Container;
+controls_Collectable.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.ac = new controls_AnimationController([util_Asset.getTextures(util_Asset.getResource("img/" + this.type[0] + ".json").data,new EReg("Idle/.*","")),util_Asset.getTextures(util_Asset.getResource("img/" + this.type[0] + ".json").data,new EReg("Blink/.*",""))],["idle","blink"]);
+		this.addChild(this.ac);
+		this.ac.gotoAndPlay("idle");
+		this.ac.loop = true;
+		this.ac.animationSpeed = 0.083333333333333329;
+		this.scale.x = this.scale.y = 0.5;
+		this.restartTimer();
+	}
+	,restartTimer: function() {
+		if(this.idleTimer != null) {
+			this.idleTimer.stop();
+		}
+		this.idleTimer = new haxe_Timer(Math.floor(Math.random() * 3 + 1) * 500);
+		this.idleTimer.run = $bind(this,this.ontick);
+	}
+	,ontick: function() {
+		var _gthis = this;
+		this.ac.gotoAndPlay("blink");
+		this.restartTimer();
+		var tmp = Math.floor(100 + Math.floor(Math.random() * 100));
+		haxe_Timer.delay(function() {
+			_gthis.ac.gotoAndPlay("idle");
+		},tmp);
+	}
+	,__class__: controls_Collectable
+});
+var controls_CompoundType = { __ename__ : true, __constructs__ : ["alu_bromide","alu_oxide","lithium_bromide","lithium_oxide","mag_bromide","mag_oxide"] };
+controls_CompoundType.alu_bromide = ["alu_bromide",0];
+controls_CompoundType.alu_bromide.toString = $estr;
+controls_CompoundType.alu_bromide.__enum__ = controls_CompoundType;
+controls_CompoundType.alu_oxide = ["alu_oxide",1];
+controls_CompoundType.alu_oxide.toString = $estr;
+controls_CompoundType.alu_oxide.__enum__ = controls_CompoundType;
+controls_CompoundType.lithium_bromide = ["lithium_bromide",2];
+controls_CompoundType.lithium_bromide.toString = $estr;
+controls_CompoundType.lithium_bromide.__enum__ = controls_CompoundType;
+controls_CompoundType.lithium_oxide = ["lithium_oxide",3];
+controls_CompoundType.lithium_oxide.toString = $estr;
+controls_CompoundType.lithium_oxide.__enum__ = controls_CompoundType;
+controls_CompoundType.mag_bromide = ["mag_bromide",4];
+controls_CompoundType.mag_bromide.toString = $estr;
+controls_CompoundType.mag_bromide.__enum__ = controls_CompoundType;
+controls_CompoundType.mag_oxide = ["mag_oxide",5];
+controls_CompoundType.mag_oxide.toString = $estr;
+controls_CompoundType.mag_oxide.__enum__ = controls_CompoundType;
+var controls_Compound = function(type) {
+	PIXI.Container.call(this);
+	this.type = type;
+	this.initializeControls();
+};
+controls_Compound.__name__ = true;
+controls_Compound.__super__ = PIXI.Container;
+controls_Compound.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.ac = new controls_AnimationController([util_Asset.getTextures(util_Asset.getResource("img/" + this.type[0] + ".json").data,new EReg("Idle/.*","")),util_Asset.getTextures(util_Asset.getResource("img/" + this.type[0] + ".json").data,new EReg("Blink/.*",""))],["idle","blink"]);
+		this.addChild(this.ac);
+		this.ac.gotoAndPlay("idle");
+		this.ac.loop = true;
+		this.ac.animationSpeed = 0.083333333333333329;
+		this.scale.x = this.scale.y = 0.5;
+		this.restartTimer();
+	}
+	,restartTimer: function() {
+		if(this.idleTimer != null) {
+			this.idleTimer.stop();
+		}
+		this.idleTimer = new haxe_Timer(Math.floor(Math.random() * 3 + 1) * 500);
+		this.idleTimer.run = $bind(this,this.ontick);
+	}
+	,ontick: function() {
+		var _gthis = this;
+		this.ac.gotoAndPlay("blink");
+		this.restartTimer();
+		var tmp = Math.floor(100 + Math.floor(Math.random() * 100));
+		haxe_Timer.delay(function() {
+			_gthis.ac.gotoAndPlay("idle");
+		},tmp);
+	}
+	,__class__: controls_Compound
 });
 var controls_DeviceOrientationControl = function() {
 };
@@ -368,56 +884,742 @@ controls_DeviceOrientationControl.Quat2Angle = function(x,y,z,w) {
 controls_DeviceOrientationControl.prototype = {
 	__class__: controls_DeviceOrientationControl
 };
-var controls_GameView = function() {
-	this.maxvelocity = 40;
+var controls_EndUi = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_EndUi.__name__ = true;
+controls_EndUi.__super__ = PIXI.Container;
+controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.replay = util_Asset.getImage("UI_replay.png",true);
+		this.info = util_Asset.getImage("UI_info button.png",true);
+		this.infoLabel = util_Asset.getImage("help_bg.png",true);
+		this.replay.scale.x = this.replay.scale.y = 0.5;
+		this.info.scale.x = this.info.scale.y = 0.5;
+		this.replay.interactive = true;
+		var ts = { };
+		ts.wordWrap = false;
+		ts.fontSize = 24;
+		ts.fontFamily = "pigment_demoregular";
+		this.infoText = new PIXI.Text("Lithium oxide or lithia is an\ninorganic chemical compound.\nIt is a white solid.",ts);
+		this.infoC = new PIXI.Container();
+		this.infoC.addChild(this.infoLabel);
+		this.infoC.addChild(this.infoText);
+		this.infoLabel.x = 0;
+		this.infoLabel.y = 0;
+		this.infoLabel.width = this.infoText.width;
+		this.infoLabel.height = this.infoText.height;
+		this.infoC.visible = false;
+		this.info.interactive = true;
+		this.info.addListener("click",$bind(this,this.onInfoclick));
+		this.info.addListener("tap",$bind(this,this.onInfoclick));
+		this.infoC.interactive = true;
+		this.infoC.addListener("click",$bind(this,this.onInfoclick));
+		this.infoC.addListener("tap",$bind(this,this.onInfoclick));
+		this.replay.addListener("click",$bind(this,this.onreplay));
+		this.replay.addListener("tap",$bind(this,this.onreplay));
+		this.addChild(this.infoC);
+		this.addChild(this.info);
+		this.addChild(this.replay);
+	}
+	,onreplay: function(e) {
+		Main.instance.replay();
+		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
+	}
+	,onInfoclick: function(e) {
+		this.infoC.visible = !this.infoC.visible;
+		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
+	}
+	,resize: function(size) {
+		this.info.x = size.width - this.info.width;
+		this.info.y = 50;
+		this.replay.x = 0;
+		this.replay.y = 50;
+		this.infoC.x = (size.width - this.infoC.width) / 2;
+		this.infoC.y = size.height - this.infoC.height - 10;
+	}
+	,hide: function() {
+		this.visible = false;
+	}
+	,show: function() {
+		this.visible = true;
+	}
+	,__class__: controls_EndUi
+});
+var controls_GameView = $hx_exports["GV"] = function() {
+	this.xspawn = [];
+	this.ending = false;
+	this.running = false;
+	this.previousSpawn = 0;
+	this.active = [];
+	this.maxvelocity = 3.0;
 	this.dropSpeed = 0;
 	this.time = 0;
 	this.charpos = new PIXI.Point();
 	PIXI.Container.call(this);
+	this.colmap = new haxe_ds_EnumValueMap();
+	this.oxygen = new util_Pool(10,function() {
+		return new controls_Collectable(controls_CType.oxygen);
+	});
+	this.lithium = new util_Pool(10,function() {
+		return new controls_Collectable(controls_CType.lithium);
+	});
+	this.magnesium = new util_Pool(10,function() {
+		return new controls_Collectable(controls_CType.magnesium);
+	});
+	this.aluminium = new util_Pool(10,function() {
+		return new controls_Collectable(controls_CType.aluminium);
+	});
+	this.brohm = new util_Pool(10,function() {
+		return new controls_Collectable(controls_CType.brohm);
+	});
+	this.colmap.set(controls_CType.oxygen,this.oxygen);
+	this.colmap.set(controls_CType.lithium,this.lithium);
+	this.colmap.set(controls_CType.magnesium,this.magnesium);
+	this.colmap.set(controls_CType.aluminium,this.aluminium);
+	this.colmap.set(controls_CType.brohm,this.brohm);
+	this.allCollectables = [this.oxygen,this.lithium,this.magnesium,this.aluminium,this.brohm];
 	this.initializeControls();
 };
 controls_GameView.__name__ = true;
 controls_GameView.__super__ = PIXI.Container;
 controls_GameView.prototype = $extend(PIXI.Container.prototype,{
-	applyCharMove: function(angle) {
+	start: function() {
+		Matter.Body.setPosition(this.character.body,{ x : 0, y : 0});
+		this.blocks.alpha = 1;
+		this.collectables.alpha = 1;
+		Main.instance.bg.rememberPosition(this.charpos);
+		createjs.Tween.get(this.character).to({ alpha : 1},1000);
+		createjs.Tween.get(this.jar).to({ alpha : 0},1000);
+		this.ending = false;
+		this.collectables.removeChildren();
+		this.blocks.clear();
+		this.charpos.x = this.charpos.y = 0;
+		this.active = [];
+		this.extra = [];
+		this.current = [];
+		controls_GameView.CONF = [{ instruction : "litiumoksidin_reaktio_intro.png", 'final' : "litiumoksidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.lithium,controls_CType.oxygen], compound : controls_CompoundType.lithium_oxide},{ instruction : "litiumbromidin_reaktio_intro.png", 'final' : "litiumbromidin_reaktio.png", conf : [controls_CType.lithium,controls_CType.brohm], compound : controls_CompoundType.lithium_bromide},{ instruction : "magnesiumbromidin_reaktio_intro.png", 'final' : "magnesiumbromidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.mag_bromide},{ instruction : "magnesiumoksidin_reaktio_intro.png", 'final' : "magnesiumoksidin_reaktio.png", conf : [controls_CType.magnesium,controls_CType.oxygen], compound : controls_CompoundType.mag_oxide},{ instruction : "alumiinibromidin_reaktio_intro.png", 'final' : "alumiinibromidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.brohm,controls_CType.brohm,controls_CType.brohm], compound : controls_CompoundType.alu_bromide},{ instruction : "alumiinioksidin_reaktio_intro.png", 'final' : "alumiinioksidin_reaktio.png", conf : [controls_CType.aluminium,controls_CType.aluminium,controls_CType.oxygen,controls_CType.oxygen,controls_CType.oxygen], compound : controls_CompoundType.alu_oxide}][Math.floor(Math.random() * 6)];
+		var conf = controls_GameView.CONF.conf;
+		this.baseconf = conf;
+		Matter.Body.setStatic(this.character.body,false);
+		Math.round(20 / conf.length);
+		this.requiredPairs = 3;
+		this.ui.updatePairAmount(this.requiredPairs);
+		var types = [];
+		var _g = 0;
+		while(_g < conf.length) {
+			var t = conf[_g];
+			++_g;
+			if(types.indexOf(t) == -1) {
+				types.push(t);
+			}
+		}
+		this.ui.target1.setType(types[0]);
+		this.ui.target2.setType(types[1]);
+		this.running = true;
+		this.updatePairs();
+	}
+	,applyCharMove: function(angle) {
 		if(angle < 0) {
 			angle = Math.max(-8,angle);
 		} else if(angle > 0) {
 			angle = Math.min(8,angle);
 		}
-		this.character.body.velocity.x += angle / 10;
-		this.character.body.velocity.x = Math.min(8,Math.max(-8,this.character.body.velocity.x));
+		Matter.Body.applyForce(this.character.body,{ x : 0, y : 0},{ x : -angle / 15, y : 0});
 		this.charpos.x += angle;
 	}
 	,initializeControls: function() {
+		this.collectables = new PIXI.Container();
 		this.character = new controls_Character();
-		this.addChild(this.character);
+		Matter.Body.setStatic(this.character.body,true);
 		this.blocks = new controls_Blocks();
 		this.addChild(this.blocks);
+		this.addChild(this.collectables);
+		this.addChild(this.character);
+		this.jar = new controls_Jar();
+		this.addChild(this.jar);
+		this.jar.visible = false;
 		Main.instance.tickListeners.push($bind(this,this.onTick));
+		this.character.alpha = 0;
 	}
 	,onTick: function(delta) {
 		this.time += delta;
+		if(!this.running) {
+			return;
+		}
 		this.charpos.x = this.character.body.position.x;
 		this.charpos.y = this.character.body.position.y;
-		this.character.body.velocity.y = Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y));
+		Matter.Body.setVelocity(this.character.body,{ x : Math.min(this.maxvelocity,Math.max(-this.maxvelocity,this.character.body.velocity.x)), y : Math.max(-this.maxvelocity,Math.min(this.maxvelocity,this.character.body.velocity.y))});
 		Main.instance.bg.update(-this.charpos.x,-this.charpos.y);
 		this.blocks.y = -this.charpos.y;
 		this.blocks.x = -this.charpos.x;
-		this.blocks.update(this.charpos);
+		this.collectables.x = -this.charpos.x;
+		this.collectables.y = -this.charpos.y;
+		if(!this.ending) {
+			this.blocks.update(this.charpos);
+			this.spawnCollectable();
+			this.collect();
+		}
+	}
+	,collect: function() {
+		var _gthis = this;
+		var remove = [];
+		var _g = 0;
+		var _g1 = this.active;
+		while(_g < _g1.length) {
+			var c = [_g1[_g]];
+			++_g;
+			var cp = this.collectables.toLocal(new PIXI.Point(this.size.width / 2,this.size.height / 2));
+			var dx = cp.x - c[0].x;
+			var dy = cp.y - c[0].y;
+			if(Math.sqrt(dx * dx + dy * dy) < 95) {
+				var wrong = false;
+				if(this.baseconf.indexOf(c[0].type) >= 0) {
+					this.current.push(c[0].type);
+				} else {
+					wrong = true;
+					Main.instance.bg.filter.wrong();
+					this.extra.push(c[0].type);
+				}
+				remove.push(c[0]);
+				cp.x += this.character.body.velocity.x * 20;
+				cp.y += this.character.body.velocity.y * 20;
+				if(!wrong) {
+					sounds_Sounds.playEffect(sounds_Sounds.BLOB_SUCK,0,0.6);
+					createjs.Tween.get(c[0]).to({ x : cp.x, y : cp.y},350,createjs.Ease.quadOut);
+					createjs.Tween.get(c[0].scale).to({ x : 0, y : 0},350,createjs.Ease.quadOut).call((function(c1) {
+						return function() {
+							_gthis.collectables.removeChild(c1[0]);
+							_gthis.updatePairs();
+						};
+					})(c));
+				} else {
+					sounds_Sounds.playEffect(sounds_Sounds.BLOB_WRONG);
+					createjs.Tween.get(c[0]).to({ alpha : 0},350);
+					createjs.Tween.get(c[0].scale).to({ x : 1.5, y : 1.5},350,createjs.Ease.quadOut).call((function(c2) {
+						return function() {
+							_gthis.collectables.removeChild(c2[0]);
+							_gthis.updatePairs();
+						};
+					})(c));
+				}
+			}
+			if(c[0].getBounds().y < -this.size.height) {
+				remove.push(c[0]);
+				this.collectables.removeChild(c[0]);
+			}
+		}
+		var _g2 = 0;
+		while(_g2 < remove.length) {
+			var c3 = remove[_g2];
+			++_g2;
+			HxOverrides.remove(this.active,c3);
+		}
+	}
+	,updatePairs: function() {
+		var _gthis = this;
+		var lc = 0;
+		var rc = 0;
+		var conf = this.baseconf.slice(0);
+		var removeFromCur = [];
+		var charge = 0;
+		var _g = 0;
+		var _g1 = this.current;
+		while(_g < _g1.length) {
+			var c = _g1[_g];
+			++_g;
+			if(c == this.ui.target1.type) {
+				++lc;
+			} else if(c == this.ui.target2.type) {
+				++rc;
+			}
+			if(conf.indexOf(c) >= 0) {
+				HxOverrides.remove(conf,c);
+				removeFromCur.push(c);
+			}
+			if(c == controls_CType.lithium) {
+				++charge;
+			} else if(c == controls_CType.brohm) {
+				--charge;
+			} else if(c == controls_CType.oxygen) {
+				charge -= 2;
+			} else if(c == controls_CType.magnesium) {
+				charge += 2;
+			} else if(c == controls_CType.aluminium) {
+				charge += 3;
+			}
+		}
+		this.ui.charge.updateCharge(charge);
+		this.ui.target1.setcount(lc);
+		this.ui.target2.setcount(rc);
+		if(conf.length == 0) {
+			var _g2 = 0;
+			while(_g2 < removeFromCur.length) {
+				var c1 = removeFromCur[_g2];
+				++_g2;
+				HxOverrides.remove(this.current,c1);
+			}
+		}
+		haxe_Timer.delay(function() {
+			if(conf.length == 0) {
+				_gthis.requiredPairs--;
+				_gthis.updatePairs();
+				_gthis.ui.formPair(_gthis.baseconf,_gthis.requiredPairs);
+				if(_gthis.requiredPairs == 0 && !_gthis.ending) {
+					_gthis.ending = true;
+					haxe_Timer.delay(($_=_gthis.ui,$bind($_,$_.hide)),4000);
+					createjs.Tween.get(_gthis.character).wait(1500,true).to({ alpha : 0},2500);
+					createjs.Tween.get(_gthis.collectables).wait(1500,true).to({ alpha : 0},2500);
+					createjs.Tween.get(_gthis.blocks).wait(1500,true).to({ alpha : 0},2500).wait(1500,true).call($bind(_gthis,_gthis.endgame));
+				}
+			}
+		},350);
+	}
+	,endgame: function() {
+		particles_ParticleManager.words.show();
+		this.running = false;
+		this.jar.randomize();
+		this.jar.visible = true;
+		createjs.Tween.get(this.jar).to({ alpha : 1},500);
+	}
+	,hide: function() {
+		createjs.Tween.get(this.jar).to({ alpha : 0},250);
+	}
+	,spawnCollectable: function() {
+		if(!this.ending && Math.abs(this.previousSpawn - this.charpos.y) > 100) {
+			if(this.xspawn.length == 0) {
+				var _g = 0;
+				while(_g < 20) {
+					var i = _g++;
+					this.xspawn.push(Math.random() / 20 + i / 20);
+				}
+				this.xspawn = util_MathUtil.shuffle(this.xspawn,new Date().getTime());
+			}
+			console.log("spawn");
+			this.previousSpawn = this.charpos.y;
+			var rnd = this.baseconf.slice(0);
+			rnd.push(controls_CType.aluminium);
+			rnd.push(controls_CType.brohm);
+			rnd.push(controls_CType.lithium);
+			rnd.push(controls_CType.magnesium);
+			rnd.push(controls_CType.oxygen);
+			var c = this.colmap.get(rnd[Math.floor(Math.random() * rnd.length)]).getNext();
+			this.collectables.addChild(c);
+			c.scale.x = c.scale.y = 0.5;
+			this.active.push(c);
+			c.x = this.charpos.x + this.xspawn.pop() * this.size.width * 2;
+			c.y = this.charpos.y + this.size.height / Main.instance.viewport.scale.x;
+		}
 	}
 	,resize: function(size) {
+		this.size = size;
 		this.blocks.resize(size);
+		this.jar.y = size.height / 2 / Main.instance.viewport.scale.x;
+		this.jar.resize(size);
 	}
 	,__class__: controls_GameView
 });
+var controls_Help = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_Help.__name__ = true;
+controls_Help.__super__ = PIXI.Container;
+controls_Help.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.info = util_Asset.getImage("UI_info button.png",true);
+		this.helpJar = util_Asset.getImage("instructions jar.png",true);
+		this.info.interactive = true;
+		this.helpJar.visible = false;
+		this.info.scale.x = this.info.scale.y = 0.5;
+		this.addChild(this.info);
+		this.addChild(this.helpJar);
+		var ts = { };
+		ts.wordWrap = false;
+		ts.fontSize = 36;
+		ts.fontFamily = "pigment_demoregular";
+		this.helpText = new PIXI.Text("Form 3 elements by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nMusic\n    Lauri\nCode\n    Henri Sarasvirta\n\n       EduGameJam 2018",ts);
+		this.helpJar.addChild(this.helpText);
+		this.helpText.x = 160;
+		this.helpText.y = 280;
+	}
+	,resize: function(size) {
+		this.info.x = size.width - this.info.width;
+		this.info.y = 0;
+		this.helpJar.scale.x = this.helpJar.scale.y = 1;
+		this.helpJar.scale.x = this.helpJar.scale.y = Math.min(1,Math.min((size.width - 50) / this.helpJar.width,(size.height - 50) / this.helpJar.height));
+		this.helpJar.x = Math.round((size.width - this.helpJar.width) / 2);
+		this.helpJar.y = size.height - this.helpJar.height;
+	}
+	,__class__: controls_Help
+});
+var controls_Jar = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_Jar.__name__ = true;
+controls_Jar.__super__ = PIXI.Container;
+controls_Jar.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.jar = util_Asset.getImage("jar_1.png",true);
+		this.jar.anchor.x = 0.5;
+		this.jar.anchor.y = 1;
+		this.jar.scale.x = this.jar.scale.y = 0.6;
+		this.addChild(this.jar);
+		this.alu_bromide = this.createcompound(controls_CompoundType.alu_bromide);
+		this.alu_oxide = this.createcompound(controls_CompoundType.alu_oxide);
+		this.lithium_bromide = this.createcompound(controls_CompoundType.lithium_bromide);
+		this.lithium_oxide = this.createcompound(controls_CompoundType.lithium_oxide);
+		this.mag_bromide = this.createcompound(controls_CompoundType.mag_bromide);
+		this.mag_oxide = this.createcompound(controls_CompoundType.mag_oxide);
+	}
+	,createcompound: function(type) {
+		var c = new controls_Compound(type);
+		c.pivot.y = c.height;
+		c.scale.x = c.scale.y = 1;
+		c.y = -180;
+		this.jar.addChild(c);
+		return c;
+	}
+	,resize: function(size) {
+		this.jar.scale.x = this.jar.scale.y = 1;
+		this.jar.scale.x = this.jar.scale.y = Math.min(1,Math.min(size.width / Main.instance.viewport.scale.x * 0.9 / this.jar.width,size.height / Main.instance.viewport.scale.x * 0.9 / this.jar.height));
+	}
+	,randomize: function() {
+		this.jar.texture = util_Asset.getTexture("jar_" + Math.floor(Math.random() * 6 + 1) + ".png",true);
+		this.alu_bromide.visible = controls_GameView.CONF.compound == controls_CompoundType.alu_bromide;
+		this.alu_oxide.visible = controls_GameView.CONF.compound == controls_CompoundType.alu_oxide;
+		this.lithium_bromide.visible = controls_GameView.CONF.compound == controls_CompoundType.lithium_bromide;
+		this.lithium_oxide.visible = controls_GameView.CONF.compound == controls_CompoundType.lithium_oxide;
+		this.mag_bromide.visible = controls_GameView.CONF.compound == controls_CompoundType.mag_bromide;
+		this.mag_oxide.visible = controls_GameView.CONF.compound == controls_CompoundType.mag_oxide;
+	}
+	,__class__: controls_Jar
+});
+var controls_PairFormer = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_PairFormer.__name__ = true;
+controls_PairFormer.__super__ = PIXI.Container;
+controls_PairFormer.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.oxygen = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.oxygen);
+		});
+		this.lithium = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.lithium);
+		});
+		this.magnesium = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.magnesium);
+		});
+		this.aluminium = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.aluminium);
+		});
+		this.brohm = new util_Pool(10,function() {
+			return new controls_Collectable(controls_CType.brohm);
+		});
+		this.pools = new haxe_ds_EnumValueMap();
+		this.pools.set(controls_CType.oxygen,this.oxygen);
+		this.pools.set(controls_CType.lithium,this.lithium);
+		this.pools.set(controls_CType.magnesium,this.magnesium);
+		this.pools.set(controls_CType.aluminium,this.aluminium);
+		this.pools.set(controls_CType.brohm,this.brohm);
+		this.comAluBromide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.alu_bromide);
+		});
+		this.comAluOxide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.alu_oxide);
+		});
+		this.comLithiumBromide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.lithium_bromide);
+		});
+		this.comLithiumOxide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.lithium_oxide);
+		});
+		this.comMagBromide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.mag_bromide);
+		});
+		this.comMagOxide = new util_Pool(10,function() {
+			return new controls_Compound(controls_CompoundType.mag_oxide);
+		});
+		this.comPools = new haxe_ds_EnumValueMap();
+		this.comPools.set(controls_CompoundType.alu_bromide,this.comAluBromide);
+		this.comPools.set(controls_CompoundType.alu_oxide,this.comAluOxide);
+		this.comPools.set(controls_CompoundType.lithium_bromide,this.comLithiumBromide);
+		this.comPools.set(controls_CompoundType.lithium_oxide,this.comLithiumOxide);
+		this.comPools.set(controls_CompoundType.mag_bromide,this.comMagBromide);
+		this.comPools.set(controls_CompoundType.mag_oxide,this.comMagOxide);
+	}
+	,resize: function(size) {
+		this.size = size;
+	}
+	,formPairs: function(items,left,right) {
+		var cc = 0;
+		var cols = [];
+		var _g = 0;
+		while(_g < items.length) {
+			var item = items[_g];
+			++_g;
+			var c = this.pools.get(item).getNext();
+			c.visible = true;
+			this.addChild(c);
+			cols.push(c);
+			if(item == left) {
+				c.x = 50;
+				c.y = 50;
+			} else {
+				c.x = this.size.width - 50;
+				c.y = 50;
+			}
+			var last = cc == items.length - 1;
+			c.visible = false;
+			this.animateform(c,cols,last,cc,items);
+			++cc;
+		}
+		sounds_Sounds.playEffect(sounds_Sounds.BLOBS_COMBINE);
+	}
+	,animateform: function(c,cols,last,cc,items) {
+		var _gthis = this;
+		var tmp = createjs.Tween.get(c);
+		var tmp1 = cc * 250 + 50;
+		var tmp2 = this.size.width / 2;
+		tmp.wait(tmp1,true).call(function() {
+			c.visible = true;
+			createjs.Tween.get(c.scale).to({ x : 0.25, y : 0.25},500).wait(items.length * 100 - cc * 80).to({ x : 0, y : 0},1000);
+			createjs.Tween.get(c.pivot).to({ x : Math.sin(Math.PI * 2 * cc / items.length) * 200, y : Math.cos(Math.PI * 2 * cc / items.length) * 200},500).wait(items.length * 100).to({ x : 0, y : 0},250);
+			createjs.Tween.get(c).to({ rotation : Math.PI / 2 * 16},750 + 250 * items.length - cc * 250,createjs.Ease.quadIn);
+		}).to({ x : tmp2, y : 125},250,createjs.Ease.quadOut).wait(500,true).call(function() {
+			if(last) {
+				sounds_Sounds.playEffect(controls_GameView.CONF.compound[0]);
+				var _g = 0;
+				while(_g < cols.length) {
+					var cr = cols[_g];
+					++_g;
+					createjs.Tween.get(cr).to({ alpha : 0},400);
+				}
+				var com = _gthis.comPools.get(controls_GameView.CONF.compound).getNext();
+				com.x = _gthis.size.width / 2;
+				com.y = 200;
+				_gthis.addChild(com);
+				com.visible = true;
+				com.alpha = 0;
+				com.scale.x = com.scale.y = 0.7;
+				createjs.Tween.get(com).to({ alpha : 1},250,createjs.Ease.quadOut).wait(750,true).to({ alpha : 0},500).call(function() {
+					_gthis.removeChild(com);
+				});
+				createjs.Tween.get(com.scale).to({ x : 1, y : 1},500,createjs.Ease.quadOut).wait(250,true).to({ x : 1.3, y : 1.3},750,createjs.Ease.quadIn);
+			}
+		});
+	}
+	,__class__: controls_PairFormer
+});
 var controls_StartView = function() {
 	PIXI.Container.call(this);
+	this.initializeControls();
 };
 controls_StartView.__name__ = true;
 controls_StartView.__super__ = PIXI.Container;
 controls_StartView.prototype = $extend(PIXI.Container.prototype,{
-	__class__: controls_StartView
+	initializeControls: function() {
+		this.logo = util_Asset.getImage("logo.png",true);
+		this.start = util_Asset.getImage("start_button.png",true);
+		this.start.y = 720;
+		this.start.x = 110;
+		this.start.interactive = true;
+		this.addChild(this.logo);
+		this.logo.addChild(this.start);
+		this.help = new controls_Help();
+		this.help.info.addListener("click",$bind(this,this.onHelpClick));
+		this.help.info.addListener("tap",$bind(this,this.onHelpClick));
+		this.origsize = this.getBounds();
+	}
+	,onHelpClick: function(e) {
+		this.logo.visible = !this.logo.visible;
+		this.help.helpJar.visible = !this.help.helpJar.visible;
+		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
+	}
+	,resize: function(size) {
+		this.scale.x = this.scale.y = 1;
+		this.logo.scale.x = this.logo.scale.y = Math.min((size.width - 50) / this.origsize.width,(size.height - 50) / this.origsize.height);
+		this.logo.y = size.height - this.logo.height;
+		this.logo.x = Math.round((size.width - this.logo.width) / 2);
+		this.help.resize(size);
+	}
+	,hide: function() {
+		createjs.Tween.get(this.logo).to({ alpha : 0},450);
+		createjs.Tween.get(this.start).to({ alpha : 0},450);
+		createjs.Tween.get(this.help).to({ alpha : 0},450);
+	}
+	,show: function() {
+		createjs.Tween.get(this.logo).to({ alpha : 1},500);
+		createjs.Tween.get(this.start).to({ alpha : 1},500);
+		createjs.Tween.get(this.help).to({ alpha : 1},500);
+	}
+	,__class__: controls_StartView
+});
+var controls_TargetIndicator = function(left) {
+	this.left = false;
+	PIXI.Container.call(this);
+	this.left = left;
+	this.initializeControls();
+};
+controls_TargetIndicator.__name__ = true;
+controls_TargetIndicator.__super__ = PIXI.Container;
+controls_TargetIndicator.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.cOxygen = new controls_Collectable(controls_CType.oxygen);
+		this.cLithium = new controls_Collectable(controls_CType.lithium);
+		this.cAluminium = new controls_Collectable(controls_CType.aluminium);
+		this.cBrohm = new controls_Collectable(controls_CType.brohm);
+		this.cMagnesium = new controls_Collectable(controls_CType.magnesium);
+		this.addChild(this.cOxygen);
+		this.addChild(this.cLithium);
+		this.addChild(this.cBrohm);
+		this.addChild(this.cMagnesium);
+		this.addChild(this.cAluminium);
+		this.cOxygen.scale.x = this.cOxygen.scale.y = 0.25;
+		this.cLithium.scale.x = this.cLithium.scale.y = 0.25;
+		this.cBrohm.scale.x = this.cBrohm.scale.y = 0.25;
+		this.cMagnesium.scale.x = this.cMagnesium.scale.y = 0.25;
+		this.cAluminium.scale.x = this.cAluminium.scale.y = 0.25;
+		this.cOxygen.x = 50;
+		this.cOxygen.y = 50;
+		this.cLithium.x = 50;
+		this.cLithium.y = 50;
+		this.cBrohm.x = 50;
+		this.cBrohm.y = 50;
+		this.cMagnesium.x = 50;
+		this.cMagnesium.y = 50;
+		this.cAluminium.x = 50;
+		this.cAluminium.y = 50;
+		var ts = { };
+		ts.fontFamily = "pigment_demoregular";
+		this.count = new PIXI.Text("7",ts);
+		this.addChild(this.count);
+		this.pivot.y = -50;
+		this.pivot.x = this.left?100:-100;
+		this.count.alpha = 0;
+	}
+	,setType: function(type) {
+		this.type = type;
+		this.cOxygen.visible = type == controls_CType.oxygen;
+		this.cLithium.visible = type == controls_CType.lithium;
+		this.cBrohm.visible = type == controls_CType.brohm;
+		this.cMagnesium.visible = type == controls_CType.magnesium;
+		this.cAluminium.visible = type == controls_CType.aluminium;
+	}
+	,setcount: function(val) {
+		this.count.text = val == null?"null":"" + val;
+	}
+	,start: function() {
+		createjs.Tween.get(this.pivot).wait(450,true).to({ x : 0},450,createjs.Ease.getBackOut(1.3));
+		createjs.Tween.get(this.count).wait(900,true).to({ alpha : 1},450);
+	}
+	,hide: function() {
+		var tmp = this.left?100:-100;
+		createjs.Tween.get(this.pivot).to({ x : tmp},450,createjs.Ease.backIn);
+		createjs.Tween.get(this.count).to({ alpha : 0},450);
+	}
+	,__class__: controls_TargetIndicator
+});
+var controls_UI = function() {
+	PIXI.Container.call(this);
+	this.initializeControls();
+};
+controls_UI.__name__ = true;
+controls_UI.__super__ = PIXI.Container;
+controls_UI.prototype = $extend(PIXI.Container.prototype,{
+	initializeControls: function() {
+		this.target1 = new controls_TargetIndicator(true);
+		this.target2 = new controls_TargetIndicator(false);
+		this.charge = new controls_Charge();
+		this.target1.count.x = 44;
+		this.target2.count.x = 44;
+		this.target1.count.y = 80;
+		this.target2.count.y = 80;
+		this.addChild(this.charge);
+		this.addChild(this.target1);
+		this.addChild(this.target2);
+		this.former = new controls_PairFormer();
+		this.addChild(this.former);
+		this.finalreactionlabel = util_Asset.getImage("label.png",true);
+		this.reactionlabel = util_Asset.getImage("label.png",true);
+		this.finalReactionC = new PIXI.Container();
+		this.reactionC = new PIXI.Container();
+		this.finalReactionC.addChild(this.finalreactionlabel);
+		this.reactionC.addChild(this.reactionlabel);
+		this.reactionlabel.y = -70;
+		this.finalreactionlabel.y = -70;
+		this.addChild(this.reactionC);
+		this.addChild(this.finalReactionC);
+		this.finalReaction = util_Asset.getImage("alumiinibromidin_reaktio.png",true);
+		this.reaction = util_Asset.getImage("alumiinibromidin_reaktio.png",true);
+		this.reactionC.addChild(this.reaction);
+		this.finalReactionC.addChild(this.finalReaction);
+		this.reactionC.pivot.y = 100;
+		this.finalReactionC.pivot.y = 100;
+		this.endUI = new controls_EndUi();
+		this.addChild(this.endUI);
+		this.endUI.visible = false;
+	}
+	,resize: function(size) {
+		this.size = size;
+		this.target2.x = size.width - 100;
+		this.reaction.width = size.width - 100;
+		this.reaction.height = 50;
+		this.reaction.scale.x = this.reaction.scale.y = Math.min(1,Math.min(this.reaction.scale.y,this.reaction.scale.x));
+		this.reactionlabel.width = this.reaction.width * 2;
+		this.reaction.x = (this.reactionlabel.width - this.reaction.width) / 2;
+		this.reactionC.x = Math.round((size.width - this.reactionC.width) / 2);
+		this.finalReaction.width = size.width - 100;
+		this.finalReaction.height = 50;
+		this.finalReaction.scale.x = this.finalReaction.scale.y = Math.min(1,Math.min(this.finalReaction.scale.y,this.finalReaction.scale.x));
+		this.finalreactionlabel.width = this.finalReaction.width * 2;
+		this.finalReaction.x = (this.finalreactionlabel.width - this.finalReaction.width) / 2;
+		this.finalReactionC.x = Math.round((size.width - this.finalReactionC.width) / 2);
+		this.charge.resize(size);
+		this.former.resize(size);
+		this.endUI.resize(size);
+	}
+	,start: function(reaction,finalReaction) {
+		this.target1.start();
+		this.target2.start();
+		this.reaction.texture = util_Asset.getTexture(reaction,true);
+		this.finalReaction.texture = util_Asset.getTexture(finalReaction,true);
+		this.resize(this.size);
+		createjs.Tween.get(this.reactionC.pivot).to({ y : 0},450,createjs.Ease.getBackOut(0.3));
+		this.charge.show();
+		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 100},450,createjs.Ease.getBackOut(0.3));
+	}
+	,hide: function() {
+		this.target1.hide();
+		this.target2.hide();
+		this.charge.hide();
+		createjs.Tween.get(this.reactionC.pivot).to({ y : 100},450,createjs.Ease.backIn);
+		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 0},450,createjs.Ease.backIn);
+		this.endUI.show();
+	}
+	,backToSelect: function() {
+		createjs.Tween.get(this.finalReactionC.pivot).to({ y : 100},450,createjs.Ease.getBackOut(0.3));
+		this.endUI.hide();
+	}
+	,updatePairAmount: function(pairsNeeded) {
+		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
+		if(pairsNeeded > 0) {
+			haxe_Timer.delay(($_=this.charge,$bind($_,$_.shake)),2500);
+		}
+	}
+	,formPair: function(items,pairsNeeded) {
+		console.log("Foorm pari");
+		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
+		if(pairsNeeded > 0) {
+			haxe_Timer.delay(($_=this.charge,$bind($_,$_.shake)),2500);
+		}
+		this.former.formPairs(items,this.target1.type,this.target2.type);
+	}
+	,__class__: controls_UI
 });
 var filters_bg_BgFilter = function() {
 	this.time = 0;
@@ -437,9 +1639,17 @@ filters_bg_BgFilter.prototype = $extend(PIXI.Filter.prototype,{
 	}
 	,apply: function(filterManager,input,output,clear) {
 		this.time += 0.0038461538461538464;
+		if(this.time > 100) {
+			this.time = 0;
+		}
 		this.uniforms.time = this.time;
 		this.uniforms.off = [-Main.instance.game.charpos.x / 2000,-Main.instance.game.charpos.y / 2000];
 		PIXI.Filter.prototype.apply.call(this,filterManager,input,output,clear);
+	}
+	,wrong: function() {
+		this.uniforms.flash += 2;
+		createjs.Tween.removeTweens(this.uniforms);
+		createjs.Tween.get(this.uniforms).to({ flash : 0},1050,createjs.Ease.quadIn);
 	}
 	,__class__: filters_bg_BgFilter
 });
@@ -663,6 +1873,154 @@ haxe_crypto_BaseCode.prototype = {
 	}
 	,__class__: haxe_crypto_BaseCode
 };
+var haxe_ds_BalancedTree = function() {
+};
+haxe_ds_BalancedTree.__name__ = true;
+haxe_ds_BalancedTree.prototype = {
+	set: function(key,value) {
+		this.root = this.setLoop(key,value,this.root);
+	}
+	,get: function(key) {
+		var node = this.root;
+		while(node != null) {
+			var c = this.compare(key,node.key);
+			if(c == 0) {
+				return node.value;
+			}
+			if(c < 0) {
+				node = node.left;
+			} else {
+				node = node.right;
+			}
+		}
+		return null;
+	}
+	,setLoop: function(k,v,node) {
+		if(node == null) {
+			return new haxe_ds_TreeNode(null,k,v,null);
+		}
+		var c = this.compare(k,node.key);
+		if(c == 0) {
+			return new haxe_ds_TreeNode(node.left,k,v,node.right,node == null?0:node._height);
+		} else if(c < 0) {
+			return this.balance(this.setLoop(k,v,node.left),node.key,node.value,node.right);
+		} else {
+			return this.balance(node.left,node.key,node.value,this.setLoop(k,v,node.right));
+		}
+	}
+	,balance: function(l,k,v,r) {
+		var hl = l == null?0:l._height;
+		var hr = r == null?0:r._height;
+		if(hl > hr + 2) {
+			var _this = l.left;
+			var tmp = _this == null?0:_this._height;
+			var _this1 = l.right;
+			if(tmp >= (_this1 == null?0:_this1._height)) {
+				return new haxe_ds_TreeNode(l.left,l.key,l.value,new haxe_ds_TreeNode(l.right,k,v,r));
+			} else {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l.left,l.key,l.value,l.right.left),l.right.key,l.right.value,new haxe_ds_TreeNode(l.right.right,k,v,r));
+			}
+		} else if(hr > hl + 2) {
+			var _this2 = r.right;
+			var tmp1 = _this2 == null?0:_this2._height;
+			var _this3 = r.left;
+			if(tmp1 > (_this3 == null?0:_this3._height)) {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l,k,v,r.left),r.key,r.value,r.right);
+			} else {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l,k,v,r.left.left),r.left.key,r.left.value,new haxe_ds_TreeNode(r.left.right,r.key,r.value,r.right));
+			}
+		} else {
+			return new haxe_ds_TreeNode(l,k,v,r,(hl > hr?hl:hr) + 1);
+		}
+	}
+	,compare: function(k1,k2) {
+		return Reflect.compare(k1,k2);
+	}
+	,__class__: haxe_ds_BalancedTree
+};
+var haxe_ds_TreeNode = function(l,k,v,r,h) {
+	if(h == null) {
+		h = -1;
+	}
+	this.left = l;
+	this.key = k;
+	this.value = v;
+	this.right = r;
+	if(h == -1) {
+		var tmp;
+		var _this = this.left;
+		var tmp1 = _this == null?0:_this._height;
+		var _this1 = this.right;
+		if(tmp1 > (_this1 == null?0:_this1._height)) {
+			var _this2 = this.left;
+			if(_this2 == null) {
+				tmp = 0;
+			} else {
+				tmp = _this2._height;
+			}
+		} else {
+			var _this3 = this.right;
+			if(_this3 == null) {
+				tmp = 0;
+			} else {
+				tmp = _this3._height;
+			}
+		}
+		this._height = tmp + 1;
+	} else {
+		this._height = h;
+	}
+};
+haxe_ds_TreeNode.__name__ = true;
+haxe_ds_TreeNode.prototype = {
+	__class__: haxe_ds_TreeNode
+};
+var haxe_ds_EnumValueMap = function() {
+	haxe_ds_BalancedTree.call(this);
+};
+haxe_ds_EnumValueMap.__name__ = true;
+haxe_ds_EnumValueMap.__interfaces__ = [haxe_IMap];
+haxe_ds_EnumValueMap.__super__ = haxe_ds_BalancedTree;
+haxe_ds_EnumValueMap.prototype = $extend(haxe_ds_BalancedTree.prototype,{
+	compare: function(k1,k2) {
+		var d = k1[1] - k2[1];
+		if(d != 0) {
+			return d;
+		}
+		var p1 = k1.slice(2);
+		var p2 = k2.slice(2);
+		if(p1.length == 0 && p2.length == 0) {
+			return 0;
+		}
+		return this.compareArgs(p1,p2);
+	}
+	,compareArgs: function(a1,a2) {
+		var ld = a1.length - a2.length;
+		if(ld != 0) {
+			return ld;
+		}
+		var _g1 = 0;
+		var _g = a1.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var d = this.compareArg(a1[i],a2[i]);
+			if(d != 0) {
+				return d;
+			}
+		}
+		return 0;
+	}
+	,compareArg: function(v1,v2) {
+		if(Reflect.isEnumValue(v1) && Reflect.isEnumValue(v2)) {
+			return this.compare(v1,v2);
+		} else if((v1 instanceof Array) && v1.__enum__ == null && ((v2 instanceof Array) && v2.__enum__ == null)) {
+			return this.compareArgs(v1,v2);
+		} else {
+			return Reflect.compare(v1,v2);
+		}
+	}
+	,__class__: haxe_ds_EnumValueMap
+});
 var haxe_ds_StringMap = function() {
 	this.h = { };
 };
@@ -687,6 +2045,25 @@ haxe_ds_StringMap.prototype = {
 			return false;
 		}
 		return this.rh.hasOwnProperty("$" + key);
+	}
+	,keys: function() {
+		return HxOverrides.iter(this.arrayKeys());
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) {
+			out.push(key);
+		}
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) {
+				out.push(key.substr(1));
+			}
+			}
+		}
+		return out;
 	}
 	,__class__: haxe_ds_StringMap
 };
@@ -1155,8 +2532,8 @@ var particles_BgStars = function() {
 	this.area = new PIXI.Rectangle(0,0,2048,2048);
 	var _gthis = this;
 	particles_BaseParticleEffect.call(this);
-	this.pool = new util_Pool(150,function() {
-		var p = { sprite : util_Asset.getImage("collector.png",true), lifetime : 0, maxlife : 0, sx : 0, sy : 0};
+	this.pool = new util_Pool(50,function() {
+		var p = { sprite : util_Asset.getImage("UI_little circle.png",true), lifetime : 0, maxlife : 0, sx : 0, sy : 0};
 		_gthis.addChild(p.sprite);
 		p.sprite.scale.x = p.sprite.scale.y = 0.1;
 		p.sprite.anchor.x = p.sprite.anchor.y = 0.5 + Math.random();
@@ -1170,7 +2547,7 @@ particles_BgStars.__name__ = true;
 particles_BgStars.__super__ = particles_BaseParticleEffect;
 particles_BgStars.prototype = $extend(particles_BaseParticleEffect.prototype,{
 	randomizeParticle: function(p) {
-		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.05 + 0.02;
+		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.06 + 0.025;
 		p.lifetime = (Math.random() + 0.5) * 80 + 30;
 		p.maxlife = p.lifetime;
 		p.sprite.x = Math.random() * this.area.width + this.area.x;
@@ -1193,13 +2570,71 @@ particles_BgStars.prototype = $extend(particles_BaseParticleEffect.prototype,{
 			p.sprite.y += p.sy * d;
 			p.sprite.rotation = (p.lifetime + p.maxlife) * p.sprite.scale.x * 0.1;
 			var phase = (p.maxlife - p.lifetime) / p.maxlife;
-			p.sprite.alpha = phase < 0.34?phase / 0.34:1 - (phase - 0.34) / 0.65999999999999992;
+			p.sprite.alpha = (phase < 0.34?phase / 0.34:1 - (phase - 0.34) / 0.65999999999999992) * 0.5;
 		}
 	}
 	,clear: function() {
 		particles_BaseParticleEffect.prototype.clear.call(this);
 	}
 	,__class__: particles_BgStars
+});
+var particles_BgWords = function() {
+	this.area = new PIXI.Rectangle(0,0,2048,2048);
+	var _gthis = this;
+	particles_BaseParticleEffect.call(this);
+	var pos = ["alumiini.png","alumiinibromidi.png","alumiinioksidi.png","bromidi.png","litium.png","litiumbromidi.png","litiumoksidi.png","magnesium.png","magnesiumbromidi.png","magnesiumoksidi.png","oksidi.png"];
+	var c = 0;
+	this.pool = new util_Pool(150,function() {
+		var p = { sprite : util_Asset.getImage(pos[c % pos.length],true), lifetime : 0, maxlife : 0, sx : 0, sy : 0};
+		_gthis.addChild(p.sprite);
+		p.sprite.scale.x = p.sprite.scale.y = 0.1;
+		p.sprite.anchor.x = p.sprite.anchor.y = 0.5 + Math.random();
+		_gthis.randomizeParticle(p);
+		++c;
+		return p;
+	});
+	Main.instance.tickListeners.push($bind(this,this.update));
+};
+particles_BgWords.__name__ = true;
+particles_BgWords.__super__ = particles_BaseParticleEffect;
+particles_BgWords.prototype = $extend(particles_BaseParticleEffect.prototype,{
+	randomizeParticle: function(p) {
+		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.4 + 0.2;
+		p.lifetime = (Math.random() + 0.5) * 160 + 80;
+		p.maxlife = p.lifetime;
+		p.sprite.x = Math.random() * this.area.width + this.area.x;
+		p.sprite.y = Math.random() * this.area.height + this.area.y;
+		p.sprite.rotation = (Math.random() - 0.5) * 0.25;
+		p.sx = (Math.random() - 0.5) * 0.5;
+		p.sy = (Math.random() - 1.5) * 0.5;
+	}
+	,update: function(d) {
+		particles_BaseParticleEffect.prototype.update.call(this,d);
+		var _g = 0;
+		var _g1 = this.pool.get_all();
+		while(_g < _g1.length) {
+			var p = _g1[_g];
+			++_g;
+			p.lifetime -= d;
+			if(p.lifetime < 0) {
+				this.randomizeParticle(p);
+			}
+			p.sprite.x += p.sx * d;
+			p.sprite.y += p.sy * d;
+			var phase = (p.maxlife - p.lifetime) / p.maxlife;
+			p.sprite.alpha = (phase < 0.34?phase / 0.34:1 - (phase - 0.34) / 0.65999999999999992) * 0.5;
+		}
+	}
+	,show: function() {
+		createjs.Tween.get(this).to({ alpha : 1},500);
+	}
+	,hide: function() {
+		createjs.Tween.get(this).to({ alpha : 0},500);
+	}
+	,clear: function() {
+		particles_BaseParticleEffect.prototype.clear.call(this);
+	}
+	,__class__: particles_BgWords
 });
 var particles_ParticleManager = $hx_exports["ParticleManager"] = function() {
 	throw new js__$Boot_HaxeError("Particle manager is static.");
@@ -1209,6 +2644,8 @@ particles_ParticleManager.init = function() {
 	particles_ParticleManager.stars = new PIXI.Container();
 	particles_ParticleManager.bgStars = new particles_BgStars();
 	particles_ParticleManager.stars.addChild(particles_ParticleManager.bgStars);
+	particles_ParticleManager.words = new particles_BgWords();
+	particles_ParticleManager.stars.addChild(particles_ParticleManager.words);
 };
 particles_ParticleManager.rand = function(min,max) {
 	return Math.floor(min + Math.random() * (max - min));
@@ -1216,21 +2653,20 @@ particles_ParticleManager.rand = function(min,max) {
 particles_ParticleManager.prototype = {
 	__class__: particles_ParticleManager
 };
-var sounds_Sounds = function() { };
+var sounds_Sounds = $hx_exports["Sounds"] = function() { };
 sounds_Sounds.__name__ = true;
 sounds_Sounds.initSounds = function() {
 	createjs.Sound.addEventListener("fileload",sounds_Sounds.soundLoadHandler);
 	sounds_Sounds.loaded = [];
 	sounds_Sounds.soundMap = new haxe_ds_StringMap();
 	var base = "snd/";
-	createjs.Sound.alternateExtensions = ["mp3"];
-	sounds_Sounds.sounds = [{ s : sounds_Sounds.BACKGROUND, c : 1}];
+	sounds_Sounds.sounds = [{ s : sounds_Sounds.BACKGROUND, c : 1},{ s : sounds_Sounds.BLOB_WRONG, c : 4},{ s : sounds_Sounds.BLOB_SUCK, c : 4},{ s : sounds_Sounds.BLOBS_COMBINE, c : 4},{ s : sounds_Sounds.BLOCK_BREAK, c : 4},{ s : sounds_Sounds.BLOCK_HIT, c : 4},{ s : sounds_Sounds.TOGGLE, c : 4},{ s : sounds_Sounds.ALU_BROMIDE, c : 1},{ s : sounds_Sounds.ALU_OXIDE, c : 1},{ s : sounds_Sounds.LITHIUM_BROMIDE, c : 1},{ s : sounds_Sounds.LITHIUM_OXIDE, c : 1},{ s : sounds_Sounds.MAG_BROMIDE, c : 1},{ s : sounds_Sounds.MAG_OXIDE, c : 1}];
 	var _g = 0;
 	var _g1 = sounds_Sounds.sounds;
 	while(_g < _g1.length) {
 		var s = _g1[_g];
 		++_g;
-		createjs.Sound.registerSound(base + Std.string(s.s) + ".ogg",s.s,s.c);
+		createjs.Sound.registerSound(base + Std.string(s.s) + ".mp3",s.s,s.c);
 	}
 	var iOS = new RegExp("iPad|iPhone|iPod").test(window.navigator.userAgent) && !window.MSStream;
 	if(iOS) {
@@ -1238,6 +2674,29 @@ sounds_Sounds.initSounds = function() {
 		window.addEventListener("click",sounds_Sounds.handleInitClick,true);
 		window.addEventListener("touchstart",sounds_Sounds.handleInitClick,true);
 	}
+	var hidden = null;
+	var visibilityChange = null;
+	if(window.document.hidden != null) {
+		hidden = "hidden";
+		visibilityChange = "visibilitychange";
+	} else if(window.document.msHidden != null) {
+		hidden = "msHidden";
+		visibilityChange = "msvisibilitychange";
+	} else if(window.document.webkitHidden != null) {
+		hidden = "webkitHidden";
+		visibilityChange = "webkitvisibilitychange";
+	}
+	window.document.addEventListener(visibilityChange,function() {
+		if(Reflect.field(window.document,hidden)) {
+			sounds_Sounds.stopSound(sounds_Sounds.BACKGROUND);
+			createjs.Sound.setMute(true);
+		} else {
+			createjs.Sound.setMute(false);
+			if(!createjs.Sound.getMute() && !sounds_Sounds.waitingForIOS) {
+				sounds_Sounds.playEffect(sounds_Sounds.BACKGROUND,-1,1);
+			}
+		}
+	});
 	sounds_Sounds.initok = true;
 	sounds_Sounds.totalSounds = 0;
 	return true;
@@ -1268,6 +2727,9 @@ sounds_Sounds.handleInitClick = function(event) {
 	}
 };
 sounds_Sounds.playEffect = function(name,loops,volume,delay) {
+	if(!sounds_Sounds.soundRegistered(name)) {
+		console.log("sound " + name + " not found");
+	}
 	if(!createjs.Sound.getMute() && sounds_Sounds.initok && sounds_Sounds.soundRegistered(name)) {
 		if(volume == null) {
 			volume = 1;
@@ -1568,9 +3030,8 @@ util_LoaderWrapper.assetLoaded = function() {
 	}
 };
 util_LoaderWrapper.updateText = function() {
-	var sound = Math.floor(sounds_Sounds.soundsLoaded / sounds_Sounds.totalSounds) * 100;
 	var other = Math.floor(util_LoaderWrapper.loadCount / util_LoaderWrapper.totalCount) * 100;
-	window.document.getElementById("preload").innerHTML = Math.min(sound,other) + "%";
+	window.document.getElementById("preload").innerHTML = "Loading: " + Math.min(other,other) + "%";
 };
 util_LoaderWrapper.handleSound = function() {
 	sounds_Sounds.loadChange = util_LoaderWrapper.updateSoundText;
@@ -1647,6 +3108,21 @@ util_MathUtil.cubicInterpolation = function(array,t,tangentFactor) {
 	var t3 = t * t2;
 	return (2 * t3 - 3 * t2 + 1) * p_0 + (t3 - 2 * t2 + t) * m_0 + (-2 * t3 + 3 * t2) * p_1 + (t3 - t2) * m_1;
 };
+util_MathUtil.shuffle = function(array,key) {
+	var index;
+	var result = [];
+	var copy = array.slice(0);
+	while(copy.length > 0) {
+		if(!isNaN(key)) {
+			index = key % copy.length;
+		} else {
+			index = Math.floor(Math.random() * copy.length);
+		}
+		result.push(copy[index]);
+		copy.splice(index,1);
+	}
+	return result;
+};
 util_MathUtil.prototype = {
 	__class__: util_MathUtil
 };
@@ -1679,6 +3155,8 @@ function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id
 String.prototype.__class__ = String;
 String.__name__ = true;
 Array.__name__ = true;
+Date.prototype.__class__ = Date;
+Date.__name__ = ["Date"];
 var Int = { __name__ : ["Int"]};
 var Dynamic = { __name__ : ["Dynamic"]};
 var Float = Number;
@@ -1687,7 +3165,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQoNCnZvaWQgbWFpbiggICkNCnsNCgkvLyBOb3JtYWxpemVkIHBpeGVsIGNvb3JkaW5hdGVzIChmcm9tIDAgdG8gMSkNCiAgICB2ZWMyIHV2ID0gdlRleHR1cmVDb29yZDsNCgl2ZWMyIG51diA9IHZUZXh0dXJlQ29vcmQqLjA4Ow0KCQ0KICAgIGZsb2F0IG4gPSB0ZXh0dXJlMkQobm9pc2UsIG51dit2ZWMyKHNpbih0aW1lKi4zKSx0aW1lKSouMDItb2ZmKi40KS5yLS41Ow0KICAgIGZsb2F0IG4yID0gdGV4dHVyZTJEKG5vaXNlLCBudXYrdmVjMihzaW4odGltZSouNSksdGltZSkqLjA0LW9mZiouOCkuci0uNTsNCiAgICBuKz1uMjsNCiAgICANCgludXYueSo9YXNwZWN0Ow0KICAgIHV2LngrPW4vNTAuOw0KICAgIHV2LnkrPW4vNTAuOw0KICAgIA0KICAgIGZsb2F0IGQgPSBsZW5ndGgodXYtdmVjMigwLjUpKTsNCiAgICBkPXNtb290aHN0ZXAoMC4xLDAuNiwxLi1kKTsNCgl2ZWM0IGJhc2UgPSB0ZXh0dXJlMkQodVNhbXBsZXIsIHV2KSpkOw0KICAgIC8vIE91dHB1dCB0byBzY3JlZW4NCiAgICB2ZWM0IGNvbCA9IHZlYzQoIHNpbih1di54K3RpbWUpLCBjb3ModXYueSt0aW1lKSwgdXYueCwxLik7DQogICAgZ2xfRnJhZ0NvbG9yID0gYmFzZStzbW9vdGhzdGVwKC0xLiwgMS4sIG4pKmNvbCouMTsNCn0NCg"}];
+haxe_Resource.content = [{ name : "bg.frag", data : "cHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7DQoNCnZhcnlpbmcgbWVkaXVtcCB2ZWMyIHZUZXh0dXJlQ29vcmQ7DQoNCnVuaWZvcm0gc2FtcGxlcjJEIHVTYW1wbGVyOw0KdW5pZm9ybSBzYW1wbGVyMkQgbm9pc2U7DQoNCnVuaWZvcm0gZmxvYXQgdGltZTsNCnVuaWZvcm0gdmVjNCBmaWx0ZXJDbGFtcDsNCg0KdW5pZm9ybSBmbG9hdCBhc3BlY3Q7DQoNCnVuaWZvcm0gdmVjMiBvZmY7DQp1bmlmb3JtIGZsb2F0IGZsYXNoOw0KDQp2b2lkIG1haW4oICApDQp7DQoJLy8gTm9ybWFsaXplZCBwaXhlbCBjb29yZGluYXRlcyAoZnJvbSAwIHRvIDEpDQogICAgdmVjMiB1diA9IHZUZXh0dXJlQ29vcmQ7DQoJdmVjMiBudXYgPSB2VGV4dHVyZUNvb3JkKjMuMDsNCgkNCiAgICBmbG9hdCBuID0gdGV4dHVyZTJEKG5vaXNlLCBudXYrdmVjMihzaW4odGltZSouMyksdGltZSkqLjAyLW9mZiouNCkuci0uNTsNCiAgICBmbG9hdCBuMiA9IHRleHR1cmUyRChub2lzZSx2ZWMyKC4yKSsgbnV2K3ZlYzIoc2luKHRpbWUqLjUpLHRpbWUpKi4wNC1vZmYqLjgpLnItLjU7DQogICAgbis9bjI7DQogICAgDQoJbnV2LnkqPWFzcGVjdDsNCiAgICB1di54Kz1uLzI1MC47DQogICAgdXYueSs9bi8yNTAuOw0KICAgIA0KICAgIGZsb2F0IGQgPSBsZW5ndGgodXYtdmVjMigwLjUpKTsNCiAgICBkPXNtb290aHN0ZXAoMC4xLDAuNiwxLi1kKTsNCgl2ZWM0IGJhc2UgPSB0ZXh0dXJlMkQodVNhbXBsZXIsIHV2KSpkOw0KCQ0KICAgIC8vIE91dHB1dCB0byBzY3JlZW4NCiAgICB2ZWM0IGNvbCA9IHZlYzQoIHNpbih1di54K3RpbWUpLCBjb3ModXYueSt0aW1lKSwgdXYueCwxLik7DQogICAgDQoJZ2xfRnJhZ0NvbG9yID0gYmFzZStzbW9vdGhzdGVwKC0xLiwgMS4sIG4pKmNvbCouMSArIHZlYzQoMi4sIDAuLDAuLDEuKSpmbGFzaCpzbW9vdGhzdGVwKC0wLjEsMS41LDEuLWQpOw0KCS8vZ2xfRnJhZ0NvbG9yID12ZWM0KG4sbixuLDEuKTsvLw0KfQ0K"}];
 var __map_reserved = {}
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -1695,9 +3173,12 @@ if(ArrayBuffer.prototype.slice == null) {
 }
 var Float32Array = $global.Float32Array || js_html_compat_Float32Array._new;
 var Uint8Array = $global.Uint8Array || js_html_compat_Uint8Array._new;
-Config.ASSETS = ["img/black.png","img/bg.jpg","img/ui.json","img/noise.jpg"];
+Config.ASSETS = ["img/black.png","img/bg.jpg","img/noise.jpg","img/jars.json","img/ui.json","img/oxygen.json","img/brohm.json","img/lithium.json","img/aluminium.json","img/magnesium.json","img/alu_bromide.json","img/alu_oxide.json","img/lithium_bromide.json","img/lithium_oxide.json","img/mag_bromide.json","img/mag_oxide.json"];
 Config.VERSION = "chemistry fall 0.1";
 Config.GRAVITY = 0.1;
+controls_AnimationController.ON_COMPLETE = "onComplete";
+controls_AnimationController.ON_CHANGE = "onChange";
+controls_Block.blockType = 0;
 controls_DeviceOrientationControl.lon = 0;
 controls_DeviceOrientationControl.lat = 0;
 controls_DeviceOrientationControl.absolute = true;
@@ -1712,9 +3193,19 @@ haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 js_Boot.__toStr = { }.toString;
 js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
-sounds_Sounds.WIN = "win";
-sounds_Sounds.LOSE = "loss";
-sounds_Sounds.BACKGROUND = "background";
+sounds_Sounds.BLOB_SUCK = "blob_suck";
+sounds_Sounds.BLOB_WRONG = "blob_wrong";
+sounds_Sounds.BLOBS_COMBINE = "blobs_combine";
+sounds_Sounds.BLOCK_BREAK = "block_break";
+sounds_Sounds.BLOCK_HIT = "block_hit";
+sounds_Sounds.TOGGLE = "toggle";
+sounds_Sounds.ALU_BROMIDE = "alu_bromide";
+sounds_Sounds.ALU_OXIDE = "alu_oxide";
+sounds_Sounds.LITHIUM_BROMIDE = "lithium_bromide";
+sounds_Sounds.LITHIUM_OXIDE = "lithium_oxide";
+sounds_Sounds.MAG_BROMIDE = "mag_bromide";
+sounds_Sounds.MAG_OXIDE = "mag_oxide";
+sounds_Sounds.BACKGROUND = "Ion_in_A_Jar_01";
 sounds_Sounds.bg_volume = 1;
 sounds_Sounds.totalSounds = 0;
 sounds_Sounds.initok = false;

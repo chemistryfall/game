@@ -23,9 +23,9 @@ class BgStars extends BaseParticleEffect
 	{
 		super();
 		var c:Int = 0;
-		this.pool = new Pool<BgStarParticle>(150, function():BgStarParticle{
+		this.pool = new Pool<BgStarParticle>(50, function():BgStarParticle{
 			var p:BgStarParticle = {
-				sprite:Asset.getImage("collector.png", true),
+				sprite:Asset.getImage("UI_little circle.png", true),
 				lifetime:0,
 				maxlife:0,
 				sx:0,
@@ -44,7 +44,7 @@ class BgStars extends BaseParticleEffect
 	
 	private function randomizeParticle(p:BgStarParticle):Void
 	{
-		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.05 + 0.02;
+		p.sprite.scale.x = p.sprite.scale.y = Math.random() * 0.06 + 0.025;
 		p.lifetime = (Math.random() + 0.5)*80+30;
 		p.maxlife = p.lifetime;
 		p.sprite.x = Math.random() * area.width + area.x;
@@ -67,7 +67,7 @@ class BgStars extends BaseParticleEffect
 			p.sprite.rotation = (p.lifetime+p.maxlife)*p.sprite.scale.x*0.1;
 			//Update particle
 			var phase:Float = (p.maxlife-p.lifetime) / p.maxlife;
-			p.sprite.alpha = phase < 0.34 ? phase / 0.34 : 1-(phase - 0.34) / (1 - 0.34);
+			p.sprite.alpha = (phase < 0.34 ? phase / 0.34 : 1-(phase - 0.34) / (1 - 0.34))*0.5;
 		}
 	}
 	

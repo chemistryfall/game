@@ -99,4 +99,19 @@ class MathUtil
 		var t3:Float = t * t2;
 		return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + ( -2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
 	}
+	
+	public static function shuffle(array:Dynamic, key:Int):Dynamic
+	{
+		var index:Dynamic, result:Dynamic = [];
+		var copy:Dynamic = array.slice(0);
+		while (copy.length > 0)
+		{
+			if (!Math.isNaN(key)) index = key % copy.length;
+			else index = Math.floor(Math.random() * copy.length);
+			result.push(copy[index]);
+			copy.splice(index, 1);
+		}
+		return result;
+	}
+
 }

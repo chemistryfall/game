@@ -3,6 +3,7 @@ import controls.Background;
 import controls.DeviceOrientationControl;
 import controls.GameView;
 import controls.StartView;
+import controls.UI;
 import createjs.soundjs.Sound;
 import createjs.tweenjs.Tween;
 import haxe.Timer;
@@ -54,7 +55,7 @@ class Main
 	private var container:DivElement;
 	private var mainCanvas:CanvasElement;
 	private var mainContainer:Container;
-	private var viewport:Container;
+	public var viewport:Container;
 	
 	private var ticker:Ticker;
 	
@@ -64,7 +65,7 @@ class Main
 	public var engine:Engine;
 	public var world:World;
 	private var runner:Runner;
-	
+	private var ui:UI;
 	
 	private var start:StartView;
 	/**
@@ -121,12 +122,19 @@ class Main
 		{
 			var size:Rectangle = this.getGameSize();
 			
+			var s:Float = Math.min( size.width / 475, size.height / 475);
+			this.viewport.scale.x = this.viewport.scale.y = s;
+			
 			this.bg.resize(size);
 			this.game.resize(size);
 			this.renderer.resize(size.width, size.height);
 			
 			this.viewport.x = size.width / 2;
 			this.viewport.y = size.height / 2;
+			
+			this.start.resize(size);
+			this.ui.resize(size);
+	//		this.mainContainer.visible = true;
 		},
 		50);
 	}
@@ -174,15 +182,19 @@ class Main
 		this.bg = new Background();
 		this.game = new GameView();
 		this.start = new StartView();
+		this.ui = new UI();
+		
+		this.game.ui = ui;
 		
 		ParticleManager.init();
 		this.bg.addChild(ParticleManager.stars);
 		
 		this.viewport = new Container();
 		this.viewport.addChild(this.bg);
-		this.viewport.addChild(this.start);
 		this.viewport.addChild(this.game);
 		this.mainContainer.addChild(this.viewport);
+		this.mainContainer.addChild(this.ui);
+		this.ui.addChild(this.start);
 		
 		this.viewport.pivot.x = 1024;
 		this.viewport.pivot.y = 1024;
@@ -190,17 +202,36 @@ class Main
 		this.game.x = 1024;
 		this.game.y = 1024;
 		
+	//	this.mainContainer.visible = false;
 		this.onResize(null);
-		
 		this.ticker = new Ticker();
 		this.ticker.start();
 		this.ticker.add(onTickerTick);
 		
-		
-		this.runner = Runner.create();
-		Runner.run(runner, engine);
-		
 		DeviceOrientationControl.initialize();
+		
+		this.start.start.addListener("click", onStartClick);
+		this.start.start.addListener("tap", onStartClick);
+	}
+	
+	private function onStartClick():Void
+	{
+		Sounds.playEffect(Sounds.TOGGLE);
+		this.start.interactiveChildren = false;
+		this.start.hide();
+		ParticleManager.words.hide();
+		Timer.delay(function(){
+			this.game.start();
+			this.ui.start(GameView.CONF.instruction, GameView.CONF.final);
+		},500);
+	}
+	
+	public function replay():Void
+	{
+		this.game.hide();
+		this.ui.backToSelect();
+		this.start.interactiveChildren = true;
+		this.start.show();
 	}
 	
 	/**
@@ -209,11 +240,11 @@ class Main
 	*/
 	private function onTickerTick():Void
 	{
+		Engine.update(engine, 1000 / 60);
+		
 		var delta:Float = ticker.deltaTime;
 		Tween.tick(ticker.elapsedMS,false);
 		for (t in tickListeners) t(delta);
-		
-		
 		
 		this.renderer.render(this.mainContainer);
 	}

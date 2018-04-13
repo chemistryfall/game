@@ -1,5 +1,7 @@
 package filters.bg;
 
+import createjs.tweenjs.Ease;
+import createjs.tweenjs.Tween;
 import haxe.Resource;
 import js.Lib;
 import pixi.core.Pixi;
@@ -42,8 +44,16 @@ class BgFilter extends Filter
 	override public function apply(filterManager:Dynamic, input:Dynamic, output:Dynamic, ?clear:Bool):Void 
 	{
 		time+= 1 / 260;
+		if (time > 100) time = 0;
 		this.uniforms.time = time;
 		this.uniforms.off = [-Main.instance.game.charpos.x/2000, -Main.instance.game.charpos.y/2000];
 		super.apply(filterManager, input, output, clear);
+	}
+	
+	public function wrong():Void
+	{
+		this.uniforms.flash += 2;
+		Tween.removeTweens(this.uniforms);
+		Tween.get(this.uniforms).to( { flash:0 }, 1050, Ease.quadIn);
 	}
 }

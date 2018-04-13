@@ -15,17 +15,28 @@ import util.BrowserDetect;
 /**
 * Simple sound manager for sounds.
 */
+@:expose("Sounds")
 class Sounds
 {
 	/**
 	 * Possible sounds. Mapped to id.
 	 */
+	public static var BLOB_SUCK:String = "blob_suck";
+	public static var BLOB_WRONG:String = "blob_wrong";
+	public static var BLOBS_COMBINE:String = "blobs_combine";
+	public static var BLOCK_BREAK:String = "block_break";
+	public static var BLOCK_HIT:String = "block_hit";
+	public static var TOGGLE:String = "toggle";
+	public static var ALU_BROMIDE:String = "alu_bromide";
+	public static var ALU_OXIDE:String = "alu_oxide";
+	public static var LITHIUM_BROMIDE:String = "lithium_bromide";
+	public static var LITHIUM_OXIDE:String = "lithium_oxide";
+	public static var MAG_BROMIDE:String = "mag_bromide";
+	public static var MAG_OXIDE:String = "mag_oxide";
 	
-	public static var WIN:String = "win";
-	public static var LOSE:String = "loss";
 
 	
-	public static var BACKGROUND:String = "background";
+	public static var BACKGROUND:String = "Ion_in_A_Jar_01";
 
 	private static var bg_volume:Float = 1;
 	
@@ -61,16 +72,29 @@ class Sounds
 		soundMap = new StringMap();
 		
 		var base:String = "snd/";
-		Sound.alternateExtensions = ["mp3"];
-		
+	//	Sound.alternateExtensions = ["mp3"];
+
 		sounds = [
-			{s:BACKGROUND, c:1 }
+			{s:BACKGROUND, c:1 },
+			{s:BLOB_WRONG, c:4 },
+			{s:BLOB_SUCK, c:4 },
+			{s:BLOBS_COMBINE, c:4 },
+			{s:BLOCK_BREAK, c:4 },
+			{s:BLOCK_HIT, c:4 },
+			{s:TOGGLE, c:4 },
+			{s:ALU_BROMIDE, c:1 },
+			{s:ALU_OXIDE, c:1 },
+			{s:LITHIUM_BROMIDE, c:1},
+			{s:LITHIUM_OXIDE, c:1 },
+			{s:MAG_BROMIDE, c:1 },
+			{s:MAG_OXIDE, c:1},
+			
 		];
 		
 		//Load single sounds
 		for (s in sounds)
 		{
-			Sound.registerSound(base + s.s+".ogg", s.s, s.c);
+			Sound.registerSound(base + s.s+".mp3", s.s, s.c);
 		}
 		
 		//Listen for ios unlock. Soundjs does the initial unlocking automatically in 6.2 and forwards. This is used to start bg loop.
@@ -81,6 +105,41 @@ class Sounds
 			Browser.window.addEventListener("click", handleInitClick, true);
 			Browser.window.addEventListener("touchstart", handleInitClick, true);
 		}
+		
+		var hidden:String=null;
+		var visibilityChange:String=null; 
+		if (untyped Browser.document.hidden != null)
+		{ // Opera 12.10 and Firefox 18 and later support 
+			hidden = "hidden";
+			visibilityChange = "visibilitychange";
+		} 
+		else if (untyped Browser.document.msHidden != null)
+		{
+			hidden = "msHidden";
+			visibilityChange = "msvisibilitychange";
+		} 
+		else if (untyped Browser.document.webkitHidden != null) 
+		{
+			hidden = "webkitHidden";
+			visibilityChange = "webkitvisibilitychange";
+		}
+		Browser.document.addEventListener(visibilityChange, function() {
+			if (Reflect.field(Browser.document, hidden))
+			{
+				Sounds.stopSound(Sounds.BACKGROUND); 
+				Sound.setMute(true);
+			}
+			else
+			{
+				Sound.setMute(false);
+				
+				if (!Sound.getMute() && ( !waitingForIOS ))
+				{
+					Sounds.playEffect(Sounds.BACKGROUND, -1, 1);
+				}
+			}
+		});
+		
 		
 		initok = true;
 		
@@ -137,6 +196,7 @@ class Sounds
 	 */
 	static public function playEffect(name:String,?loops:Int, ?volume:Float, ?delay:Float):AbstractSoundInstance
 	{
+		if (!Sounds.soundRegistered(name)) trace("sound " + name+" not found");
 		if (!Sound.getMute() && initok && Sounds.soundRegistered(name))
 		{
 			if (volume == null)

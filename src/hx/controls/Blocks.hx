@@ -1,11 +1,14 @@
 package controls;
 
 
+import createjs.tweenjs.Ease;
+import createjs.tweenjs.Tween;
 import matter.Composite;
 import matter.World;
 import pixi.core.display.Container;
 import pixi.core.math.Point;
 import pixi.core.math.shapes.Rectangle;
+import sounds.Sounds;
 import util.Pool;
 
 /**
@@ -29,19 +32,43 @@ class Blocks extends Container
 	
 	private function initializeControls():Void
 	{
-		this.composite = Composite.create( { } );
-		World.add(Main.instance.world, this.composite);
+		blocks = [];
 		this.pool = new Pool<Block>(50, function():Block { 
 			var b:Block = new Block(0, -999);
+			blocks.push(b);
 			b.visible = false;
+			b.interactive = true;
+			b.addListener("click", onBlockClick);
+			b.addListener("tap", onBlockClick);
 			this.addChild(b);
 			return b;
 		} );
 	}
 	
+	private function onBlockClick(e:Dynamic):Void
+	{
+		var b:Block = e.currentTarget;
+		if (b.body == null) return;
+		trace("Remove body");
+		
+		untyped World.remove(Main.instance.world, b.body);
+		b.body = null;
+		Tween.get(b).to( { alpha:0 }, 75);
+		Tween.get(b.scale).to( { x:1.5, y:1.5 }, 75, Ease.quadOut).call(function() { b.visible = false; } );
+		Sounds.playEffect(Sounds.BLOCK_BREAK);
+	}
+	
 	public function resize(size:Rectangle):Void
 	{
 		this.size = size;
+	}
+	public function clear():Void
+	{
+		for (b in blocks)
+		{
+			if (b.body != null) untyped World.remove(Main.instance.world, b.body);
+			b.visible = false;
+		}
 	}
 	
 	public function update(charpos:Point):Void
@@ -50,10 +77,22 @@ class Blocks extends Container
 		{
 			previousSpawn = charpos.y;
 			var b:Block = pool.getNext();
-			if (composite.bodies.indexOf(b.body) >= 0) composite.bodies.remove(b.body);
-			b.randomize(charpos.x + (Math.random() - 0.5) * size.width, charpos.y + size.height);
-			composite.bodies.push(b.body);
+			
+			if(b.body != null)
+				untyped World.remove(Main.instance.world, b.body);
+			b.randomize(charpos.x + (Math.random() - 0.5) * size.width*2, charpos.y + size.height/Main.instance.viewport.scale.x);
+		//	Composite.add(composite, b.body);
+			World.add(Main.instance.world, b.body);
 			b.visible = true;
+		}
+		for (b in pool.all)
+		{
+			if (b.body != null)
+			{
+		//		b.x = b.body.position.x;
+		//		b.y = b.body.position.y;
+		//		b.rotation = b.body.angle;
+			}
 		}
 	}
 	

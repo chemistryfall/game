@@ -15,9 +15,11 @@ import util.Asset;
 class Background extends Container
 {
 	
-	private var filter: BgFilter;
+	public var filter: BgFilter;
 
 	private var bg:TilingSprite;
+	private var offx:Float = 0;
+	private var offy:Float = 0;
 	
 	public function new() 
 	{
@@ -32,17 +34,21 @@ class Background extends Container
 		
 		this.filter = new BgFilter();
 		this.filterArea =untyped Main.instance.renderer.screen;
-		this.filters = [filter];
+	//	this.filters = [filter];
 		
 		this.addChild(this.bg);
 		
-		
 	}
 	
+	public function rememberPosition(charpos:Point):Void
+	{
+		offx += -charpos.x;
+		offy += -charpos.y;
+	}
 	public function update(charX:Float, charY:Float):Void
 	{
-		this.bg.tilePosition.x = charX;
-		this.bg.tilePosition.y = charY;
+		this.bg.tilePosition.x = (charX+offx)%2048;
+		this.bg.tilePosition.y = (charY+offy)%2048;
 	}
 	
 	
