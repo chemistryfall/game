@@ -943,6 +943,7 @@ controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
 		sounds_Sounds.playEffect(sounds_Sounds.TOGGLE);
 	}
 	,resize: function(size) {
+		this.size = size;
 		this.info.x = size.width - this.info.width;
 		this.info.y = 50;
 		this.replay.x = 0;
@@ -960,6 +961,25 @@ controls_EndUi.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,show: function(rating) {
 		this.visible = true;
+		if(controls_GameView.CONF.compound == controls_CompoundType.alu_bromide) {
+			this.infoText.text = "Aluminium bromide is any chemical compound with the empirical formula AlBr. Aluminium tribromide is the most common form of aluminium bromide.";
+		} else if(controls_GameView.CONF.compound == controls_CompoundType.alu_oxide) {
+			this.infoText.text = "Aluminium oxide is a chemical compound of aluminium and oxygen. It is the most commonly occurring of several aluminium oxides";
+		} else if(controls_GameView.CONF.compound == controls_CompoundType.lithium_bromide) {
+			this.infoText.text = "Lithium bromide is a chemical compound of lithium and bromine. Its extreme hygroscopic character makes LiBr useful as a desiccant in certain air conditioning systems.";
+		} else if(controls_GameView.CONF.compound == controls_CompoundType.lithium_oxide) {
+			this.infoText.text = "Lithium oxide or lithia is an inorganic chemical compound. It is a white solid. ";
+		} else if(controls_GameView.CONF.compound == controls_CompoundType.mag_bromide) {
+			this.infoText.text = "Magnesium bromide is a chemical compound of magnesium and bromine that is white and deliquescent. It is often used as a mild sedative and as an anticonvulsant for treatment of nervous disorders.";
+		} else if(controls_GameView.CONF.compound == controls_CompoundType.mag_oxide) {
+			this.infoText.text = "Magnesium oxide, or magnesia, is a white hygroscopic solid mineral that occurs naturally as periclase and is a source of magnesium.";
+		}
+		this.infoLabel.width = this.infoText.width + 10;
+		this.infoLabel.height = this.infoText.height + 10;
+		this.infoText.x = 5;
+		this.infoText.y = 5;
+		this.infoC.x = (this.size.width - this.infoC.width) / 2;
+		this.infoC.y = this.size.height - this.infoC.height - 10;
 		if(rating == 0) {
 			this.rating.text = "Extra materials\ndetected.";
 		} else if(rating == 1) {

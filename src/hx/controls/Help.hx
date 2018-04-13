@@ -41,7 +41,7 @@ class Help extends Container
 		ts.fontSize = 35;
 		ts.lineHeight = 30;
 		ts.fontFamily = 'pigment_demoregular';
-		this.helpText = new Text("Form 3 compounds by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nMusic\n    Lauri\nCode\n    Henri Sarasvirta\n\n       EduGameJam 2018", ts);
+		this.helpText = new Text("Form 3 compounds by collecting\nions. Make sure that you get\nthe charges correct!\nAvoid unneeded elements.\n\nControl by tilting phone in\nportrait mode.\nTap salts to destroy them.\n\nChemistry\n    Anni Kukko\nGraphics\n    Laura K. Horton\nMusic\n    Lauri Leskinen\nCode+sfx\n    Henri Sarasvirta\n\n       EduGameJam 2018", ts);
 		this.helpJar.addChild(this.helpText);
 		
 		this.helpText.x = 160;

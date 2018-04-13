@@ -9,6 +9,7 @@ import pixi.core.text.Text;
 import pixi.core.text.TextStyleObject;
 import sounds.Sounds;
 import util.Asset;
+import controls.Compound.CompoundType;
 
 /**
  * ...
@@ -19,10 +20,11 @@ class EndUi extends Container
 	private var replay:Sprite;
 	private var info:Sprite;
 	private var infoLabel:Sprite;
-	private var infoText:Sprite;
+	private var infoText:Text;
 	private var infoC:Container;
 	
 	private var rating:Text;
+	private var size:Rectangle;
 	
 	public function new() 
 	{
@@ -99,6 +101,7 @@ class EndUi extends Container
 	
 	public function resize(size:Rectangle):Void
 	{
+		this.size = size;
 		this.info.x = size.width - info.width;
 		this.info.y = 50;
 		
@@ -125,6 +128,26 @@ class EndUi extends Container
 		this.visible = true;
 		
 		//TODO - update compound text & position label
+		if (GameView.CONF.compound == CompoundType.alu_bromide)
+			this.infoText.text = "Aluminium bromide is any chemical compound with the empirical formula AlBr. Aluminium tribromide is the most common form of aluminium bromide.";
+		else if (GameView.CONF.compound == CompoundType.alu_oxide)
+			this.infoText.text = "Aluminium oxide is a chemical compound of aluminium and oxygen. It is the most commonly occurring of several aluminium oxides";
+		else if (GameView.CONF.compound == CompoundType.lithium_bromide)
+			this.infoText.text = "Lithium bromide is a chemical compound of lithium and bromine. Its extreme hygroscopic character makes LiBr useful as a desiccant in certain air conditioning systems.";
+		else if (GameView.CONF.compound == CompoundType.lithium_oxide)
+			this.infoText.text = "Lithium oxide or lithia is an inorganic chemical compound. It is a white solid. ";
+		else if (GameView.CONF.compound == CompoundType.mag_bromide)
+			this.infoText.text = "Magnesium bromide is a chemical compound of magnesium and bromine that is white and deliquescent. It is often used as a mild sedative and as an anticonvulsant for treatment of nervous disorders.";
+		else if (GameView.CONF.compound == CompoundType.mag_oxide)
+			this.infoText.text = "Magnesium oxide, or magnesia, is a white hygroscopic solid mineral that occurs naturally as periclase and is a source of magnesium.";
+		
+		infoLabel.width = infoText.width+10;
+		infoLabel.height = infoText.height+10;
+		infoText.x = 5;
+		infoText.y = 5;
+		
+		this.infoC.x = (size.width - infoC.width) / 2;
+		this.infoC.y = size.height-infoC.height-10;
 		
 		if (rating == 0) {
 			this.rating.text = "Extra materials\ndetected.";
