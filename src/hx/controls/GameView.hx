@@ -43,6 +43,7 @@ class GameView extends Container
 	private var brohm:Pool<Collectable>;
 	private var allCollectables:Array<Pool<Collectable>>;
 	private var active:Array<Collectable> = [];
+	private var colmap:Map<CType, Pool<Collectable>>;
 	
 	private var previousSpawn:Float = 0;
 	private var size:Rectangle;
@@ -61,12 +62,18 @@ class GameView extends Container
 	public function new() 
 	{
 		super();
-		
+		colmap = new Map<CType, Pool<Collectable>>();
 		this.oxygen = new Pool<Collectable>(10, function():Collectable { return new Collectable(CType.oxygen); } );
 		this.lithium = new Pool<Collectable>(10, function():Collectable { return new Collectable(CType.lithium); } );
 		this.magnesium = new Pool<Collectable>(10, function():Collectable { return new Collectable(CType.magnesium); } );
 		this.aluminium = new Pool<Collectable>(10, function():Collectable { return new Collectable(CType.aluminium); } );
 		this.brohm = new Pool<Collectable>(10, function():Collectable { return new Collectable(CType.brohm); } );
+		
+		colmap.set(CType.oxygen, oxygen);
+		colmap.set(CType.lithium, lithium);
+		colmap.set(CType.magnesium, magnesium);
+		colmap.set(CType.aluminium, aluminium);
+		colmap.set(CType.brohm, brohm);
 		
 		this.allCollectables = [
 			this.oxygen,
@@ -135,7 +142,7 @@ class GameView extends Container
 		this.baseconf = conf;
 		Body.setStatic(this.character.body, false);
 		var amount:Int = Math.round(20 / conf.length);
-		this.requiredPairs = 1;
+		this.requiredPairs = 3;
 		this.ui.updatePairAmount(this.requiredPairs);
 		var types:Array<CType> = [];
 		for (t in conf) if (types.indexOf(t) == -1) types.push(t);
@@ -347,7 +354,15 @@ class GameView extends Container
 			}
 			trace("spawn");
 			previousSpawn = charpos.y;
-			var c:Collectable = this.allCollectables[Math.floor(Math.random() * allCollectables.length)].getNext();
+			
+			var rnd:Array<CType> = baseconf.slice(0);
+			rnd.push(CType.aluminium);
+			rnd.push(CType.brohm);
+			rnd.push(CType.lithium);
+			rnd.push(CType.magnesium);
+			rnd.push(CType.oxygen);
+			var rndi:Int = Math.floor(Math.random()*rnd.length);
+			var c:Collectable = this.colmap.get(rnd[rndi]).getNext();// this.allCollectables[Math.floor(Math.random() * allCollectables.length)].getNext();
 			this.collectables.addChild(c);
 			c.scale.x = c.scale.y = 0.5;
 			active.push(c);

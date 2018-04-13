@@ -2,6 +2,7 @@ package controls;
 
 import createjs.tweenjs.Ease;
 import createjs.tweenjs.Tween;
+import haxe.Timer;
 import pixi.core.display.Container;
 import pixi.core.math.shapes.Rectangle;
 import pixi.core.sprites.Sprite;
@@ -135,12 +136,15 @@ class UI extends Container
 	public function updatePairAmount(pairsNeeded:Int):Void
 	{
 		this.charge.count.text = Std.string(Math.max(0, pairsNeeded));
+		
+		if (pairsNeeded > 0) Timer.delay(this.charge.shake, 2500);
 	}
 	
 	public function formPair(items:Array<CType>, pairsNeeded:Int):Void
 	{
 		trace("Foorm pari");
 		this.charge.count.text = Std.string(Math.max(0, pairsNeeded));
+		if (pairsNeeded > 0) Timer.delay(this.charge.shake, 2500);
 		this.former.formPairs(items, this.target1.type, this.target2.type);
 	}
 	

@@ -38,8 +38,9 @@ class Charge extends Container
 		ts.fontFamily = 'pigment_demoregular';
 		this.count = new Text("5", ts);
 		this.count.x = 70;
-		this.count.y = 58;
+		this.count.y = -140;
 		this.beaker.addChild(this.count);
+		beaker.anchor.y = 1;
 		
 		this.charge = Asset.getImage("charge_slider.png", true);
 		this.slider = Asset.getImage("charge_sliderPointer.png", true);
@@ -89,7 +90,16 @@ class Charge extends Container
 	public function resize(size:Rectangle):Void
 	{
 		this.charge.x = size.width / 2;
-		this.beaker.y = size.height - beaker.height;
+		this.beaker.y = size.height;
 		this.beaker.x = 0;
+	}
+	
+	public function shake():Void
+	{
+		Tween.get(this.beaker).to( { rotation:0.2 }, 100).to( { rotation:0 }, 100).to( { rotation:0.2 }, 100).to( { rotation:0 }, 100)
+		.to( { rotation:0.2 }, 100).to( { rotation:0 }, 100).to( { rotation:0.2 }, 100).to( { rotation:0 }, 100);
+		Tween.get(this.beaker.scale).to( { x:0.45, y:0.45 }, 100).to( { x:0.4, y:0.4 }, 100).to( { x:0.45, y:0.45 }, 100).to( { x:0.4, y:0.4 }, 100)
+		.to( {x:0.45, y:0.45 }, 100).to( { x:0.4, y:0.4 }, 100).to( { x:0.45, y:0.45 }, 100).to( { x:0.4, y:0.4 }, 100);
+		
 	}
 }

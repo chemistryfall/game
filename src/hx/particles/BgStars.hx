@@ -23,7 +23,7 @@ class BgStars extends BaseParticleEffect
 	{
 		super();
 		var c:Int = 0;
-		this.pool = new Pool<BgStarParticle>(150, function():BgStarParticle{
+		this.pool = new Pool<BgStarParticle>(50, function():BgStarParticle{
 			var p:BgStarParticle = {
 				sprite:Asset.getImage("UI_little circle.png", true),
 				lifetime:0,

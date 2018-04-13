@@ -46,6 +46,7 @@ class Block extends Container
 	{
 		this.scale.x = this.scale.y = 1;
 		this.alpha = 1;
+		this.visible = true;
 		this.block.rotation = (Math.random() - 0.5)*2.5;
 		if (this.block.rotation < 0)
 			this.block.rotation = Math.min( -0.6, this.block.rotation);

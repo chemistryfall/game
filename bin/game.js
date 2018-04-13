@@ -100,7 +100,7 @@ Main.prototype = {
 		}
 		this.resizeTimer = haxe_Timer.delay(function() {
 			var size = _gthis.getGameSize();
-			_gthis.viewport.scale.x = _gthis.viewport.scale.y = Math.min(size.width / 480,size.height / 480);
+			_gthis.viewport.scale.x = _gthis.viewport.scale.y = Math.min(size.width / 475,size.height / 475);
 			_gthis.bg.resize(size);
 			_gthis.game.resize(size);
 			_gthis.renderer.resize(size.width,size.height);
@@ -108,7 +108,6 @@ Main.prototype = {
 			_gthis.viewport.y = size.height / 2;
 			_gthis.start.resize(size);
 			_gthis.ui.resize(size);
-			_gthis.mainContainer.visible = true;
 		},50);
 	}
 	,getGameSize: function() {
@@ -148,7 +147,6 @@ Main.prototype = {
 		this.viewport.pivot.y = 1024;
 		this.game.x = 1024;
 		this.game.y = 1024;
-		this.mainContainer.visible = false;
 		this.onResize(null);
 		this.ticker = new PIXI.ticker.Ticker();
 		this.ticker.start();
@@ -463,7 +461,6 @@ controls_Background.prototype = $extend(PIXI.Container.prototype,{
 		this.bg.tileScale.x = this.bg.tileScale.y = 0.5;
 		this.filter = new filters_bg_BgFilter();
 		this.filterArea = Main.instance.renderer.screen;
-		this.filters = [this.filter];
 		this.addChild(this.bg);
 	}
 	,rememberPosition: function(charpos) {
@@ -471,8 +468,8 @@ controls_Background.prototype = $extend(PIXI.Container.prototype,{
 		this.offy += -charpos.y;
 	}
 	,update: function(charX,charY) {
-		this.bg.tilePosition.x = charX + this.offx;
-		this.bg.tilePosition.y = charY + this.offy;
+		this.bg.tilePosition.x = (charX + this.offx) % 2048;
+		this.bg.tilePosition.y = (charY + this.offy) % 2048;
 	}
 	,resize: function(size) {
 		this.filter.resize(size);
@@ -499,6 +496,7 @@ controls_Block.prototype = $extend(PIXI.Container.prototype,{
 	,randomize: function(x,y) {
 		this.scale.x = this.scale.y = 1;
 		this.alpha = 1;
+		this.visible = true;
 		this.block.rotation = (Math.random() - 0.5) * 2.5;
 		if(this.block.rotation < 0) {
 			this.block.rotation = Math.min(-0.6,this.block.rotation);
@@ -664,8 +662,9 @@ controls_Charge.prototype = $extend(PIXI.Container.prototype,{
 		ts.fontFamily = "pigment_demoregular";
 		this.count = new PIXI.Text("5",ts);
 		this.count.x = 70;
-		this.count.y = 58;
+		this.count.y = -140;
 		this.beaker.addChild(this.count);
+		this.beaker.anchor.y = 1;
 		this.charge = util_Asset.getImage("charge_slider.png",true);
 		this.slider = util_Asset.getImage("charge_sliderPointer.png",true);
 		this.slider.anchor.x = 0.5;
@@ -698,8 +697,12 @@ controls_Charge.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,resize: function(size) {
 		this.charge.x = size.width / 2;
-		this.beaker.y = size.height - this.beaker.height;
+		this.beaker.y = size.height;
 		this.beaker.x = 0;
+	}
+	,shake: function() {
+		createjs.Tween.get(this.beaker).to({ rotation : 0.2},100).to({ rotation : 0},100).to({ rotation : 0.2},100).to({ rotation : 0},100).to({ rotation : 0.2},100).to({ rotation : 0},100).to({ rotation : 0.2},100).to({ rotation : 0},100);
+		createjs.Tween.get(this.beaker.scale).to({ x : 0.45, y : 0.45},100).to({ x : 0.4, y : 0.4},100).to({ x : 0.45, y : 0.45},100).to({ x : 0.4, y : 0.4},100).to({ x : 0.45, y : 0.45},100).to({ x : 0.4, y : 0.4},100).to({ x : 0.45, y : 0.45},100).to({ x : 0.4, y : 0.4},100);
 	}
 	,__class__: controls_Charge
 });
@@ -955,6 +958,7 @@ var controls_GameView = $hx_exports["GV"] = function() {
 	this.time = 0;
 	this.charpos = new PIXI.Point();
 	PIXI.Container.call(this);
+	this.colmap = new haxe_ds_EnumValueMap();
 	this.oxygen = new util_Pool(10,function() {
 		return new controls_Collectable(controls_CType.oxygen);
 	});
@@ -970,6 +974,11 @@ var controls_GameView = $hx_exports["GV"] = function() {
 	this.brohm = new util_Pool(10,function() {
 		return new controls_Collectable(controls_CType.brohm);
 	});
+	this.colmap.set(controls_CType.oxygen,this.oxygen);
+	this.colmap.set(controls_CType.lithium,this.lithium);
+	this.colmap.set(controls_CType.magnesium,this.magnesium);
+	this.colmap.set(controls_CType.aluminium,this.aluminium);
+	this.colmap.set(controls_CType.brohm,this.brohm);
 	this.allCollectables = [this.oxygen,this.lithium,this.magnesium,this.aluminium,this.brohm];
 	this.initializeControls();
 };
@@ -995,7 +1004,7 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 		this.baseconf = conf;
 		Matter.Body.setStatic(this.character.body,false);
 		Math.round(20 / conf.length);
-		this.requiredPairs = 1;
+		this.requiredPairs = 3;
 		this.ui.updatePairAmount(this.requiredPairs);
 		var types = [];
 		var _g = 0;
@@ -1189,7 +1198,13 @@ controls_GameView.prototype = $extend(PIXI.Container.prototype,{
 			}
 			console.log("spawn");
 			this.previousSpawn = this.charpos.y;
-			var c = this.allCollectables[Math.floor(Math.random() * this.allCollectables.length)].getNext();
+			var rnd = this.baseconf.slice(0);
+			rnd.push(controls_CType.aluminium);
+			rnd.push(controls_CType.brohm);
+			rnd.push(controls_CType.lithium);
+			rnd.push(controls_CType.magnesium);
+			rnd.push(controls_CType.oxygen);
+			var c = this.colmap.get(rnd[Math.floor(Math.random() * rnd.length)]).getNext();
 			this.collectables.addChild(c);
 			c.scale.x = c.scale.y = 0.5;
 			this.active.push(c);
@@ -1416,7 +1431,6 @@ controls_StartView.prototype = $extend(PIXI.Container.prototype,{
 		this.addChild(this.logo);
 		this.logo.addChild(this.start);
 		this.help = new controls_Help();
-		this.addChild(this.help);
 		this.help.info.addListener("click",$bind(this,this.onHelpClick));
 		this.help.info.addListener("tap",$bind(this,this.onHelpClick));
 		this.origsize = this.getBounds();
@@ -1593,10 +1607,16 @@ controls_UI.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,updatePairAmount: function(pairsNeeded) {
 		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
+		if(pairsNeeded > 0) {
+			haxe_Timer.delay(($_=this.charge,$bind($_,$_.shake)),2500);
+		}
 	}
 	,formPair: function(items,pairsNeeded) {
 		console.log("Foorm pari");
 		this.charge.count.text = Std.string(Math.max(0,pairsNeeded));
+		if(pairsNeeded > 0) {
+			haxe_Timer.delay(($_=this.charge,$bind($_,$_.shake)),2500);
+		}
 		this.former.formPairs(items,this.target1.type,this.target2.type);
 	}
 	,__class__: controls_UI
@@ -1619,6 +1639,9 @@ filters_bg_BgFilter.prototype = $extend(PIXI.Filter.prototype,{
 	}
 	,apply: function(filterManager,input,output,clear) {
 		this.time += 0.0038461538461538464;
+		if(this.time > 100) {
+			this.time = 0;
+		}
 		this.uniforms.time = this.time;
 		this.uniforms.off = [-Main.instance.game.charpos.x / 2000,-Main.instance.game.charpos.y / 2000];
 		PIXI.Filter.prototype.apply.call(this,filterManager,input,output,clear);
@@ -2509,7 +2532,7 @@ var particles_BgStars = function() {
 	this.area = new PIXI.Rectangle(0,0,2048,2048);
 	var _gthis = this;
 	particles_BaseParticleEffect.call(this);
-	this.pool = new util_Pool(150,function() {
+	this.pool = new util_Pool(50,function() {
 		var p = { sprite : util_Asset.getImage("UI_little circle.png",true), lifetime : 0, maxlife : 0, sx : 0, sy : 0};
 		_gthis.addChild(p.sprite);
 		p.sprite.scale.x = p.sprite.scale.y = 0.1;

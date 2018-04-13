@@ -38,7 +38,7 @@ class StartView extends Container
 		this.logo.addChild(this.start);
 		
 		this.help = new Help();
-		this.addChild(this.help);
+//		this.addChild(this.help);
 		this.help.info.addListener("click", onHelpClick);
 		this.help.info.addListener("tap", onHelpClick);
 		

@@ -34,7 +34,7 @@ class Background extends Container
 		
 		this.filter = new BgFilter();
 		this.filterArea =untyped Main.instance.renderer.screen;
-		this.filters = [filter];
+	//	this.filters = [filter];
 		
 		this.addChild(this.bg);
 		
@@ -47,8 +47,8 @@ class Background extends Container
 	}
 	public function update(charX:Float, charY:Float):Void
 	{
-		this.bg.tilePosition.x = charX+offx;
-		this.bg.tilePosition.y = charY+offy;
+		this.bg.tilePosition.x = (charX+offx)%2048;
+		this.bg.tilePosition.y = (charY+offy)%2048;
 	}
 	
 	
