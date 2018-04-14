@@ -46,10 +46,10 @@ class EndUi extends Container
 		var ts:TextStyleObject = { };
 		ts.wordWrap = false;
 		//ts.wordWrapWidth = 400;
-		ts.fontSize = 24;
+		ts.fontSize = 20;
+		ts.align = "center";
 		ts.fontFamily = 'pigment_demoregular';
 		this.infoText = new Text("Lithium oxide or lithia is an\ninorganic chemical compound.\nIt is a white solid.", ts);
-		
 		
 		var ts:TextStyleObject = { };
 		ts.wordWrap = false;
@@ -112,7 +112,7 @@ class EndUi extends Container
 		this.infoC.y = size.height-infoC.height-10;
 		
 		this.rating.x = size.width / 2;
-		this.rating.y = 300;
+		this.rating.y = 200;
 	}
 	
 	public function hide():Void
@@ -129,17 +129,17 @@ class EndUi extends Container
 		
 		//TODO - update compound text & position label
 		if (GameView.CONF.compound == CompoundType.alu_bromide)
-			this.infoText.text = "Aluminium bromide is any chemical compound\nwith the empirical formula AlBr.\nAluminium tribromide is the most common\nform of aluminium bromide.";
+			this.infoText.text = Config.getText("alu_bromide");// "Aluminium bromide is any chemical compound\nwith the empirical formula AlBr.\nAluminium tribromide is the most common\nform of aluminium bromide.";
 		else if (GameView.CONF.compound == CompoundType.alu_oxide)
-			this.infoText.text = "Aluminium oxide is a chemical\ncompound of aluminium and oxygen.\nIt is the most commonly occurring of\nseveral aluminium oxides";
+			this.infoText.text = Config.getText("alu_oxide");//"Aluminium oxide is a chemical\ncompound of aluminium and oxygen.\nIt is the most commonly occurring of\nseveral aluminium oxides";
 		else if (GameView.CONF.compound == CompoundType.lithium_bromide)
-			this.infoText.text = "Lithium bromide is a chemical\ncompound of lithium and bromine.\nIts extreme hygroscopic character makes\nLiBr useful as a desiccant in\ncertain air conditioning systems.";
+			this.infoText.text = Config.getText("lithium_bromide");//"Lithium bromide is a chemical\ncompound of lithium and bromine.\nIts extreme hygroscopic character makes\nLiBr useful as a desiccant in\ncertain air conditioning systems.";
 		else if (GameView.CONF.compound == CompoundType.lithium_oxide)
-			this.infoText.text = "Lithium oxide or lithia is an\ninorganic chemical compound.\nIt is a white solid. ";
+			this.infoText.text = Config.getText("lithium_oxide");//"Lithium oxide or lithia is an\ninorganic chemical compound.\nIt is a white solid. ";
 		else if (GameView.CONF.compound == CompoundType.mag_bromide)
-			this.infoText.text = "Magnesium bromide is a chemical compound\nof magnesium and bromine that is\nwhite and deliquescent.\nIt is often used as a mild sedative and\nas an anticonvulsant for treatment\nof nervous disorders.";
+			this.infoText.text = Config.getText("mag_bromide");//"Magnesium bromide is a chemical compound\nof magnesium and bromine that is\nwhite and deliquescent.\nIt is often used as a mild sedative and\nas an anticonvulsant for treatment\nof nervous disorders.";
 		else if (GameView.CONF.compound == CompoundType.mag_oxide)
-			this.infoText.text = "Magnesium oxide, or magnesia,\nis a white hygroscopic solid mineral that\noccurs naturally as periclase\nand is a source of magnesium.";
+			this.infoText.text = Config.getText("mag_oxide");//"Magnesium oxide, or magnesia,\nis a white hygroscopic solid mineral that\noccurs naturally as periclase\nand is a source of magnesium.";
 		
 		infoLabel.width = infoText.width+220;
 		infoLabel.height = infoText.height+120;
@@ -150,14 +150,14 @@ class EndUi extends Container
 		this.infoC.y = size.height-infoC.height-10;
 		
 		if (rating == 0) {
-			this.rating.text = "Extra materials\ndetected.";
+			this.rating.text =Config.getText("extra_material");// "Extra materials\ndetected.";
 		}
 		else if (rating == 1)
 		{
-			this.rating.text = "Ions not in\nequilibrium!";
+			this.rating.text =Config.getText("ions_not_equilibrium");// "Ions not in\nequilibrium!";
 		}
 		else
-			this.rating.text = "Perfect!";
+			this.rating.text = Config.getText("perfect");// "Perfect!";
 			
 		this.rating.scale.x = this.rating.scale.y = 1;
 		this.rating.pivot.x = this.rating.width/2;

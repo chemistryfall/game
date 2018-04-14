@@ -413,6 +413,20 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">../assets/images/ui/end_InfoLabel.png</key>
+            <key type="filename">../assets/images/ui/instructions jar.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>180,275,360,550</rect>
+                <key>scale9Paddings</key>
+                <rect>180,275,360,550</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">../assets/images/ui/help_bg.png</key>
             <key type="filename">../assets/images/ui/label.png</key>
             <struct type="IndividualSpriteSettings">
@@ -424,19 +438,6 @@
                 <rect>123,43,246,87</rect>
                 <key>scale9Paddings</key>
                 <rect>123,43,246,87</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../assets/images/ui/instructions jar.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>180,275,360,550</rect>
-                <key>scale9Paddings</key>
-                <rect>180,275,360,550</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

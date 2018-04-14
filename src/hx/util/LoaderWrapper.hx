@@ -133,7 +133,7 @@ class LoaderWrapper
 	{
 	//	var sound:Float = Math.floor(Sounds.soundsLoaded / Sounds.totalSounds) * 100;
 		var other:Float = Math.floor(loadCount / totalCount) * 100;
-		Browser.document.getElementById("preload").innerHTML = "Loading: "+ Math.min(other,other)+"%";
+		Browser.document.getElementById("preload").innerHTML = "Loading: please wait a moment. ";
 	}
 	
 	public static function handleSound():Void
